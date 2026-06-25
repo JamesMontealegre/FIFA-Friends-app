@@ -79,7 +79,7 @@ export function HistorialPage() {
       )}
 
       {!loading && tournaments.length === 0 && (
-        <EmptyState message="No hay torneos finalizados aun" icon="\uD83D\uDCDC" />
+        <EmptyState message="No hay torneos finalizados aun" icon="📜" />
       )}
 
       {tournaments.length > 0 && (
