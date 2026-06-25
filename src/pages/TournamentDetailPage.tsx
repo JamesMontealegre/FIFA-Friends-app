@@ -39,7 +39,9 @@ export function TournamentDetailPage() {
   const [sessionCount, setSessionCount] = useState(2)
   const [creatingSessions, setCreatingSessions] = useState(false)
   const [playoffOpen, setPlayoffOpen] = useState(true)
-  const [matchesOpen, setMatchesOpen] = useState(false)
+  const [matchesOpen, setMatchesOpen] = useState<boolean | null>(null)
+  const [seedingType, setSeedingType] = useState<'random' | 'seeded'>('random')
+  const [playoffHomeAway, setPlayoffHomeAway] = useState(false)
 
   if (tLoading || mLoading) {
     return (
@@ -187,12 +189,17 @@ export function TournamentDetailPage() {
   const leagueMatches = matches.filter((m) => m.phase === 'league')
   const groupMatches = matches.filter((m) => m.phase === 'group')
   const knockoutMatches = matches.filter((m) => m.phase === 'knockout')
-  const hasKnockout = knockoutMatches.length > 0
 
   // Sessions: matches with sessionNumber assigned and not completed
   const activeSessions = matches.filter((m) => m.sessionNumber != null && m.status !== 'completed')
   const maxSession = matches.reduce((max, m) => Math.max(max, m.sessionNumber ?? 0), 0)
   const pendingForSession = matches.filter((m) => m.sessionNumber == null && m.status !== 'completed')
+
+  // Max consolas = jugadores unicos en partidos pendientes / 2
+  const uniquePendingPlayers = new Set(
+    pendingForSession.flatMap((m) => [m.homePlayer.uid, m.awayPlayer.uid]),
+  )
+  const maxConsoles = Math.floor(uniquePendingPlayers.size / 2)
 
   const handleMatchClick = (match: MatchDoc) => {
     navigate(`/tournaments/${id}/matches/${match.id}`)
@@ -205,21 +212,55 @@ export function TournamentDetailPage() {
     }
     setCreatingSessions(true)
     try {
-      const count = Math.min(sessionCount, pendingForSession.length)
-      // Shuffle and pick N random matches
+      const count = Math.min(sessionCount, pendingForSession.length, maxConsoles)
+      // Seleccionar partidos sin repetir jugadores
       const shuffled = [...pendingForSession].sort(() => Math.random() - 0.5)
-      const selected = shuffled.slice(0, count)
+      const selected: MatchDoc[] = []
+      const usedPlayers = new Set<string>()
+      for (const m of shuffled) {
+        if (selected.length >= count) break
+        if (usedPlayers.has(m.homePlayer.uid) || usedPlayers.has(m.awayPlayer.uid)) continue
+        selected.push(m)
+        usedPlayers.add(m.homePlayer.uid)
+        usedPlayers.add(m.awayPlayer.uid)
+      }
+      if (selected.length === 0) {
+        toast.error('No se pueden crear sesiones sin conflictos de jugadores')
+        return
+      }
       await assignMatchesToSessions(
         tournament.id,
         selected.map((m) => m.id),
         maxSession + 1,
       )
-      toast.success(`${count} sesiones creadas`)
+      toast.success(`${selected.length} sesiones creadas`)
     } catch {
       toast.error('Error al crear sesiones')
     } finally {
       setCreatingSessions(false)
     }
+  }
+
+  // Seeding tradicional: 1ro vs 3ro, 2do vs 4to, etc.
+  // Para bracket: posiciones consecutivas se enfrentan [0,1], [2,3]
+  // Asi que el array queda [1ro, 3ro, 2do, 4to, ...] para emparejar por posicion
+  const seedTraditional = (players: typeof tournament.players) => {
+    const half = Math.ceil(players.length / 2)
+    const top = players.slice(0, half)
+    const bottom = players.slice(half).reverse()
+    const seeded: typeof players = []
+    for (let i = 0; i < half; i++) {
+      seeded.push(top[i])
+      if (bottom[i]) seeded.push(bottom[i])
+    }
+    return seeded
+  }
+
+  const applySeeding = (players: typeof tournament.players) => {
+    if (seedingType === 'random') {
+      return [...players].sort(() => Math.random() - 0.5)
+    }
+    return seedTraditional(players)
   }
 
   const handleAdvanceToPlayoffs = async () => {
@@ -239,9 +280,8 @@ export function TournamentDetailPage() {
         return
       }
 
-      // Random bracket draw
-      const shuffled = [...topPlayers].sort(() => Math.random() - 0.5)
-      await generateKnockoutFixtures(tournament.id, shuffled, tournament.homeAway)
+      const seeded = applySeeding(topPlayers)
+      await generateKnockoutFixtures(tournament.id, seeded, tournament.homeAway || playoffHomeAway)
       await updateTournament(tournament.id, { status: 'playoffs' } as never)
       toast.success('Playoffs generados')
     } catch {
@@ -270,9 +310,8 @@ export function TournamentDetailPage() {
         return
       }
 
-      // Random bracket draw
-      const shuffled = [...qualifiers].sort(() => Math.random() - 0.5)
-      await generateKnockoutFixtures(tournament.id, shuffled, tournament.homeAway)
+      const seeded = applySeeding(qualifiers)
+      await generateKnockoutFixtures(tournament.id, seeded, tournament.homeAway || playoffHomeAway)
       await updateTournament(tournament.id, { status: 'knockout' } as never)
       toast.success('Eliminatorias generadas')
     } catch {
@@ -292,20 +331,6 @@ export function TournamentDetailPage() {
     }
     return false
   })()
-
-  const handleComplete = async () => {
-    if (!tournament || !standings) return
-    const finalRows = standings.tables[0]?.rows ?? []
-    await updateTournament(tournament.id, {
-      status: 'completed',
-      finalStandings: finalRows.map((r, i) => ({
-        uid: r.uid,
-        displayName: r.displayName,
-        position: i + 1,
-      })),
-    } as never)
-    toast.success('Torneo finalizado')
-  }
 
   const tabs: Tab[] = ['standings', 'matches', 'sessions']
 
@@ -358,7 +383,29 @@ export function TournamentDetailPage() {
           )}
 
           {canAdvance && (
-            <div className="text-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-gray-300">Sorteo:</label>
+                <select
+                  value={seedingType}
+                  onChange={(e) => setSeedingType(e.target.value as 'random' | 'seeded')}
+                  className="px-3 py-1.5 bg-surface-card border border-white/10 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-neon/50"
+                >
+                  <option value="random">Aleatorio</option>
+                  <option value="seeded">Tradicional (1ro vs 3ro, 2do vs 4to)</option>
+                </select>
+              </div>
+              {!tournament.homeAway && (
+                <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={playoffHomeAway}
+                    onChange={(e) => setPlayoffHomeAway(e.target.checked)}
+                    className="accent-neon w-4 h-4"
+                  />
+                  Ida y Vuelta
+                </label>
+              )}
               <Button
                 onClick={tournament.type === 'league' ? handleAdvanceToPlayoffs : handleAdvanceToKnockout}
                 loading={advancing}
@@ -370,78 +417,83 @@ export function TournamentDetailPage() {
         </div>
       )}
 
-      {tab === 'matches' && (
-        <div className="space-y-4">
-          {/* Playoff arriba, desplegado por defecto */}
-          {knockoutMatches.length > 0 && (
-            <>
-              <button
-                onClick={() => setPlayoffOpen(!playoffOpen)}
-                className="w-full flex items-center justify-between py-2 text-sm font-semibold text-neon"
-              >
-                <span>Playoff</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`w-4 h-4 transition-transform ${playoffOpen ? 'rotate-180' : ''}`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+      {tab === 'matches' && (() => {
+        const hasPlayoff = knockoutMatches.length > 0
+        // Si no se ha tocado (null), abierto solo cuando no hay playoff
+        const isMatchesOpen = matchesOpen === null ? !hasPlayoff : matchesOpen
+        return (
+          <div className="space-y-4">
+            {/* Playoff arriba, desplegado por defecto */}
+            {hasPlayoff && (
+              <>
+                <button
+                  onClick={() => setPlayoffOpen(!playoffOpen)}
+                  className="w-full flex items-center justify-between py-2 text-sm font-semibold text-neon"
                 >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-              {playoffOpen && (
-                <MatchList
-                  matches={knockoutMatches}
-                  onMatchClick={isAdmin ? handleMatchClick : undefined}
-                  roundLabelFn={(round, total) => {
-                    const fromEnd = total - round
-                    if (fromEnd === 0) return 'Final'
-                    if (fromEnd === 1) return 'Semifinal'
-                    if (fromEnd === 2) return 'Cuartos de Final'
-                    if (fromEnd === 3) return 'Octavos de Final'
-                    return `Ronda ${round}`
-                  }}
-                />
-              )}
-            </>
-          )}
+                  <span>Playoff</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`w-4 h-4 transition-transform ${playoffOpen ? 'rotate-180' : ''}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+                {playoffOpen && (
+                  <MatchList
+                    matches={knockoutMatches}
+                    onMatchClick={isAdmin ? handleMatchClick : undefined}
+                    roundLabelFn={(round, total) => {
+                      const fromEnd = total - round
+                      if (fromEnd === 0) return 'Final'
+                      if (fromEnd === 1) return 'Semifinal'
+                      if (fromEnd === 2) return 'Cuartos de Final'
+                      if (fromEnd === 3) return 'Octavos de Final'
+                      return `Ronda ${round}`
+                    }}
+                  />
+                )}
+              </>
+            )}
 
-          {/* Partidos regulares, plegable */}
-          <button
-            onClick={() => setMatchesOpen(!matchesOpen)}
-            className="w-full flex items-center justify-between py-2 text-sm font-semibold text-gray-300"
-          >
-            <span>Partidos</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className={`w-4 h-4 transition-transform ${matchesOpen ? 'rotate-180' : ''}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            {/* Partidos regulares */}
+            <button
+              onClick={() => setMatchesOpen(!isMatchesOpen)}
+              className="w-full flex items-center justify-between py-2 text-sm font-semibold text-gray-300"
             >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-          {matchesOpen && (
-            <MatchList
-              matches={tournament.type === 'league' ? leagueMatches : groupMatches}
-              onMatchClick={isAdmin ? handleMatchClick : undefined}
-            />
-          )}
-        </div>
-      )}
+              <span>Partidos</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`w-4 h-4 transition-transform ${isMatchesOpen ? 'rotate-180' : ''}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {isMatchesOpen && (
+              <MatchList
+                matches={tournament.type === 'league' ? leagueMatches : groupMatches}
+                onMatchClick={isAdmin ? handleMatchClick : undefined}
+              />
+            )}
+          </div>
+        )
+      })()}
 
       {tab === 'sessions' && (
         <div className="space-y-6">
           {/* Create sessions (admin only) */}
-          {isAdmin && pendingForSession.length > 0 && (
+          {isAdmin && pendingForSession.length > 0 && activeSessions.length === 0 && (
             <div className="bg-surface-card rounded-xl border border-white/10 p-4">
               <h3 className="text-sm font-medium text-gray-400 mb-3">Crear Sesiones</h3>
               <div className="flex items-center gap-3">
@@ -451,7 +503,7 @@ export function TournamentDetailPage() {
                   onChange={(e) => setSessionCount(Number(e.target.value))}
                   className="px-3 py-1.5 bg-surface-card border border-white/10 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-neon/50"
                 >
-                  {Array.from({ length: Math.min(10, pendingForSession.length) }, (_, i) => i + 1).map((n) => (
+                  {Array.from({ length: Math.min(10, pendingForSession.length, maxConsoles) }, (_, i) => i + 1).map((n) => (
                     <option key={n} value={n}>{n}</option>
                   ))}
                 </select>
@@ -494,24 +546,6 @@ export function TournamentDetailPage() {
         </div>
       )}
 
-      {/* Admin actions */}
-      {isAdmin && tournament.status !== 'completed' && (
-        <div className="mt-8 flex items-center justify-center gap-4">
-          <Button variant="secondary" onClick={handleComplete}>
-            Finalizar Torneo
-          </Button>
-          <Button variant="danger" size="sm" onClick={handleDeleteTournament} loading={deleting}>
-            Eliminar
-          </Button>
-        </div>
-      )}
-      {isAdmin && tournament.status === 'completed' && (
-        <div className="mt-8 text-center">
-          <Button variant="danger" size="sm" onClick={handleDeleteTournament} loading={deleting}>
-            Eliminar Torneo
-          </Button>
-        </div>
-      )}
     </PageLayout>
   )
 }

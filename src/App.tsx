@@ -14,6 +14,7 @@ import { TournamentDetailPage } from './pages/TournamentDetailPage'
 import { MatchDetailPage } from './pages/MatchDetailPage'
 import { PalmaresPage } from './pages/PalmaresPage'
 import { UserHistoryPage } from './pages/UserHistoryPage'
+import { HistorialPage } from './pages/HistorialPage'
 import { JoinTournamentPage } from './pages/JoinTournamentPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/tournaments/:id" element={<ProtectedRoute><TournamentDetailPage /></ProtectedRoute>} />
               <Route path="/tournaments/:id/matches/:matchId" element={<ProtectedRoute><MatchDetailPage /></ProtectedRoute>} />
               <Route path="/palmares" element={<ProtectedRoute><PalmaresPage /></ProtectedRoute>} />
+              <Route path="/historial" element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
               <Route path="/history/:uid" element={<ProtectedRoute><UserHistoryPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

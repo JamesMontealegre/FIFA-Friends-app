@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { to: '/teams', label: 'Selecciones' },
   { to: '/tournaments', label: 'Torneos' },
   { to: '/palmares', label: 'Palmares' },
+  { to: '/historial', label: 'Historial' },
 ]
 
 export function Navbar() {

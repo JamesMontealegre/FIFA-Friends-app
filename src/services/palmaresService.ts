@@ -10,10 +10,9 @@ import {
 import { db } from '../config/firebase'
 import type { TournamentDoc } from '../types/tournament'
 import type { PalmaresDoc, TournamentWin } from '../types/palmares'
-import type { UserDoc } from '../types/user'
+import type { PlayerRef } from '../types/user'
 
-export async function recalculatePalmares(user: UserDoc): Promise<void> {
-  // Get all completed tournaments
+export async function recalculatePalmaresForAll(players: PlayerRef[]): Promise<void> {
   const tournamentsSnap = await getDocs(
     query(collection(db, 'tournaments'), where('status', '==', 'completed')),
   )
@@ -21,75 +20,78 @@ export async function recalculatePalmares(user: UserDoc): Promise<void> {
     (d) => ({ id: d.id, ...d.data() }) as TournamentDoc,
   )
 
-  let totalGoalsFor = 0
-  let totalGoalsAgainst = 0
-  let totalPoints = 0
-  let totalMatchesPlayed = 0
-  let totalWins = 0
-  let totalDraws = 0
-  let totalLosses = 0
-  const tournamentsWon: TournamentWin[] = []
+  // Pre-fetch all matches
+  const tournamentMatches: Record<string, Record<string, unknown>[]> = {}
+  for (const t of tournaments) {
+    const matchesSnap = await getDocs(collection(db, 'tournaments', t.id, 'matches'))
+    tournamentMatches[t.id] = matchesSnap.docs.map((d) => d.data() as Record<string, unknown>)
+  }
 
-  for (const tournament of tournaments) {
-    // Check if this user participated
-    if (!tournament.players.some((p) => p.uid === user.uid)) continue
+  for (const player of players) {
+    let totalGoalsFor = 0
+    let totalGoalsAgainst = 0
+    let totalPoints = 0
+    let totalMatchesPlayed = 0
+    let totalWins = 0
+    let totalDraws = 0
+    let totalLosses = 0
+    const tournamentsWon: TournamentWin[] = []
+    let secondPlaces = 0
+    let thirdPlaces = 0
 
-    // Get all matches
-    const matchesSnap = await getDocs(
-      collection(db, 'tournaments', tournament.id, 'matches'),
-    )
+    for (const tournament of tournaments) {
+      if (!tournament.players.some((p) => p.uid === player.uid)) continue
 
-    for (const mDoc of matchesSnap.docs) {
-      const m = mDoc.data()
-      if (m.status !== 'completed' || m.homeScore === null || m.awayScore === null) continue
+      const matches = tournamentMatches[tournament.id] ?? []
+      for (const m of matches) {
+        if (m.status !== 'completed' || m.homeScore === null || m.awayScore === null) continue
+        const hp = m.homePlayer as { uid: string }
+        const ap = m.awayPlayer as { uid: string }
+        const isHome = hp.uid === player.uid
+        const isAway = ap.uid === player.uid
+        if (!isHome && !isAway) continue
 
-      const isHome = m.homePlayer.uid === user.uid
-      const isAway = m.awayPlayer.uid === user.uid
-      if (!isHome && !isAway) continue
+        totalMatchesPlayed++
+        const gf = isHome ? (m.homeScore as number) : (m.awayScore as number)
+        const ga = isHome ? (m.awayScore as number) : (m.homeScore as number)
+        totalGoalsFor += gf
+        totalGoalsAgainst += ga
 
-      totalMatchesPlayed++
-      const gf = isHome ? m.homeScore : m.awayScore
-      const ga = isHome ? m.awayScore : m.homeScore
-      totalGoalsFor += gf
-      totalGoalsAgainst += ga
-
-      if (gf > ga) {
-        totalWins++
-        totalPoints += 3
-      } else if (gf < ga) {
-        totalLosses++
-      } else {
-        totalDraws++
-        totalPoints += 1
+        if (gf > ga) { totalWins++; totalPoints += 3 }
+        else if (gf < ga) { totalLosses++ }
+        else { totalDraws++; totalPoints += 1 }
       }
+
+      const pos = tournament.finalStandings?.find((s) => s.uid === player.uid)?.position
+      if (pos === 1) {
+        tournamentsWon.push({
+          tournamentId: tournament.id,
+          tournamentName: tournament.name,
+          type: tournament.type,
+          wonAt: tournament.updatedAt,
+        })
+      } else if (pos === 2) { secondPlaces++ }
+      else if (pos === 3) { thirdPlaces++ }
     }
 
-    // Check if user won this tournament
-    if (tournament.finalStandings?.[0]?.uid === user.uid) {
-      tournamentsWon.push({
-        tournamentId: tournament.id,
-        tournamentName: tournament.name,
-        type: tournament.type,
-        wonAt: tournament.updatedAt,
-      })
+    const palmaresDoc: Omit<PalmaresDoc, 'updatedAt'> & { updatedAt: ReturnType<typeof serverTimestamp> } = {
+      uid: player.uid,
+      displayName: player.displayName,
+      photoURL: player.photoURL,
+      totalGoalsFor,
+      totalGoalsAgainst,
+      totalPoints,
+      totalMatchesPlayed,
+      totalWins,
+      totalDraws,
+      totalLosses,
+      tournamentsWon,
+      tournamentsWonCount: tournamentsWon.length,
+      secondPlaces,
+      thirdPlaces,
+      updatedAt: serverTimestamp(),
     }
-  }
 
-  const palmaresDoc: Omit<PalmaresDoc, 'updatedAt'> & { updatedAt: ReturnType<typeof serverTimestamp> } = {
-    uid: user.uid,
-    displayName: user.displayName,
-    photoURL: user.photoURL,
-    totalGoalsFor,
-    totalGoalsAgainst,
-    totalPoints,
-    totalMatchesPlayed,
-    totalWins,
-    totalDraws,
-    totalLosses,
-    tournamentsWon,
-    tournamentsWonCount: tournamentsWon.length,
-    updatedAt: serverTimestamp(),
+    await setDoc(doc(db, 'palmares', player.uid), palmaresDoc)
   }
-
-  await setDoc(doc(db, 'palmares', user.uid), palmaresDoc)
 }

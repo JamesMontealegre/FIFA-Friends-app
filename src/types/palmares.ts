@@ -20,5 +20,7 @@ export interface PalmaresDoc {
   totalLosses: number
   tournamentsWon: TournamentWin[]
   tournamentsWonCount: number
+  secondPlaces: number
+  thirdPlaces: number
   updatedAt: Timestamp
 }

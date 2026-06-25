@@ -14,7 +14,12 @@ export function usePalmares() {
       q,
       (snap) => {
         const docs = snap.docs.map((d) => d.data() as PalmaresDoc)
-        docs.sort((a, b) => b.totalPoints - a.totalPoints)
+        docs.sort((a, b) =>
+          (b.tournamentsWonCount ?? 0) - (a.tournamentsWonCount ?? 0)
+          || (b.secondPlaces ?? 0) - (a.secondPlaces ?? 0)
+          || (b.thirdPlaces ?? 0) - (a.thirdPlaces ?? 0)
+          || b.totalPoints - a.totalPoints,
+        )
         setPalmares(docs)
         setLoading(false)
       },

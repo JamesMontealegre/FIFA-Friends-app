@@ -9,8 +9,10 @@ import { Card } from '../components/ui/Card'
 import { useAdmin } from '../hooks/useAdmin'
 import { useTeams } from '../hooks/useTeams'
 import { useTournament } from '../hooks/useTournament'
-import { getMatch, getMatchByTieIdAndLeg, updateMatchTeams, updateMatchScore, addUsedTeams } from '../services/matchService'
-import { recalculateStandings } from '../services/standingsService'
+import { getMatch, getMatches, getMatchByTieIdAndLeg, updateMatchTeams, updateMatchScore, addUsedTeams } from '../services/matchService'
+import { recalculateStandings, getStandings } from '../services/standingsService'
+import { updateTournament } from '../services/tournamentService'
+import { recalculatePalmaresForAll } from '../services/palmaresService'
 import type { MatchDoc } from '../types/tournament'
 import type { TeamSelection } from '../types/team'
 import toast from 'react-hot-toast'
@@ -53,13 +55,16 @@ export function MatchDetailPage() {
     )
   }
 
-  // Determine excluded teams for home/away mode
-  const excludeTeams = tournament.homeAway
-    ? [
-        ...(tournament.usedTeams[match.homePlayer.uid] ?? []),
-        ...(tournament.usedTeams[match.awayPlayer.uid] ?? []),
-      ]
-    : []
+  // Equipos excluidos: los ya usados por el jugador actual + el equipo del oponente en este partido
+  const getExcludeTeams = () => {
+    if (!pickerSide) return []
+    const currentPlayerUid = pickerSide === 'home' ? match.homePlayer.uid : match.awayPlayer.uid
+    const opponentTeam = pickerSide === 'home' ? awayTeam : homeTeam
+    return [
+      ...(tournament.usedTeams[currentPlayerUid] ?? []),
+      ...(opponentTeam ? [opponentTeam.team] : []),
+    ]
+  }
 
   const handleTeamSelect = (team: TeamSelection) => {
     if (pickerSide === 'home') setHomeTeam(team)
@@ -71,6 +76,12 @@ export function MatchDetailPage() {
     if (!homeTeam || !awayTeam || !tournamentId || !matchId) return
     try {
       await updateMatchTeams(tournamentId, matchId, homeTeam, awayTeam)
+
+      // Registrar equipos usados por cada jugador
+      await addUsedTeams(tournamentId, match.homePlayer.uid, [homeTeam.team], tournament.usedTeams)
+      const refreshed = { ...tournament.usedTeams }
+      refreshed[match.homePlayer.uid] = [...(refreshed[match.homePlayer.uid] ?? []), homeTeam.team]
+      await addUsedTeams(tournamentId, match.awayPlayer.uid, [awayTeam.team], refreshed)
 
       // Auto-assign reversed teams for the paired leg
       if (match.tieId) {
@@ -92,35 +103,40 @@ export function MatchDetailPage() {
     if (!tournamentId || !matchId) return
     try {
       await updateMatchScore(tournamentId, matchId, homeScore, awayScore)
+      await recalculateStandings(tournamentId)
 
-      // If home/away and this completes a tie, mark teams as used
-      if (tournament.homeAway && match.tieId) {
-        const updatedMatch = await getMatch(tournamentId, matchId)
-        if (updatedMatch?.status === 'completed' && updatedMatch.homeTeam && updatedMatch.awayTeam) {
-          const teamsUsed = [updatedMatch.homeTeam.team, updatedMatch.awayTeam.team]
-          await addUsedTeams(
-            tournamentId,
-            match.homePlayer.uid,
-            teamsUsed,
-            tournament.usedTeams,
-          )
-          const refreshedTournament = { ...tournament }
-          refreshedTournament.usedTeams[match.homePlayer.uid] = [
-            ...(refreshedTournament.usedTeams[match.homePlayer.uid] ?? []),
-            ...teamsUsed,
-          ]
-          await addUsedTeams(
-            tournamentId,
-            match.awayPlayer.uid,
-            teamsUsed,
-            refreshedTournament.usedTeams,
-          )
-        }
+      // Auto-finalizar torneo si todos los partidos estan completados
+      // No auto-finalizar si faltan playoffs/knockout por generar
+      const allMatches = await getMatches(tournamentId)
+      const allCompleted = allMatches.length > 0 && allMatches.every((m) => m.status === 'completed')
+
+      const pendingPlayoffs = tournament.type === 'league'
+        && tournament.status === 'league_stage'
+        && (tournament.leagueConfig?.playoffSize ?? 0) > 0
+
+      const pendingKnockout = tournament.type === 'cup'
+        && tournament.status === 'group_stage'
+
+      if (allCompleted && !pendingPlayoffs && !pendingKnockout) {
+        const standings = await getStandings(tournamentId)
+        const rows = standings?.tables[0]?.rows ?? []
+        const finalStandings = rows.map((r, i) => ({
+          uid: r.uid,
+          displayName: r.displayName,
+          position: i + 1,
+        }))
+
+        await updateTournament(tournament.id, {
+          status: 'completed',
+          finalStandings,
+        } as never)
+        await recalculatePalmaresForAll(tournament.players)
+        toast.success('Torneo finalizado')
+      } else {
+        toast.success('Resultado guardado')
       }
 
-      await recalculateStandings(tournamentId)
-      toast.success('Resultado guardado')
-      navigate(`/tournaments/${tournamentId}?tab=sessions`)
+      navigate(`/tournaments/${tournamentId}?tab=matches`)
     } catch {
       toast.error('Error al guardar resultado')
     }
@@ -262,7 +278,7 @@ export function MatchDetailPage() {
           onClose={() => setPickerSide(null)}
           onSelect={handleTeamSelect}
           teams={allTeams}
-          excludeTeams={excludeTeams}
+          excludeTeams={getExcludeTeams()}
           title={`Equipo para ${pickerSide === 'home' ? match.homePlayer.displayName : match.awayPlayer.displayName}`}
         />
       )}
