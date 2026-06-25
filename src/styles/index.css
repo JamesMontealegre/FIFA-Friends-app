@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #ff6b6b;
+  --color-primary-light: #ff8787;
+  --color-primary-dark: #e05252;
+  --color-neon: #39ff14;
+  --color-neon-dark: #2dd40f;
+  --color-neon-glow: #39ff1440;
+  --color-accent: #ff6b6b;
+  --color-accent-light: #ff8787;
+  --color-surface: #0a0a0a;
+  --color-surface-light: #1a1a2e;
+  --color-surface-card: #16213e;
+  --color-surface-dark: #0f3460;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: #e0e0e0;
+}
+
+/* Neon glow effects */
+.neon-border {
+  box-shadow: 0 0 5px var(--color-neon-glow), 0 0 20px var(--color-neon-glow);
+  border-color: var(--color-neon);
+}
+
+.neon-text {
+  text-shadow: 0 0 10px var(--color-neon-glow), 0 0 40px var(--color-neon-glow);
+}
