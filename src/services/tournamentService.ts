@@ -1,11 +1,12 @@
 import {
   collection,
   doc,
-  addDoc,
+  setDoc,
   getDoc,
   getDocs,
   updateDoc,
   deleteDoc,
+  writeBatch,
   query,
   where,
   orderBy,
@@ -16,6 +17,7 @@ import {
 import { db } from '../config/firebase'
 import { generateInviteCode } from '../lib/inviteCode'
 import { generateLeagueFixtures, generateGroupFixtures } from './fixtureGenerator'
+import { recalculateStandings } from './standingsService'
 import type { TournamentDoc } from '../types/tournament'
 import type { PlayerRef } from '../types/user'
 
@@ -33,7 +35,8 @@ export interface CreateTournamentInput {
 export async function createTournament(input: CreateTournamentInput): Promise<string> {
   const inviteCode = generateInviteCode()
   const { createdBy, ...rest } = input
-  const docRef = await addDoc(collection(db, COLLECTION), {
+  const docRef = doc(collection(db, COLLECTION))
+  const data = {
     ...rest,
     createdBy: createdBy.uid,
     players: [createdBy],
@@ -43,7 +46,28 @@ export async function createTournament(input: CreateTournamentInput): Promise<st
     usedTeams: {},
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-  })
+  }
+
+  const writePromise = setDoc(docRef, data)
+
+  // Wait up to 4s for server confirmation; proceed with client ID if it times out
+  try {
+    await Promise.race([
+      writePromise,
+      new Promise<void>((_, reject) =>
+        setTimeout(() => reject(new Error('__timeout__')), 4000),
+      ),
+    ])
+  } catch (err) {
+    if (err instanceof Error && err.message === '__timeout__') {
+      // Write still pending in background — continue with client ID
+      writePromise.catch((e) => console.error('Tournament write failed:', e))
+    } else {
+      // Real Firestore error (permission denied, etc.) — propagate to caller
+      throw err
+    }
+  }
+
   return docRef.id
 }
 
@@ -70,7 +94,23 @@ export async function updateTournament(id: string, data: Partial<TournamentDoc>)
   })
 }
 
-export async function deleteTournament(id: string): Promise<void> {
+export async function deleteAllTournamentData(id: string): Promise<void> {
+  // Delete all matches in the subcollection
+  const matchesSnap = await getDocs(collection(db, COLLECTION, id, 'matches'))
+  if (!matchesSnap.empty) {
+    const batch = writeBatch(db)
+    matchesSnap.docs.forEach((d) => batch.delete(d.ref))
+    await batch.commit()
+  }
+
+  // Delete standings doc
+  const standingsRef = doc(db, 'standings', id)
+  const standingsSnap = await getDoc(standingsRef)
+  if (standingsSnap.exists()) {
+    await deleteDoc(standingsRef)
+  }
+
+  // Delete tournament doc
   await deleteDoc(doc(db, COLLECTION, id))
 }
 
@@ -112,4 +152,7 @@ export async function startTournament(
     )
     await updateTournament(tournamentId, { status: 'group_stage' } as never)
   }
+
+  // Create standings doc with all zeros so the table shows immediately
+  await recalculateStandings(tournamentId)
 }

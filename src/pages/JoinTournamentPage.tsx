@@ -20,7 +20,7 @@ export function JoinTournamentPage() {
       const tournament = await findTournamentByCode(code.trim())
 
       if (!tournament) {
-        toast.error('Codigo no encontrado')
+        toast.error('Codigo no encontrado. Verifica que sea correcto.')
         return
       }
 

@@ -50,6 +50,7 @@ export type MatchStatus = 'pending' | 'teams_selected' | 'completed'
 export interface MatchPlayer {
   uid: string
   displayName: string
+  photoURL: string
 }
 
 export interface MatchDoc {
@@ -69,11 +70,15 @@ export interface MatchDoc {
   tieId?: string
   status: MatchStatus
   completedAt?: Timestamp
+  sessionNumber?: number
 }
+
+export type FormResult = 'W' | 'D' | 'L'
 
 export interface StandingRow {
   uid: string
   displayName: string
+  photoURL: string
   played: number
   won: number
   drawn: number
@@ -82,6 +87,7 @@ export interface StandingRow {
   goalsAgainst: number
   goalDifference: number
   points: number
+  form: FormResult[]
 }
 
 export interface StandingTable {

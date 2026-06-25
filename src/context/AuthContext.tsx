@@ -52,7 +52,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = userDoc?.role === 'admin'
 
   useEffect(() => {
+    // Si Firebase Auth no responde en 3s, dejar de mostrar loading
+    const authTimeout = setTimeout(() => setLoading(false), 3000)
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      clearTimeout(authTimeout)
       setUser(firebaseUser)
 
       if (firebaseUser) {
@@ -102,7 +106,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    return () => unsubscribe()
+    return () => {
+      clearTimeout(authTimeout)
+      unsubscribe()
+    }
   }, [])
 
   const signIn = async () => {

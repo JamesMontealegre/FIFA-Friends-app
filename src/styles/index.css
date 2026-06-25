@@ -29,3 +29,17 @@ body {
 .neon-text {
   text-shadow: 0 0 10px var(--color-neon-glow), 0 0 40px var(--color-neon-glow);
 }
+
+.font-gaming {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.neon-cyan {
+  color: #00e5ff;
+  text-shadow: 0 0 8px #00e5ff66, 0 0 20px #00e5ff33;
+}
+
+.neon-pink {
+  color: #ff4081;
+  text-shadow: 0 0 8px #ff408166, 0 0 20px #ff408133;
+}

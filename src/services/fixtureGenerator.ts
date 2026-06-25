@@ -15,8 +15,8 @@ interface MatchData {
   round: number
   group?: string
   bracketPosition?: number
-  homePlayer: { uid: string; displayName: string }
-  awayPlayer: { uid: string; displayName: string }
+  homePlayer: { uid: string; displayName: string; photoURL: string }
+  awayPlayer: { uid: string; displayName: string; photoURL: string }
   leg: 1 | 2
   tieId?: string
   homeTeam: null
@@ -69,16 +69,16 @@ export async function generateLeagueFixtures(
       matches.push({
         ...base,
         round: match.round,
-        homePlayer: { uid: match.home.uid, displayName: match.home.displayName },
-        awayPlayer: { uid: match.away.uid, displayName: match.away.displayName },
+        homePlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
+        awayPlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
         leg: 1,
         tieId,
       })
       matches.push({
         ...base,
         round: match.round + schedule.length,
-        homePlayer: { uid: match.away.uid, displayName: match.away.displayName },
-        awayPlayer: { uid: match.home.uid, displayName: match.home.displayName },
+        homePlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
+        awayPlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
         leg: 2,
         tieId,
       })
@@ -86,8 +86,8 @@ export async function generateLeagueFixtures(
       matches.push({
         ...base,
         round: match.round,
-        homePlayer: { uid: match.home.uid, displayName: match.home.displayName },
-        awayPlayer: { uid: match.away.uid, displayName: match.away.displayName },
+        homePlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
+        awayPlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
         leg: 1,
       })
     }
@@ -125,8 +125,8 @@ export async function generateGroupFixtures(
           ...base,
           round: match.round,
           group: groupLabel,
-          homePlayer: { uid: match.home.uid, displayName: match.home.displayName },
-          awayPlayer: { uid: match.away.uid, displayName: match.away.displayName },
+          homePlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
+          awayPlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
           leg: 1,
           tieId,
         })
@@ -134,8 +134,8 @@ export async function generateGroupFixtures(
           ...base,
           round: match.round + schedule.length,
           group: groupLabel,
-          homePlayer: { uid: match.away.uid, displayName: match.away.displayName },
-          awayPlayer: { uid: match.home.uid, displayName: match.home.displayName },
+          homePlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
+          awayPlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
           leg: 2,
           tieId,
         })
@@ -144,8 +144,8 @@ export async function generateGroupFixtures(
           ...base,
           round: match.round,
           group: groupLabel,
-          homePlayer: { uid: match.home.uid, displayName: match.home.displayName },
-          awayPlayer: { uid: match.away.uid, displayName: match.away.displayName },
+          homePlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
+          awayPlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
           leg: 1,
         })
       }
@@ -171,8 +171,8 @@ export async function generateKnockoutFixtures(
           ...base,
           round: match.round,
           bracketPosition: match.bracketPosition,
-          homePlayer: { uid: match.home.uid, displayName: match.home.displayName },
-          awayPlayer: { uid: '__bye__', displayName: 'BYE' },
+          homePlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
+          awayPlayer: { uid: '__bye__', displayName: 'BYE', photoURL: '' },
           leg: 1,
         })
       }
@@ -185,8 +185,8 @@ export async function generateKnockoutFixtures(
         ...base,
         round: match.round,
         bracketPosition: match.bracketPosition,
-        homePlayer: { uid: match.home.uid, displayName: match.home.displayName },
-        awayPlayer: { uid: match.away.uid, displayName: match.away.displayName },
+        homePlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
+        awayPlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
         leg: 1,
         tieId,
       })
@@ -194,8 +194,8 @@ export async function generateKnockoutFixtures(
         ...base,
         round: match.round,
         bracketPosition: match.bracketPosition,
-        homePlayer: { uid: match.away.uid, displayName: match.away.displayName },
-        awayPlayer: { uid: match.home.uid, displayName: match.home.displayName },
+        homePlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
+        awayPlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
         leg: 2,
         tieId,
       })
@@ -204,8 +204,8 @@ export async function generateKnockoutFixtures(
         ...base,
         round: match.round,
         bracketPosition: match.bracketPosition,
-        homePlayer: { uid: match.home.uid, displayName: match.home.displayName },
-        awayPlayer: { uid: match.away.uid, displayName: match.away.displayName },
+        homePlayer: { uid: match.home.uid, displayName: match.home.displayName, photoURL: match.home.photoURL },
+        awayPlayer: { uid: match.away.uid, displayName: match.away.displayName, photoURL: match.away.photoURL },
         leg: 1,
       })
     }

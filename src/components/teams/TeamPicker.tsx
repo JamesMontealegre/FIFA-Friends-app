@@ -15,6 +15,7 @@ interface TeamPickerProps {
 export function TeamPicker({ open, onClose, onSelect, teams, excludeTeams = [], title = 'Elegir Seleccion' }: TeamPickerProps) {
   const [mode, setMode] = useState<'manual' | 'random'>('manual')
   const [search, setSearch] = useState('')
+  const [exactStars, setExactStars] = useState(0)
 
   const available = useMemo(
     () => teams.filter((t) => !excludeTeams.includes(t.team)),
@@ -59,7 +60,29 @@ export function TeamPicker({ open, onClose, onSelect, teams, excludeTeams = [], 
       </div>
 
       {mode === 'random' ? (
-        <RandomTeamSpinner teams={available} onSelect={handleSelect} />
+        <>
+          <div className="flex items-center gap-2 mb-4">
+            <label className="text-sm text-gray-400">Estrellas:</label>
+            <select
+              value={exactStars}
+              onChange={(e) => setExactStars(Number(e.target.value))}
+              className="px-3 py-1.5 bg-surface-card border border-white/10 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-neon/50"
+            >
+              <option value={0}>Todas</option>
+              <option value={5}>{'\u2605'.repeat(5)}</option>
+              <option value={4.5}>{'\u2605'.repeat(4)}{'\u00BD'}</option>
+              <option value={4}>{'\u2605'.repeat(4)}</option>
+              <option value={3.5}>{'\u2605'.repeat(3)}{'\u00BD'}</option>
+              <option value={3}>{'\u2605'.repeat(3)}</option>
+              <option value={2.5}>{'\u2605'.repeat(2)}{'\u00BD'}</option>
+              <option value={2}>{'\u2605'.repeat(2)}</option>
+            </select>
+          </div>
+          <RandomTeamSpinner
+            teams={exactStars > 0 ? available.filter((t) => t.stars === exactStars) : available}
+            onSelect={handleSelect}
+          />
+        </>
       ) : (
         <>
           <input

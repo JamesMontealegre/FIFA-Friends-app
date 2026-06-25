@@ -27,12 +27,17 @@ export function MatchScoreForm({ match, onSubmit }: MatchScoreFormProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Home */}
-        <div className="flex-1 text-center">
-          <p className="text-sm font-medium text-gray-200 mb-1">{match.homePlayer.displayName}</p>
+        <div className="flex-1 min-w-0 text-center">
+          {match.homePlayer.photoURL ? (
+            <img src={match.homePlayer.photoURL} alt="" className="w-8 h-8 rounded-full mx-auto mb-1" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-gray-400 mx-auto mb-1">{match.homePlayer.displayName.charAt(0)}</div>
+          )}
+          <p className="text-sm font-gaming font-semibold neon-cyan mb-1 truncate">{match.homePlayer.displayName}</p>
           {match.homeTeam && (
-            <p className="text-xs text-gray-500 mb-2">
+            <p className="text-xs text-gray-500 mb-2 truncate">
               {match.homeTeam.flag} {match.homeTeam.team}
             </p>
           )}
@@ -45,13 +50,18 @@ export function MatchScoreForm({ match, onSubmit }: MatchScoreFormProps) {
           />
         </div>
 
-        <span className="text-gray-500 font-bold text-lg">-</span>
+        <span className="text-gray-500 font-bold text-lg shrink-0">-</span>
 
         {/* Away */}
-        <div className="flex-1 text-center">
-          <p className="text-sm font-medium text-gray-200 mb-1">{match.awayPlayer.displayName}</p>
+        <div className="flex-1 min-w-0 text-center">
+          {match.awayPlayer.photoURL ? (
+            <img src={match.awayPlayer.photoURL} alt="" className="w-8 h-8 rounded-full mx-auto mb-1" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-gray-400 mx-auto mb-1">{match.awayPlayer.displayName.charAt(0)}</div>
+          )}
+          <p className="text-sm font-gaming font-semibold neon-pink mb-1 truncate">{match.awayPlayer.displayName}</p>
           {match.awayTeam && (
-            <p className="text-xs text-gray-500 mb-2">
+            <p className="text-xs text-gray-500 mb-2 truncate">
               {match.awayTeam.flag} {match.awayTeam.team}
             </p>
           )}

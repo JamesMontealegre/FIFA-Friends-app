@@ -9,7 +9,7 @@ import { Card } from '../components/ui/Card'
 import { useAdmin } from '../hooks/useAdmin'
 import { useTeams } from '../hooks/useTeams'
 import { useTournament } from '../hooks/useTournament'
-import { getMatch, updateMatchTeams, updateMatchScore, addUsedTeams } from '../services/matchService'
+import { getMatch, getMatchByTieIdAndLeg, updateMatchTeams, updateMatchScore, addUsedTeams } from '../services/matchService'
 import { recalculateStandings } from '../services/standingsService'
 import type { MatchDoc } from '../types/tournament'
 import type { TeamSelection } from '../types/team'
@@ -71,9 +71,18 @@ export function MatchDetailPage() {
     if (!homeTeam || !awayTeam || !tournamentId || !matchId) return
     try {
       await updateMatchTeams(tournamentId, matchId, homeTeam, awayTeam)
-      const updated = await getMatch(tournamentId, matchId)
-      setMatch(updated)
+
+      // Auto-assign reversed teams for the paired leg
+      if (match.tieId) {
+        const pairedLeg = match.leg === 1 ? 2 : 1
+        const pairedMatch = await getMatchByTieIdAndLeg(tournamentId, match.tieId, pairedLeg as 1 | 2)
+        if (pairedMatch && pairedMatch.status === 'pending') {
+          await updateMatchTeams(tournamentId, pairedMatch.id, awayTeam, homeTeam)
+        }
+      }
+
       toast.success('Equipos asignados')
+      navigate(`/tournaments/${tournamentId}?tab=sessions`)
     } catch {
       toast.error('Error al asignar equipos')
     }
@@ -110,9 +119,8 @@ export function MatchDetailPage() {
       }
 
       await recalculateStandings(tournamentId)
-      const updated = await getMatch(tournamentId, matchId)
-      setMatch(updated)
       toast.success('Resultado guardado')
+      navigate(`/tournaments/${tournamentId}?tab=sessions`)
     } catch {
       toast.error('Error al guardar resultado')
     }
@@ -145,20 +153,30 @@ export function MatchDetailPage() {
 
         {/* Current score if completed */}
         {match.status === 'completed' && (
-          <div className="text-center py-4">
-            <div className="flex items-center justify-center gap-6">
-              <div className="text-center">
+          <div className="py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 min-w-0 text-center">
+                {match.homePlayer.photoURL ? (
+                  <img src={match.homePlayer.photoURL} alt="" className="w-10 h-10 rounded-full mx-auto mb-1" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold text-gray-400 mx-auto mb-1">{match.homePlayer.displayName.charAt(0)}</div>
+                )}
                 <span className="text-3xl">{match.homeTeam?.flag}</span>
-                <p className="text-sm font-medium text-gray-200 mt-1">{match.homeTeam?.team}</p>
-                <p className="text-xs text-gray-500">{match.homePlayer.displayName}</p>
+                <p className="text-sm font-medium text-gray-200 mt-1 truncate">{match.homeTeam?.team}</p>
+                <p className="text-xs font-gaming font-semibold neon-cyan truncate">{match.homePlayer.displayName}</p>
               </div>
-              <span className="text-3xl font-bold text-neon">
+              <span className="text-3xl font-bold text-neon shrink-0">
                 {match.homeScore} - {match.awayScore}
               </span>
-              <div className="text-center">
+              <div className="flex-1 min-w-0 text-center">
+                {match.awayPlayer.photoURL ? (
+                  <img src={match.awayPlayer.photoURL} alt="" className="w-10 h-10 rounded-full mx-auto mb-1" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-bold text-gray-400 mx-auto mb-1">{match.awayPlayer.displayName.charAt(0)}</div>
+                )}
                 <span className="text-3xl">{match.awayTeam?.flag}</span>
-                <p className="text-sm font-medium text-gray-200 mt-1">{match.awayTeam?.team}</p>
-                <p className="text-xs text-gray-500">{match.awayPlayer.displayName}</p>
+                <p className="text-sm font-medium text-gray-200 mt-1 truncate">{match.awayTeam?.team}</p>
+                <p className="text-xs font-gaming font-semibold neon-pink truncate">{match.awayPlayer.displayName}</p>
               </div>
             </div>
           </div>
@@ -170,12 +188,17 @@ export function MatchDetailPage() {
         <Card className="p-6 mb-6">
           <h3 className="text-sm font-semibold text-gray-300 mb-4">Seleccionar Equipos</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <p className="text-sm font-medium text-gray-200 mb-2">{match.homePlayer.displayName}</p>
+            <div className="text-center min-w-0">
+              {match.homePlayer.photoURL ? (
+                <img src={match.homePlayer.photoURL} alt="" className="w-8 h-8 rounded-full mx-auto mb-1" referrerPolicy="no-referrer" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-gray-400 mx-auto mb-1">{match.homePlayer.displayName.charAt(0)}</div>
+              )}
+              <p className="text-sm font-gaming font-semibold neon-cyan mb-2 truncate">{match.homePlayer.displayName}</p>
               {homeTeam ? (
                 <div>
                   <span className="text-4xl">{homeTeam.flag}</span>
-                  <p className="text-sm text-gray-300 mt-1">{homeTeam.team}</p>
+                  <p className="text-sm text-gray-300 mt-1 truncate">{homeTeam.team}</p>
                   <button
                     onClick={() => setPickerSide('home')}
                     className="text-xs text-neon mt-1 hover:underline"
@@ -189,12 +212,17 @@ export function MatchDetailPage() {
                 </Button>
               )}
             </div>
-            <div className="text-center">
-              <p className="text-sm font-medium text-gray-200 mb-2">{match.awayPlayer.displayName}</p>
+            <div className="text-center min-w-0">
+              {match.awayPlayer.photoURL ? (
+                <img src={match.awayPlayer.photoURL} alt="" className="w-8 h-8 rounded-full mx-auto mb-1" referrerPolicy="no-referrer" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-gray-400 mx-auto mb-1">{match.awayPlayer.displayName.charAt(0)}</div>
+              )}
+              <p className="text-sm font-gaming font-semibold neon-pink mb-2 truncate">{match.awayPlayer.displayName}</p>
               {awayTeam ? (
                 <div>
                   <span className="text-4xl">{awayTeam.flag}</span>
-                  <p className="text-sm text-gray-300 mt-1">{awayTeam.team}</p>
+                  <p className="text-sm text-gray-300 mt-1 truncate">{awayTeam.team}</p>
                   <button
                     onClick={() => setPickerSide('away')}
                     className="text-xs text-neon mt-1 hover:underline"

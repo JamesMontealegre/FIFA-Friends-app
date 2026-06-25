@@ -6,9 +6,10 @@ interface MatchListProps {
   matches: MatchDoc[]
   onMatchClick?: (match: MatchDoc) => void
   groupByRound?: boolean
+  roundLabelFn?: (round: number, totalRounds: number) => string
 }
 
-export function MatchList({ matches, onMatchClick, groupByRound = true }: MatchListProps) {
+export function MatchList({ matches, onMatchClick, groupByRound = true, roundLabelFn }: MatchListProps) {
   if (matches.length === 0) {
     return <EmptyState message="No hay partidos" icon="&#9917;" />
   }
@@ -34,7 +35,7 @@ export function MatchList({ matches, onMatchClick, groupByRound = true }: MatchL
         return (
           <div key={round}>
             <h3 className="text-sm font-medium text-gray-500 mb-2">
-              {group ? `Grupo ${group} - ` : ''}Jornada {round}
+              {roundLabelFn ? roundLabelFn(round, rounds.length) : `${group ? `Grupo ${group} - ` : ''}Jornada ${round}`}
             </h3>
             <div className="space-y-2">
               {roundMatches.map((m) => (

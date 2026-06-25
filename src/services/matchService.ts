@@ -4,6 +4,7 @@ import {
   getDocs,
   getDoc,
   updateDoc,
+  writeBatch,
   query,
   where,
   serverTimestamp,
@@ -38,6 +39,22 @@ export async function getMatch(tournamentId: string, matchId: string): Promise<M
   return { id: snap.id, ...snap.data() } as MatchDoc
 }
 
+export async function getMatchByTieIdAndLeg(
+  tournamentId: string,
+  tieId: string,
+  leg: 1 | 2,
+): Promise<MatchDoc | null> {
+  const q = query(
+    matchesRef(tournamentId),
+    where('tieId', '==', tieId),
+    where('leg', '==', leg),
+  )
+  const snap = await getDocs(q)
+  if (snap.empty) return null
+  const d = snap.docs[0]
+  return { id: d.id, ...d.data() } as MatchDoc
+}
+
 export async function updateMatchTeams(
   tournamentId: string,
   matchId: string,
@@ -63,6 +80,31 @@ export async function updateMatchScore(
     status: 'completed',
     completedAt: serverTimestamp(),
   })
+}
+
+export async function assignMatchesToSessions(
+  tournamentId: string,
+  matchIds: string[],
+  sessionStart: number,
+): Promise<void> {
+  const batch = writeBatch(db)
+  matchIds.forEach((matchId, i) => {
+    const ref = doc(db, 'tournaments', tournamentId, 'matches', matchId)
+    batch.update(ref, { sessionNumber: sessionStart + i })
+  })
+  await batch.commit()
+}
+
+export async function clearMatchSessions(
+  tournamentId: string,
+  matchIds: string[],
+): Promise<void> {
+  const batch = writeBatch(db)
+  matchIds.forEach((matchId) => {
+    const ref = doc(db, 'tournaments', tournamentId, 'matches', matchId)
+    batch.update(ref, { sessionNumber: null })
+  })
+  await batch.commit()
 }
 
 export async function addUsedTeams(

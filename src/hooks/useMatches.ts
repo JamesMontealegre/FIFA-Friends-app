@@ -3,6 +3,8 @@ import { collection, onSnapshot, query } from 'firebase/firestore'
 import { db } from '../config/firebase'
 import type { MatchDoc } from '../types/tournament'
 
+const LOAD_TIMEOUT = 5000
+
 export function useMatches(tournamentId: string | undefined) {
   const [matches, setMatches] = useState<MatchDoc[]>([])
   const [loading, setLoading] = useState(true)
@@ -13,6 +15,8 @@ export function useMatches(tournamentId: string | undefined) {
       return
     }
 
+    const timer = setTimeout(() => setLoading(false), LOAD_TIMEOUT)
+
     const q = query(
       collection(db, 'tournaments', tournamentId, 'matches'),
     )
@@ -20,19 +24,24 @@ export function useMatches(tournamentId: string | undefined) {
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
+        clearTimeout(timer)
         const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as MatchDoc)
         docs.sort((a, b) => a.round - b.round)
         setMatches(docs)
         setLoading(false)
       },
       (error) => {
+        clearTimeout(timer)
         console.error('Error loading matches:', error)
         setMatches([])
         setLoading(false)
       },
     )
 
-    return () => unsubscribe()
+    return () => {
+      clearTimeout(timer)
+      unsubscribe()
+    }
   }, [tournamentId])
 
   return { matches, loading }

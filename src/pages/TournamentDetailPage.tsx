@@ -1,35 +1,45 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { PageLayout } from '../components/layout/PageLayout'
 import { TournamentBadge } from '../components/tournament/TournamentBadge'
 import { StandingsTable } from '../components/standings/StandingsTable'
 import { GroupStageView } from '../components/standings/GroupStageView'
-import { BracketView } from '../components/standings/BracketView'
 import { MatchList } from '../components/match/MatchList'
+import { MatchCard } from '../components/match/MatchCard'
 import { Spinner } from '../components/ui/Spinner'
 import { Button } from '../components/ui/Button'
+import { EmptyState } from '../components/ui/EmptyState'
 import { useTournament } from '../hooks/useTournament'
 import { useMatches } from '../hooks/useMatches'
 import { useStandings } from '../hooks/useStandings'
 import { useAdmin } from '../hooks/useAdmin'
-import { updateTournament, startTournament } from '../services/tournamentService'
+import { updateTournament, startTournament, deleteAllTournamentData } from '../services/tournamentService'
 import { generateKnockoutFixtures } from '../services/fixtureGenerator'
 import { recalculateStandings } from '../services/standingsService'
+import { assignMatchesToSessions } from '../services/matchService'
 import toast from 'react-hot-toast'
 import type { MatchDoc } from '../types/tournament'
 
-type Tab = 'standings' | 'matches' | 'bracket'
+type Tab = 'standings' | 'matches' | 'sessions'
 
 export function TournamentDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { tournament, loading: tLoading } = useTournament(id)
   const { matches, loading: mLoading } = useMatches(id)
   const { standings } = useStandings(id)
   const isAdmin = useAdmin()
-  const [tab, setTab] = useState<Tab>('standings')
+  const validTabs: Tab[] = ['standings', 'matches', 'sessions']
+  const initialTab = validTabs.includes(searchParams.get('tab') as Tab) ? (searchParams.get('tab') as Tab) : 'standings'
+  const [tab, setTab] = useState<Tab>(initialTab)
   const [advancing, setAdvancing] = useState(false)
   const [starting, setStarting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [sessionCount, setSessionCount] = useState(2)
+  const [creatingSessions, setCreatingSessions] = useState(false)
+  const [playoffOpen, setPlayoffOpen] = useState(true)
+  const [matchesOpen, setMatchesOpen] = useState(false)
 
   if (tLoading || mLoading) {
     return (
@@ -57,6 +67,20 @@ export function TournamentDetailPage() {
       toast.error(err instanceof Error ? err.message : 'Error al iniciar torneo')
     } finally {
       setStarting(false)
+    }
+  }
+
+  const handleDeleteTournament = async () => {
+    if (!confirm('Eliminar torneo? Esta accion no se puede deshacer. Los datos no seran considerados en palmares ni historial.')) return
+    setDeleting(true)
+    try {
+      await deleteAllTournamentData(tournament.id)
+      toast.success('Torneo eliminado')
+      navigate('/tournaments')
+    } catch {
+      toast.error('Error al eliminar torneo')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -116,6 +140,7 @@ export function TournamentDetailPage() {
                         src={p.photoURL}
                         alt={p.displayName}
                         className="w-8 h-8 rounded-full"
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium text-gray-400">
@@ -134,7 +159,7 @@ export function TournamentDetailPage() {
 
           {/* Start tournament button (admin only) */}
           {isAdmin && (
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-4">
               <Button
                 onClick={handleStartTournament}
                 disabled={tournament.players.length < 2}
@@ -147,6 +172,11 @@ export function TournamentDetailPage() {
                   Se necesitan al menos 2 jugadores para iniciar
                 </p>
               )}
+              <div>
+                <Button variant="danger" size="sm" onClick={handleDeleteTournament} loading={deleting}>
+                  Eliminar Torneo
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -159,8 +189,37 @@ export function TournamentDetailPage() {
   const knockoutMatches = matches.filter((m) => m.phase === 'knockout')
   const hasKnockout = knockoutMatches.length > 0
 
+  // Sessions: matches with sessionNumber assigned and not completed
+  const activeSessions = matches.filter((m) => m.sessionNumber != null && m.status !== 'completed')
+  const maxSession = matches.reduce((max, m) => Math.max(max, m.sessionNumber ?? 0), 0)
+  const pendingForSession = matches.filter((m) => m.sessionNumber == null && m.status !== 'completed')
+
   const handleMatchClick = (match: MatchDoc) => {
     navigate(`/tournaments/${id}/matches/${match.id}`)
+  }
+
+  const handleCreateSessions = async () => {
+    if (pendingForSession.length === 0) {
+      toast.error('No hay partidos pendientes para asignar')
+      return
+    }
+    setCreatingSessions(true)
+    try {
+      const count = Math.min(sessionCount, pendingForSession.length)
+      // Shuffle and pick N random matches
+      const shuffled = [...pendingForSession].sort(() => Math.random() - 0.5)
+      const selected = shuffled.slice(0, count)
+      await assignMatchesToSessions(
+        tournament.id,
+        selected.map((m) => m.id),
+        maxSession + 1,
+      )
+      toast.success(`${count} sesiones creadas`)
+    } catch {
+      toast.error('Error al crear sesiones')
+    } finally {
+      setCreatingSessions(false)
+    }
   }
 
   const handleAdvanceToPlayoffs = async () => {
@@ -180,7 +239,9 @@ export function TournamentDetailPage() {
         return
       }
 
-      await generateKnockoutFixtures(tournament.id, topPlayers, tournament.homeAway)
+      // Random bracket draw
+      const shuffled = [...topPlayers].sort(() => Math.random() - 0.5)
+      await generateKnockoutFixtures(tournament.id, shuffled, tournament.homeAway)
       await updateTournament(tournament.id, { status: 'playoffs' } as never)
       toast.success('Playoffs generados')
     } catch {
@@ -209,7 +270,9 @@ export function TournamentDetailPage() {
         return
       }
 
-      await generateKnockoutFixtures(tournament.id, qualifiers, tournament.homeAway)
+      // Random bracket draw
+      const shuffled = [...qualifiers].sort(() => Math.random() - 0.5)
+      await generateKnockoutFixtures(tournament.id, shuffled, tournament.homeAway)
       await updateTournament(tournament.id, { status: 'knockout' } as never)
       toast.success('Eliminatorias generadas')
     } catch {
@@ -244,6 +307,8 @@ export function TournamentDetailPage() {
     toast.success('Torneo finalizado')
   }
 
+  const tabs: Tab[] = ['standings', 'matches', 'sessions']
+
   return (
     <PageLayout
       title={tournament.name}
@@ -257,23 +322,20 @@ export function TournamentDetailPage() {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 mb-6 border-b border-white/10">
-        {(['standings', 'matches', 'bracket'] as const).map((t) => {
-          if (t === 'bracket' && !hasKnockout && !canAdvance) return null
-          return (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                tab === t
-                  ? 'border-neon text-neon'
-                  : 'border-transparent text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              {t === 'standings' ? 'Tabla' : t === 'matches' ? 'Partidos' : 'Bracket'}
-            </button>
-          )
-        })}
+      <div className="flex gap-1 mb-6 border-b border-white/10 overflow-x-auto">
+        {tabs.map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+              tab === t
+                ? 'border-neon text-neon'
+                : 'border-transparent text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            {t === 'standings' ? 'Tabla' : t === 'matches' ? 'Partidos' : 'Sesiones'}
+          </button>
+        ))}
       </div>
 
       {/* Tab content */}
@@ -309,21 +371,144 @@ export function TournamentDetailPage() {
       )}
 
       {tab === 'matches' && (
-        <MatchList
-          matches={tournament.type === 'league' ? leagueMatches : [...groupMatches, ...knockoutMatches]}
-          onMatchClick={isAdmin ? handleMatchClick : undefined}
-        />
+        <div className="space-y-4">
+          {/* Playoff arriba, desplegado por defecto */}
+          {knockoutMatches.length > 0 && (
+            <>
+              <button
+                onClick={() => setPlayoffOpen(!playoffOpen)}
+                className="w-full flex items-center justify-between py-2 text-sm font-semibold text-neon"
+              >
+                <span>Playoff</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`w-4 h-4 transition-transform ${playoffOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              {playoffOpen && (
+                <MatchList
+                  matches={knockoutMatches}
+                  onMatchClick={isAdmin ? handleMatchClick : undefined}
+                  roundLabelFn={(round, total) => {
+                    const fromEnd = total - round
+                    if (fromEnd === 0) return 'Final'
+                    if (fromEnd === 1) return 'Semifinal'
+                    if (fromEnd === 2) return 'Cuartos de Final'
+                    if (fromEnd === 3) return 'Octavos de Final'
+                    return `Ronda ${round}`
+                  }}
+                />
+              )}
+            </>
+          )}
+
+          {/* Partidos regulares, plegable */}
+          <button
+            onClick={() => setMatchesOpen(!matchesOpen)}
+            className="w-full flex items-center justify-between py-2 text-sm font-semibold text-gray-300"
+          >
+            <span>Partidos</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`w-4 h-4 transition-transform ${matchesOpen ? 'rotate-180' : ''}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {matchesOpen && (
+            <MatchList
+              matches={tournament.type === 'league' ? leagueMatches : groupMatches}
+              onMatchClick={isAdmin ? handleMatchClick : undefined}
+            />
+          )}
+        </div>
       )}
 
-      {tab === 'bracket' && (
-        <BracketView matches={knockoutMatches} onMatchClick={isAdmin ? handleMatchClick : undefined} />
+      {tab === 'sessions' && (
+        <div className="space-y-6">
+          {/* Create sessions (admin only) */}
+          {isAdmin && pendingForSession.length > 0 && (
+            <div className="bg-surface-card rounded-xl border border-white/10 p-4">
+              <h3 className="text-sm font-medium text-gray-400 mb-3">Crear Sesiones</h3>
+              <div className="flex items-center gap-3">
+                <label className="text-sm text-gray-300">Consolas:</label>
+                <select
+                  value={sessionCount}
+                  onChange={(e) => setSessionCount(Number(e.target.value))}
+                  className="px-3 py-1.5 bg-surface-card border border-white/10 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-neon/50"
+                >
+                  {Array.from({ length: Math.min(10, pendingForSession.length) }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+                <Button size="sm" onClick={handleCreateSessions} loading={creatingSessions}>
+                  Asignar Partidos
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                {pendingForSession.length} partidos pendientes disponibles
+              </p>
+            </div>
+          )}
+
+          {/* Active sessions */}
+          {activeSessions.length > 0 ? (
+            <div className="space-y-3">
+              {[...new Set(activeSessions.map((m) => m.sessionNumber!))].sort((a, b) => a - b).map((sn, idx) => {
+                const sessionMatches = activeSessions.filter((m) => m.sessionNumber === sn)
+                return (
+                  <div key={sn} className="bg-surface-card rounded-xl border border-white/10 p-4">
+                    <h3 className="text-sm font-semibold text-neon mb-3">
+                      Consola {idx + 1}
+                    </h3>
+                    <div className="space-y-2">
+                      {sessionMatches.map((m) => (
+                        <MatchCard
+                          key={m.id}
+                          match={m}
+                          onClick={isAdmin ? () => handleMatchClick(m) : undefined}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <EmptyState message="No hay sesiones activas" icon="&#127918;" />
+          )}
+        </div>
       )}
 
-      {/* Complete tournament button */}
+      {/* Admin actions */}
       {isAdmin && tournament.status !== 'completed' && (
-        <div className="mt-8 text-center">
+        <div className="mt-8 flex items-center justify-center gap-4">
           <Button variant="secondary" onClick={handleComplete}>
             Finalizar Torneo
+          </Button>
+          <Button variant="danger" size="sm" onClick={handleDeleteTournament} loading={deleting}>
+            Eliminar
+          </Button>
+        </div>
+      )}
+      {isAdmin && tournament.status === 'completed' && (
+        <div className="mt-8 text-center">
+          <Button variant="danger" size="sm" onClick={handleDeleteTournament} loading={deleting}>
+            Eliminar Torneo
           </Button>
         </div>
       )}

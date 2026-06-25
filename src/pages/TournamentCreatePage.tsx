@@ -43,7 +43,12 @@ export function TournamentCreatePage() {
       navigate(`/tournaments/${tournamentId}`)
     } catch (err) {
       console.error('Error creating tournament:', err)
-      toast.error('Error al crear el torneo. Verifica tu conexion.')
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('permission') || msg.includes('PERMISSION_DENIED')) {
+        toast.error('Sin permisos para crear torneos. Verifica las reglas de Firestore.')
+      } else {
+        toast.error('Error al crear el torneo. Verifica tu conexion.')
+      }
     }
   }
 
