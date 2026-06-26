@@ -14,7 +14,7 @@ import {
 import { auth, db, googleProvider } from '../config/firebase'
 import type { UserDoc } from '../types/user'
 
-const ADMIN_EMAIL = 'jasmongu@gmail.com'
+const ADMIN_EMAILS = ['jasmongu@gmail.com', 'juliannino00@gmail.com']
 const FIRESTORE_TIMEOUT = 4000
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(firebaseUser)
 
       if (firebaseUser) {
-        const role = firebaseUser.email === ADMIN_EMAIL ? 'admin' : 'viewer'
+        const role = ADMIN_EMAILS.includes(firebaseUser.email ?? '') ? 'admin' : 'viewer'
         const fallbackDoc: UserDoc = {
           uid: firebaseUser.uid,
           email: firebaseUser.email ?? '',
