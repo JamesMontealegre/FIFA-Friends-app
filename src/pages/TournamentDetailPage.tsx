@@ -15,10 +15,12 @@ import { useStandings } from '../hooks/useStandings'
 import { useAdmin } from '../hooks/useAdmin'
 import { updateTournament, startTournament, deleteAllTournamentData } from '../services/tournamentService'
 import { generateKnockoutFixtures } from '../services/fixtureGenerator'
-import { recalculateStandings } from '../services/standingsService'
+import { recalculateStandings, getStandings } from '../services/standingsService'
+import { recalculatePalmaresForAll } from '../services/palmaresService'
 import { assignMatchesToSessions } from '../services/matchService'
 import toast from 'react-hot-toast'
 import type { MatchDoc } from '../types/tournament'
+import type { PlayerTier } from '../types/user'
 
 type Tab = 'standings' | 'matches' | 'sessions'
 
@@ -36,6 +38,7 @@ export function TournamentDetailPage() {
   const [advancing, setAdvancing] = useState(false)
   const [starting, setStarting] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [finalizing, setFinalizing] = useState(false)
   const [sessionCount, setSessionCount] = useState(2)
   const [creatingSessions, setCreatingSessions] = useState(false)
   const [playoffOpen, setPlayoffOpen] = useState(true)
@@ -69,6 +72,18 @@ export function TournamentDetailPage() {
       toast.error(err instanceof Error ? err.message : 'Error al iniciar torneo')
     } finally {
       setStarting(false)
+    }
+  }
+
+  const handleToggleTier = async (uid: string) => {
+    if (!tournament) return
+    const updated = tournament.players.map((p) =>
+      p.uid === uid ? { ...p, tier: (p.tier === 'pro' ? 'casual' : 'pro') as PlayerTier } : p,
+    )
+    try {
+      await updateTournament(tournament.id, { players: updated } as never)
+    } catch {
+      toast.error('Error al cambiar tier')
     }
   }
 
@@ -150,9 +165,23 @@ export function TournamentDetailPage() {
                       </div>
                     )}
                     <span className="text-sm text-gray-200">{p.displayName}</span>
-                    <span className="ml-auto text-xs text-gray-500">
-                      {p.tier === 'pro' ? 'PRO' : '5\u2605'}
-                    </span>
+                    {isAdmin ? (
+                      <button
+                        onClick={() => handleToggleTier(p.uid)}
+                        className={`ml-auto text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                          p.tier === 'pro'
+                            ? 'border-neon/40 text-neon bg-neon/10'
+                            : 'border-yellow-500/40 text-yellow-400 bg-yellow-500/10'
+                        }`}
+                        title="Cambiar tier"
+                      >
+                        {p.tier === 'pro' ? 'PRO' : '5\u2605'}
+                      </button>
+                    ) : (
+                      <span className="ml-auto text-xs text-gray-500">
+                        {p.tier === 'pro' ? 'PRO' : '5\u2605'}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -321,6 +350,32 @@ export function TournamentDetailPage() {
     }
   }
 
+  const handleFinalizeTournament = async () => {
+    if (!tournament) return
+    if (!confirm('¿Finalizar torneo sin playoffs? Esta accion no se puede deshacer.')) return
+    setFinalizing(true)
+    try {
+      await recalculateStandings(tournament.id)
+      const latestStandings = await getStandings(tournament.id)
+      const rows = latestStandings?.tables[0]?.rows ?? []
+      const finalStandings = rows.map((r, i) => ({
+        uid: r.uid,
+        displayName: r.displayName,
+        position: i + 1,
+      }))
+      await updateTournament(tournament.id, {
+        status: 'completed',
+        finalStandings,
+      } as never)
+      await recalculatePalmaresForAll(tournament.players)
+      toast.success('Torneo finalizado')
+    } catch {
+      toast.error('Error al finalizar torneo')
+    } finally {
+      setFinalizing(false)
+    }
+  }
+
   const canAdvance = (() => {
     if (!isAdmin) return false
     if (tournament.type === 'league' && tournament.status === 'league_stage' && tournament.leagueConfig?.playoffSize) {
@@ -412,6 +467,18 @@ export function TournamentDetailPage() {
               >
                 {tournament.type === 'league' ? 'Generar Playoffs' : 'Generar Eliminatorias'}
               </Button>
+            </div>
+          )}
+
+          {isAdmin && tournament.status !== 'completed' && tournament.status !== 'draft' && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleFinalizeTournament}
+                disabled={finalizing}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-[#FA8072]/20 text-[#FA8072] border border-[#FA8072]/30 hover:bg-[#FA8072]/30 transition-colors disabled:opacity-50"
+              >
+                {finalizing ? 'Finalizando...' : 'Finalizar Torneo'}
+              </button>
             </div>
           )}
         </div>

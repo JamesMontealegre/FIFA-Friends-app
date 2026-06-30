@@ -55,13 +55,15 @@ export function MatchDetailPage() {
     )
   }
 
-  // Equipos excluidos: los ya usados por el jugador actual + el equipo del oponente en este partido
+  // Equipos excluidos: los ya usados por el jugador actual (solo pro) + el equipo del oponente en este partido
   const getExcludeTeams = () => {
     if (!pickerSide) return []
     const currentPlayerUid = pickerSide === 'home' ? match.homePlayer.uid : match.awayPlayer.uid
+    const playerRef = tournament.players.find((p) => p.uid === currentPlayerUid)
     const opponentTeam = pickerSide === 'home' ? awayTeam : homeTeam
+    const usedTeams = playerRef?.tier === 'casual' ? [] : (tournament.usedTeams[currentPlayerUid] ?? [])
     return [
-      ...(tournament.usedTeams[currentPlayerUid] ?? []),
+      ...usedTeams,
       ...(opponentTeam ? [opponentTeam.team] : []),
     ]
   }
