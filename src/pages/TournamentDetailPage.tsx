@@ -470,7 +470,7 @@ export function TournamentDetailPage() {
             </div>
           )}
 
-          {isAdmin && tournament.status !== 'completed' && tournament.status !== 'draft' && (
+          {isAdmin && tournament.status !== 'completed' && (
             <div className="flex justify-center mt-4">
               <button
                 onClick={handleFinalizeTournament}
