@@ -8,9 +8,15 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../config/firebase'
-import type { TournamentDoc } from '../types/tournament'
-import type { PalmaresDoc, TournamentWin } from '../types/palmares'
+import type { TournamentDoc, TournamentVenue } from '../types/tournament'
+import type { PalmaresDoc, PalmaresStats } from '../types/palmares'
+import { emptyStats } from '../types/palmares'
 import type { PlayerRef } from '../types/user'
+
+/** Tournaments created before the venue field existed were played in person. */
+function venueOf(tournament: TournamentDoc): TournamentVenue {
+  return tournament.venue ?? 'presencial'
+}
 
 export async function recalculatePalmaresForAll(players: PlayerRef[]): Promise<void> {
   const tournamentsSnap = await getDocs(
@@ -28,19 +34,17 @@ export async function recalculatePalmaresForAll(players: PlayerRef[]): Promise<v
   }
 
   for (const player of players) {
-    let totalGoalsFor = 0
-    let totalGoalsAgainst = 0
-    let totalPoints = 0
-    let totalMatchesPlayed = 0
-    let totalWins = 0
-    let totalDraws = 0
-    let totalLosses = 0
-    const tournamentsWon: TournamentWin[] = []
-    let secondPlaces = 0
-    let thirdPlaces = 0
+    const consolidated = emptyStats()
+    const byVenue: Record<TournamentVenue, PalmaresStats> = {
+      presencial: emptyStats(),
+      remoto: emptyStats(),
+    }
 
     for (const tournament of tournaments) {
       if (!tournament.players.some((p) => p.uid === player.uid)) continue
+
+      // Every tally lands in both the consolidated totals and its venue bucket.
+      const buckets = [consolidated, byVenue[venueOf(tournament)]]
 
       const matches = tournamentMatches[tournament.id] ?? []
       for (const m of matches) {
@@ -51,44 +55,43 @@ export async function recalculatePalmaresForAll(players: PlayerRef[]): Promise<v
         const isAway = ap.uid === player.uid
         if (!isHome && !isAway) continue
 
-        totalMatchesPlayed++
         const gf = isHome ? (m.homeScore as number) : (m.awayScore as number)
         const ga = isHome ? (m.awayScore as number) : (m.homeScore as number)
-        totalGoalsFor += gf
-        totalGoalsAgainst += ga
 
-        if (gf > ga) { totalWins++; totalPoints += 3 }
-        else if (gf < ga) { totalLosses++ }
-        else { totalDraws++; totalPoints += 1 }
+        for (const b of buckets) {
+          b.totalMatchesPlayed++
+          b.totalGoalsFor += gf
+          b.totalGoalsAgainst += ga
+          if (gf > ga) { b.totalWins++; b.totalPoints += 3 }
+          else if (gf < ga) { b.totalLosses++ }
+          else { b.totalDraws++; b.totalPoints += 1 }
+        }
       }
 
       const pos = tournament.finalStandings?.find((s) => s.uid === player.uid)?.position
       if (pos === 1) {
-        tournamentsWon.push({
-          tournamentId: tournament.id,
-          tournamentName: tournament.name,
-          type: tournament.type,
-          wonAt: tournament.updatedAt,
-        })
-      } else if (pos === 2) { secondPlaces++ }
-      else if (pos === 3) { thirdPlaces++ }
+        for (const b of buckets) {
+          b.tournamentsWon.push({
+            tournamentId: tournament.id,
+            tournamentName: tournament.name,
+            type: tournament.type,
+            wonAt: tournament.updatedAt,
+          })
+          b.tournamentsWonCount++
+        }
+      } else if (pos === 2) {
+        for (const b of buckets) b.secondPlaces++
+      } else if (pos === 3) {
+        for (const b of buckets) b.thirdPlaces++
+      }
     }
 
     const palmaresDoc: Omit<PalmaresDoc, 'updatedAt'> & { updatedAt: ReturnType<typeof serverTimestamp> } = {
       uid: player.uid,
       displayName: player.displayName,
       photoURL: player.photoURL,
-      totalGoalsFor,
-      totalGoalsAgainst,
-      totalPoints,
-      totalMatchesPlayed,
-      totalWins,
-      totalDraws,
-      totalLosses,
-      tournamentsWon,
-      tournamentsWonCount: tournamentsWon.length,
-      secondPlaces,
-      thirdPlaces,
+      ...consolidated,
+      byVenue,
       updatedAt: serverTimestamp(),
     }
 

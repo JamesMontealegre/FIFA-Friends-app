@@ -1,7 +1,7 @@
-import type { PalmaresDoc } from '../../types/palmares'
+import type { PalmaresRow } from '../../types/palmares'
 
 interface PalmaresTableProps {
-  palmares: PalmaresDoc[]
+  palmares: PalmaresRow[]
 }
 
 const MEDAL: Record<number, string> = { 1: '\uD83E\uDD47', 2: '\uD83E\uDD48', 3: '\uD83E\uDD49' }
