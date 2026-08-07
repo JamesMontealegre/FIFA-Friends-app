@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Button } from '../ui/Button'
 import type { TeamKind } from '../../types/team'
+import type { TournamentVenue } from '../../types/tournament'
 
 interface TournamentFormData {
   name: string
   type: 'league' | 'cup'
   teamMode: TeamKind
+  venue: TournamentVenue
   homeAway: boolean
   leagueConfig: { playoffSize: number }
   cupConfig: { numberOfGroups: number; teamsPerGroup: number; advancePerGroup: number }
@@ -14,6 +16,11 @@ interface TournamentFormData {
 const TEAM_MODES: { kind: TeamKind; icon: string; label: string; hint: string }[] = [
   { kind: 'national', icon: '🌍', label: 'Selecciones', hint: '58 selecciones nacionales' },
   { kind: 'club', icon: '🛡️', label: 'Clubes', hint: '93 clubes de 14 ligas' },
+]
+
+const VENUES: { venue: TournamentVenue; icon: string; label: string; hint: string }[] = [
+  { venue: 'presencial', icon: '🏠', label: 'Presencial', hint: 'Todos en el mismo lugar' },
+  { venue: 'remoto', icon: '🌐', label: 'Remoto', hint: 'Cada quien desde su casa' },
 ]
 
 interface TournamentFormProps {
@@ -27,6 +34,7 @@ export function TournamentForm({ onSubmit }: TournamentFormProps) {
     name: '',
     type: 'league',
     teamMode: 'national',
+    venue: 'presencial',
     homeAway: false,
     leagueConfig: { playoffSize: 0 },
     cupConfig: { numberOfGroups: 2, teamsPerGroup: 4, advancePerGroup: 2 },
@@ -127,6 +135,30 @@ export function TournamentForm({ onSubmit }: TournamentFormProps) {
             <p className="text-xs text-gray-500 mt-2">
               Todo el torneo usa un solo tipo: no se puede mezclar selecciones con clubes.
             </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Modalidad</label>
+            <div className="grid grid-cols-2 gap-3">
+              {VENUES.map((v) => (
+                <button
+                  key={v.venue}
+                  type="button"
+                  onClick={() => setForm({ ...form, venue: v.venue })}
+                  className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                    form.venue === v.venue
+                      ? 'border-neon bg-neon/5'
+                      : 'border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <p className="font-medium text-gray-200">
+                    <span className="mr-1.5">{v.icon}</span>
+                    {v.label}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{v.hint}</p>
+                </button>
+              ))}
+            </div>
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer">

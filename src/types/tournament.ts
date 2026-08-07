@@ -12,6 +12,8 @@ export interface CupConfig {
   advancePerGroup: number
 }
 
+export type TournamentVenue = 'presencial' | 'remoto'
+
 export type TournamentStatus =
   | 'draft'
   | 'group_stage'
@@ -31,6 +33,7 @@ export interface TournamentDoc {
   name: string
   type: 'league' | 'cup'
   teamMode: TeamKind
+  venue: TournamentVenue
   homeAway: boolean
   status: TournamentStatus
   createdBy: string

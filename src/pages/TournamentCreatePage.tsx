@@ -6,11 +6,13 @@ import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 
 import type { TeamKind } from '../types/team'
+import type { TournamentVenue } from '../types/tournament'
 
 interface FormData {
   name: string
   type: 'league' | 'cup'
   teamMode: TeamKind
+  venue: TournamentVenue
   homeAway: boolean
   leagueConfig: { playoffSize: number }
   cupConfig: { numberOfGroups: number; teamsPerGroup: number; advancePerGroup: number }
@@ -31,6 +33,7 @@ export function TournamentCreatePage() {
         name: data.name,
         type: data.type,
         teamMode: data.teamMode,
+        venue: data.venue,
         homeAway: data.homeAway,
         createdBy: {
           uid: userDoc.uid,

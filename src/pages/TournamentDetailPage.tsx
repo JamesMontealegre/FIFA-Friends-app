@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { PageLayout } from '../components/layout/PageLayout'
-import { TournamentBadge } from '../components/tournament/TournamentBadge'
+import { TournamentBadge, VenueBadge } from '../components/tournament/TournamentBadge'
 import { StandingsTable } from '../components/standings/StandingsTable'
 import { GroupStageView } from '../components/standings/GroupStageView'
 import { MatchList } from '../components/match/MatchList'
@@ -105,11 +105,17 @@ export function TournamentDetailPage() {
     return (
       <PageLayout
         title={tournament.name}
-        actions={<TournamentBadge status={tournament.status} />}
+        actions={
+          <div className="flex items-center gap-2">
+            <VenueBadge venue={tournament.venue ?? 'presencial'} />
+            <TournamentBadge status={tournament.status} />
+          </div>
+        }
       >
         <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-6">
           <span>{tournament.type === 'league' ? 'Liguilla' : 'Copa'}</span>
           {tournament.homeAway && <span>Ida y Vuelta</span>}
+          <span>{tournament.teamMode === 'club' ? 'Clubes' : 'Selecciones'}</span>
         </div>
 
         <div className="max-w-md mx-auto space-y-6">
@@ -392,12 +398,18 @@ export function TournamentDetailPage() {
   return (
     <PageLayout
       title={tournament.name}
-      actions={<TournamentBadge status={tournament.status} />}
+      actions={
+        <div className="flex items-center gap-2">
+          <VenueBadge venue={tournament.venue ?? 'presencial'} />
+          <TournamentBadge status={tournament.status} />
+        </div>
+      }
     >
       {/* Info bar */}
       <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-6">
         <span>{tournament.type === 'league' ? 'Liguilla' : 'Copa'}</span>
         {tournament.homeAway && <span>Ida y Vuelta</span>}
+        <span>{tournament.teamMode === 'club' ? 'Clubes' : 'Selecciones'}</span>
         <span>{tournament.players.length} jugadores</span>
       </div>
 

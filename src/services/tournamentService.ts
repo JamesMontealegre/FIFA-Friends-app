@@ -18,7 +18,7 @@ import { db } from '../config/firebase'
 import { generateInviteCode } from '../lib/inviteCode'
 import { generateLeagueFixtures, generateGroupFixtures } from './fixtureGenerator'
 import { recalculateStandings } from './standingsService'
-import type { TournamentDoc } from '../types/tournament'
+import type { TournamentDoc, TournamentVenue } from '../types/tournament'
 import type { PlayerRef } from '../types/user'
 import type { TeamKind } from '../types/team'
 
@@ -28,6 +28,7 @@ export interface CreateTournamentInput {
   name: string
   type: 'league' | 'cup'
   teamMode: TeamKind
+  venue: TournamentVenue
   homeAway: boolean
   leagueConfig?: { playoffSize: number }
   cupConfig?: { numberOfGroups: number; teamsPerGroup: number; advancePerGroup: number }

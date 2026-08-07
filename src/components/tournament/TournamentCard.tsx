@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../ui/Card'
-import { TournamentBadge } from './TournamentBadge'
+import { TournamentBadge, VenueBadge } from './TournamentBadge'
 import type { TournamentDoc } from '../../types/tournament'
 
 export function TournamentCard({ tournament }: { tournament: TournamentDoc }) {
@@ -17,9 +17,13 @@ export function TournamentCard({ tournament }: { tournament: TournamentDoc }) {
           <p className="text-sm text-gray-500 mt-0.5">
             {tournament.type === 'league' ? 'Liguilla' : 'Copa'}
             {tournament.homeAway && ' (Ida y Vuelta)'}
+            {tournament.teamMode === 'club' ? ' · Clubes' : ' · Selecciones'}
           </p>
         </div>
-        <TournamentBadge status={tournament.status} />
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <TournamentBadge status={tournament.status} />
+          <VenueBadge venue={tournament.venue ?? 'presencial'} />
+        </div>
       </div>
       <div className="flex items-center gap-1">
         {tournament.players.slice(0, 5).map((p) => (

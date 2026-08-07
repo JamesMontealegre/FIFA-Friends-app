@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import type { TournamentStatus } from '../../types/tournament'
+import type { TournamentStatus, TournamentVenue } from '../../types/tournament'
 
 const STATUS_CONFIG: Record<TournamentStatus, { label: string; color: string }> = {
   draft: { label: 'Sala de espera', color: 'bg-blue-500/20 text-blue-400' },
@@ -14,6 +14,21 @@ export function TournamentBadge({ status }: { status: TournamentStatus }) {
   const config = STATUS_CONFIG[status]
   return (
     <span className={clsx('px-2.5 py-0.5 rounded-full text-xs font-medium', config.color)}>
+      {config.label}
+    </span>
+  )
+}
+
+const VENUE_CONFIG: Record<TournamentVenue, { label: string; icon: string; color: string }> = {
+  presencial: { label: 'Presencial', icon: '🏠', color: 'bg-emerald-500/20 text-emerald-400' },
+  remoto: { label: 'Remoto', icon: '🌐', color: 'bg-sky-500/20 text-sky-400' },
+}
+
+export function VenueBadge({ venue }: { venue: TournamentVenue }) {
+  const config = VENUE_CONFIG[venue] ?? VENUE_CONFIG.presencial
+  return (
+    <span className={clsx('px-2.5 py-0.5 rounded-full text-xs font-medium', config.color)}>
+      <span className="mr-1">{config.icon}</span>
       {config.label}
     </span>
   )
