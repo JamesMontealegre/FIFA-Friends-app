@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 const NAV_LINKS = [
   { to: '/', label: 'Inicio' },
-  { to: '/teams', label: 'Selecciones' },
+  { to: '/teams', label: 'Equipos' },
   { to: '/tournaments', label: 'Torneos' },
   { to: '/palmares', label: 'Palmares' },
   { to: '/historial', label: 'Historial' },

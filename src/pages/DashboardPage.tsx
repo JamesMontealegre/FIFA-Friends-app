@@ -29,7 +29,7 @@ export function DashboardPage() {
         <Link to="/teams">
           <Card className="p-4 text-center">
             <span className="text-2xl">&#127758;</span>
-            <p className="text-sm font-medium mt-2 text-gray-300">Selecciones</p>
+            <p className="text-sm font-medium mt-2 text-gray-300">Equipos</p>
           </Card>
         </Link>
         <Link to="/tournaments">
