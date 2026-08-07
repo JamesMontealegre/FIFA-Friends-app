@@ -18,6 +18,31 @@ function venueOf(tournament: TournamentDoc): TournamentVenue {
   return tournament.venue ?? 'presencial'
 }
 
+/**
+ * Rebuild palmares for everyone who has taken part in a completed tournament.
+ *
+ * Per-tournament recalculation only covers that tournament's players and only
+ * runs at the moment one is finalised, so this is the way to backfill stats
+ * for tournaments that finished before a scoring change shipped.
+ *
+ * Returns the number of players rebuilt.
+ */
+export async function recalculateAllPalmares(): Promise<number> {
+  const snap = await getDocs(
+    query(collection(db, 'tournaments'), where('status', '==', 'completed')),
+  )
+
+  const byUid = new Map<string, PlayerRef>()
+  for (const d of snap.docs) {
+    const t = d.data() as TournamentDoc
+    for (const p of t.players ?? []) byUid.set(p.uid, p)
+  }
+
+  const players = [...byUid.values()]
+  if (players.length > 0) await recalculatePalmaresForAll(players)
+  return players.length
+}
+
 export async function recalculatePalmaresForAll(players: PlayerRef[]): Promise<void> {
   const tournamentsSnap = await getDocs(
     query(collection(db, 'tournaments'), where('status', '==', 'completed')),
