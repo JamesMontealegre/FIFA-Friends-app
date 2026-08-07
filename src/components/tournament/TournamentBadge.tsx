@@ -13,7 +13,7 @@ const STATUS_CONFIG: Record<TournamentStatus, { label: string; color: string }> 
 export function TournamentBadge({ status }: { status: TournamentStatus }) {
   const config = STATUS_CONFIG[status]
   return (
-    <span className={clsx('px-2.5 py-0.5 rounded-full text-xs font-medium', config.color)}>
+    <span className={clsx('px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap', config.color)}>
       {config.label}
     </span>
   )
@@ -27,7 +27,7 @@ const VENUE_CONFIG: Record<TournamentVenue, { label: string; icon: string; color
 export function VenueBadge({ venue }: { venue: TournamentVenue }) {
   const config = VENUE_CONFIG[venue] ?? VENUE_CONFIG.presencial
   return (
-    <span className={clsx('px-2.5 py-0.5 rounded-full text-xs font-medium', config.color)}>
+    <span className={clsx('px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap', config.color)}>
       <span className="mr-1">{config.icon}</span>
       {config.label}
     </span>
