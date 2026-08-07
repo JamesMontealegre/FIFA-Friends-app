@@ -1,18 +1,19 @@
 import { useState, useMemo } from 'react'
 import { Modal } from '../ui/Modal'
 import { RandomTeamSpinner } from './RandomTeamSpinner'
-import type { Team, TeamSelection } from '../../types/team'
+import type { Team, TeamSelection, TeamKind } from '../../types/team'
 
 interface TeamPickerProps {
   open: boolean
   onClose: () => void
   onSelect: (team: TeamSelection) => void
   teams: Team[]
+  kind: TeamKind
   excludeTeams?: string[]
   title?: string
 }
 
-export function TeamPicker({ open, onClose, onSelect, teams, excludeTeams = [], title = 'Elegir Seleccion' }: TeamPickerProps) {
+export function TeamPicker({ open, onClose, onSelect, teams, kind, excludeTeams = [], title = 'Elegir Equipo' }: TeamPickerProps) {
   const [mode, setMode] = useState<'manual' | 'random'>('manual')
   const [search, setSearch] = useState('')
   const [exactStars, setExactStars] = useState(0)
@@ -80,6 +81,7 @@ export function TeamPicker({ open, onClose, onSelect, teams, excludeTeams = [], 
           </div>
           <RandomTeamSpinner
             teams={exactStars > 0 ? available.filter((t) => t.stars === exactStars) : available}
+            kind={kind}
             onSelect={handleSelect}
           />
         </>
@@ -102,6 +104,7 @@ export function TeamPicker({ open, onClose, onSelect, teams, excludeTeams = [], 
                     flag: team.flag,
                     GRL: team.GRL,
                     stars: team.stars,
+                    kind,
                   })
                 }
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-left transition-colors"
@@ -109,15 +112,18 @@ export function TeamPicker({ open, onClose, onSelect, teams, excludeTeams = [], 
                 <span className="text-2xl">{team.flag}</span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-200 truncate">{team.team}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 truncate">
                     {'\u2605'.repeat(Math.floor(team.stars))}
                     {team.stars % 1 >= 0.5 ? '\u00BD' : ''} - GRL {team.GRL}
+                    {kind === 'club' && ` - ${team.league}`}
                   </p>
                 </div>
               </button>
             ))}
             {filtered.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-4">No hay selecciones disponibles</p>
+              <p className="text-sm text-gray-500 text-center py-4">
+                No hay {kind === 'club' ? 'clubes' : 'selecciones'} disponibles
+              </p>
             )}
           </div>
         </>

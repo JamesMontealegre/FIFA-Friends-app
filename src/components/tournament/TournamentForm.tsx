@@ -1,13 +1,20 @@
 import { useState } from 'react'
 import { Button } from '../ui/Button'
+import type { TeamKind } from '../../types/team'
 
 interface TournamentFormData {
   name: string
   type: 'league' | 'cup'
+  teamMode: TeamKind
   homeAway: boolean
   leagueConfig: { playoffSize: number }
   cupConfig: { numberOfGroups: number; teamsPerGroup: number; advancePerGroup: number }
 }
+
+const TEAM_MODES: { kind: TeamKind; icon: string; label: string; hint: string }[] = [
+  { kind: 'national', icon: '🌍', label: 'Selecciones', hint: '58 selecciones nacionales' },
+  { kind: 'club', icon: '🛡️', label: 'Clubes', hint: '93 clubes de 14 ligas' },
+]
 
 interface TournamentFormProps {
   onSubmit: (data: TournamentFormData) => Promise<void>
@@ -19,6 +26,7 @@ export function TournamentForm({ onSubmit }: TournamentFormProps) {
   const [form, setForm] = useState<TournamentFormData>({
     name: '',
     type: 'league',
+    teamMode: 'national',
     homeAway: false,
     leagueConfig: { playoffSize: 0 },
     cupConfig: { numberOfGroups: 2, teamsPerGroup: 4, advancePerGroup: 2 },
@@ -92,6 +100,33 @@ export function TournamentForm({ onSubmit }: TournamentFormProps) {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Modo de equipos</label>
+            <div className="grid grid-cols-2 gap-3">
+              {TEAM_MODES.map((m) => (
+                <button
+                  key={m.kind}
+                  type="button"
+                  onClick={() => setForm({ ...form, teamMode: m.kind })}
+                  className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                    form.teamMode === m.kind
+                      ? 'border-neon bg-neon/5'
+                      : 'border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <p className="font-medium text-gray-200">
+                    <span className="mr-1.5">{m.icon}</span>
+                    {m.label}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{m.hint}</p>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Todo el torneo usa un solo tipo: no se puede mezclar selecciones con clubes.
+            </p>
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer">

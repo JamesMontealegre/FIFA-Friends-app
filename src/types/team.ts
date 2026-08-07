@@ -1,3 +1,5 @@
+export type TeamKind = 'national' | 'club'
+
 export interface Team {
   team: string
   flag: string
@@ -7,6 +9,15 @@ export interface Team {
   MED: number
   DEF: number
   stars: number
+  country?: string
+}
+
+export interface League {
+  league: string
+  country: string
+  flag: string
+  clubs: number
+  avg_GRL: number
 }
 
 export interface TeamSelection {
@@ -14,4 +25,5 @@ export interface TeamSelection {
   flag: string
   GRL: number
   stars: number
+  kind: TeamKind
 }

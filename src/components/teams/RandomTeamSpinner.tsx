@@ -1,14 +1,14 @@
 import { useState, useCallback } from 'react'
-import type { Team } from '../../types/team'
-import type { TeamSelection } from '../../types/team'
+import type { Team, TeamSelection, TeamKind } from '../../types/team'
 import { Button } from '../ui/Button'
 
 interface RandomTeamSpinnerProps {
   teams: Team[]
+  kind: TeamKind
   onSelect: (team: TeamSelection) => void
 }
 
-export function RandomTeamSpinner({ teams, onSelect }: RandomTeamSpinnerProps) {
+export function RandomTeamSpinner({ teams, kind, onSelect }: RandomTeamSpinnerProps) {
   const [spinning, setSpinning] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [result, setResult] = useState<Team | null>(null)
@@ -45,6 +45,7 @@ export function RandomTeamSpinner({ teams, onSelect }: RandomTeamSpinnerProps) {
         flag: result.flag,
         GRL: result.GRL,
         stars: result.stars,
+        kind,
       })
     }
   }
@@ -63,6 +64,9 @@ export function RandomTeamSpinner({ teams, onSelect }: RandomTeamSpinnerProps) {
             {'★'.repeat(Math.floor(current.stars))}
             {current.stars % 1 >= 0.5 ? '½' : ''} - GRL {current.GRL}
           </p>
+        )}
+        {current && kind === 'club' && (
+          <p className="text-xs text-gray-500 mt-0.5">{current.league}</p>
         )}
       </div>
 

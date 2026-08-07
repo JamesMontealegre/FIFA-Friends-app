@@ -1,6 +1,6 @@
 import type { Timestamp } from 'firebase/firestore'
 import type { PlayerRef } from './user'
-import type { TeamSelection } from './team'
+import type { TeamSelection, TeamKind } from './team'
 
 export interface LeagueConfig {
   playoffSize: number
@@ -30,6 +30,7 @@ export interface TournamentDoc {
   id: string
   name: string
   type: 'league' | 'cup'
+  teamMode: TeamKind
   homeAway: boolean
   status: TournamentStatus
   createdBy: string

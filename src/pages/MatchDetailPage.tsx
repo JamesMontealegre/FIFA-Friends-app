@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import { Card } from '../components/ui/Card'
 import { useAdmin } from '../hooks/useAdmin'
-import { useTeams } from '../hooks/useTeams'
+import { useTeamsByKind } from '../hooks/useTeams'
 import { useTournament } from '../hooks/useTournament'
 import { getMatch, getMatches, getMatchByTieIdAndLeg, updateMatchTeams, updateMatchScore, addUsedTeams } from '../services/matchService'
 import { recalculateStandings, getStandings } from '../services/standingsService'
@@ -21,8 +21,8 @@ export function MatchDetailPage() {
   const { id: tournamentId, matchId } = useParams<{ id: string; matchId: string }>()
   const navigate = useNavigate()
   const isAdmin = useAdmin()
-  const { data: allTeams } = useTeams()
   const { tournament } = useTournament(tournamentId)
+  const { data: allTeams } = useTeamsByKind(tournament?.teamMode ?? 'national')
   const [match, setMatch] = useState<MatchDoc | null>(null)
   const [loading, setLoading] = useState(true)
   const [pickerSide, setPickerSide] = useState<'home' | 'away' | null>(null)
@@ -280,6 +280,7 @@ export function MatchDetailPage() {
           onClose={() => setPickerSide(null)}
           onSelect={handleTeamSelect}
           teams={allTeams}
+          kind={tournament.teamMode ?? 'national'}
           excludeTeams={getExcludeTeams()}
           title={`Equipo para ${pickerSide === 'home' ? match.homePlayer.displayName : match.awayPlayer.displayName}`}
         />

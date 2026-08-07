@@ -5,9 +5,12 @@ import { createTournament } from '../services/tournamentService'
 import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 
+import type { TeamKind } from '../types/team'
+
 interface FormData {
   name: string
   type: 'league' | 'cup'
+  teamMode: TeamKind
   homeAway: boolean
   leagueConfig: { playoffSize: number }
   cupConfig: { numberOfGroups: number; teamsPerGroup: number; advancePerGroup: number }
@@ -27,6 +30,7 @@ export function TournamentCreatePage() {
       const tournamentId = await createTournament({
         name: data.name,
         type: data.type,
+        teamMode: data.teamMode,
         homeAway: data.homeAway,
         createdBy: {
           uid: userDoc.uid,

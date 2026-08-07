@@ -20,12 +20,14 @@ import { generateLeagueFixtures, generateGroupFixtures } from './fixtureGenerato
 import { recalculateStandings } from './standingsService'
 import type { TournamentDoc } from '../types/tournament'
 import type { PlayerRef } from '../types/user'
+import type { TeamKind } from '../types/team'
 
 const COLLECTION = 'tournaments'
 
 export interface CreateTournamentInput {
   name: string
   type: 'league' | 'cup'
+  teamMode: TeamKind
   homeAway: boolean
   leagueConfig?: { playoffSize: number }
   cupConfig?: { numberOfGroups: number; teamsPerGroup: number; advancePerGroup: number }

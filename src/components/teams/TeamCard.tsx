@@ -39,6 +39,9 @@ export function TeamCard({ team }: { team: Team }) {
             <StarRating stars={team.stars} />
             <span className="text-xs text-gray-500">GRL {team.GRL}</span>
           </div>
+          {team.league !== 'International' && (
+            <p className="text-xs text-gray-500 truncate mt-0.5">{team.league}</p>
+          )}
         </div>
       </div>
       <div className="space-y-1.5">

@@ -1,4 +1,4 @@
-import type { Team } from '../types/team'
+import type { Team, League } from '../types/team'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://fc26-clubs-api.vercel.app'
 
@@ -23,4 +23,12 @@ export function fetchTeamsByMinStars(minStars: number): Promise<Team[]> {
 
 export function fetchTeamsSummary(): Promise<{ stars: number; teams: number; avg_GRL: number }[]> {
   return fetchJson(`${API_BASE}/api/teams/summary`)
+}
+
+export function fetchAllClubs(): Promise<Team[]> {
+  return fetchJson<Team[]>(`${API_BASE}/api/club-teams`)
+}
+
+export function fetchLeagues(): Promise<League[]> {
+  return fetchJson<League[]>(`${API_BASE}/api/club-teams/leagues`)
 }
