@@ -1,0 +1,158 @@
+<section class="capitulo" id="cap18">
+  <h1 id="h1-18"><span class="cnum">Capítulo 18</span>Accesibilidad: principios y conformidad WCAG 2.2 AA</h1>
+
+  <p class="entradilla">La accesibilidad de este producto no es un añadido: es el conjunto de
+  requisitos que determina cómo se marcan los componentes, cómo se gestiona el foco, qué contraste
+  tienen los colores y cómo se redactan los textos. Este capítulo recorre los cuatro principios de
+  WCAG, traduce los criterios aplicables a decisiones concretas, fija las reglas de uso de ARIA y
+  especifica el tratamiento de los contenidos complejos del dominio.</p>
+
+  <h2 id="s18-1">18.1 Los cuatro principios</h2>
+  <p>WCAG organiza sus criterios en cuatro principios: el contenido debe ser <b>perceptible</b>
+  —poder percibirse por algún sentido disponible—, <b>operable</b> —poder manejarse con cualquier
+  modalidad de entrada—, <b>comprensible</b> —poder entenderse— y <b>robusto</b> —poder interpretarse
+  por agentes de usuario y tecnologías de asistencia presentes y futuras—. Un producto puede cumplir
+  los tres primeros y fallar el cuarto si construye sus controles con elementos sin semántica, que es
+  el error más extendido en aplicaciones de interfaz rica.</p>
+
+  <h2 id="s18-2">18.2 Perceptible</h2>
+  <table id="t18-1">
+    <thead><tr><th style="width:12%">Criterio</th><th style="width:26%">Exigencia</th><th style="width:62%">Aplicación en este producto</th></tr></thead>
+    <tbody>
+      <tr><td>1.1.1 A</td><td>Contenido no textual con alternativa.</td><td>Escudos de equipo con alternativa vacía cuando el nombre acompaña; avatares con el nombre de la persona; iconos decorativos ocultos; la ruleta del sorteo expone su resultado como texto.</td></tr>
+      <tr><td>1.3.1 A</td><td>Información y relaciones programáticamente determinables.</td><td>Tablas reales con <code>&lt;caption&gt;</code> y <code>scope</code>; listas como listas; encabezados jerárquicos sin saltos; formularios con <code>&lt;fieldset&gt;</code> y <code>&lt;legend&gt;</code>.</td></tr>
+      <tr><td>1.3.2 A</td><td>Secuencia significativa.</td><td>Orden del DOM igual al orden lógico en todas las disposiciones (§10.7).</td></tr>
+      <tr><td>1.3.3 A</td><td>No depender de características sensoriales.</td><td>Ninguna instrucción dice «pulsa el botón verde de la derecha»: se nombra el control.</td></tr>
+      <tr><td>1.3.4 AA</td><td>Orientación no restringida.</td><td>Ninguna vista exige orientación concreta; el cuadro eliminatorio se desplaza en ambos ejes.</td></tr>
+      <tr><td>1.3.5 AA</td><td>Propósito de entrada identificado.</td><td><code>autocomplete</code> declarado en los campos de datos personales.</td></tr>
+      <tr><td>1.4.1 A</td><td>No usar sólo el color.</td><td>Victoria, empate y derrota con letra; estados con icono; enlaces subrayados en texto; prueba de escala de grises obligatoria (§5.9).</td></tr>
+      <tr><td>1.4.3 AA</td><td>Contraste mínimo.</td><td>Verificado por par semántico en integración continua (§6.9), con margen sobre el umbral.</td></tr>
+      <tr><td>1.4.4 AA</td><td>Redimensionar texto al 200&nbsp;%.</td><td>Tipografía en unidades relativas; sin alturas fijas en contenedores de texto (§7.7).</td></tr>
+      <tr><td>1.4.5 AA</td><td>Imágenes de texto.</td><td>No se usan: marcadores, nombres y cifras son texto real.</td></tr>
+      <tr><td>1.4.10 AA</td><td>Reflujo a 320&nbsp;px sin desplazamiento en dos ejes.</td><td>Cumplido salvo en el cuadro eliminatorio, que es la excepción de «contenido que requiere disposición bidimensional», y aun así ofrece alternativa lineal (§18.8).</td></tr>
+      <tr><td>1.4.11 AA</td><td>Contraste de elementos no textuales.</td><td>Bordes de campo, iconos informativos, indicadores de selección y anillo de foco a 3:1 como mínimo.</td></tr>
+      <tr><td>1.4.12 AA</td><td>Espaciado de texto.</td><td>Verificado con la hoja de estilo de prueba en las tres rutas críticas (§19.3).</td></tr>
+      <tr><td>1.4.13 AA</td><td>Contenido al apuntar o enfocar.</td><td>La información emergente es descartable con <kbd>Esc</kbd>, permanece al desplazar el puntero sobre ella y no desaparece sola.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 18.1</b> — Criterios del principio «perceptible» y su aplicación. La lista completa con método de verificación está en el apéndice B.</caption>
+  </table>
+
+  <h2 id="s18-3">18.3 Operable</h2>
+  <table id="t18-2">
+    <thead><tr><th style="width:12%">Criterio</th><th style="width:26%">Exigencia</th><th style="width:62%">Aplicación en este producto</th></tr></thead>
+    <tbody>
+      <tr><td>2.1.1 A</td><td>Teclado.</td><td>Toda función disponible con teclado, incluidos sorteo, reordenación y desplazamiento del cuadro.</td></tr>
+      <tr><td>2.1.2 A</td><td>Sin trampas de foco.</td><td>Sólo el diálogo modal confina el foco, y se sale con <kbd>Esc</kbd>.</td></tr>
+      <tr><td>2.1.4 A</td><td>Atajos de un carácter.</td><td>Desactivados por defecto; configurables (§13.10).</td></tr>
+      <tr><td>2.2.1 A</td><td>Límites de tiempo ajustables.</td><td>El único temporizador es el de deshacer (10&nbsp;s) y es extensible; la caducidad de sesión avisa con antelación y permite prolongar.</td></tr>
+      <tr><td>2.2.2 A</td><td>Pausar, parar, ocultar.</td><td>Las animaciones autónomas son finitas; la ruleta se puede omitir.</td></tr>
+      <tr><td>2.3.1 A</td><td>Destellos.</td><td>Nada parpadea más de tres veces por segundo (§8.8).</td></tr>
+      <tr><td>2.4.1 A</td><td>Evitar bloques.</td><td>Enlace de salto al contenido principal y puntos de referencia semánticos.</td></tr>
+      <tr><td>2.4.2 A</td><td>Título de página.</td><td>Actualizado en cada ruta (§17.2).</td></tr>
+      <tr><td>2.4.3 A</td><td>Orden del foco.</td><td>Coincide con el orden visual; se verifica en cada vista.</td></tr>
+      <tr><td>2.4.4 A</td><td>Propósito del enlace.</td><td>Sin «ver más» huérfanos: el texto del enlace nombra su destino o lo completa el nombre accesible.</td></tr>
+      <tr><td>2.4.6 AA</td><td>Encabezados y etiquetas descriptivos.</td><td>Un encabezado de nivel 1 por vista, descriptivo del contenido.</td></tr>
+      <tr><td>2.4.7 AA</td><td>Foco visible.</td><td>Anillo especificado en §6.5; prohibido suprimirlo.</td></tr>
+      <tr><td>2.4.11 AA</td><td>Foco no oscurecido.</td><td>Márgenes de desplazamiento calculados sobre las barras fijas (§10.4).</td></tr>
+      <tr><td>2.5.1 A</td><td>Gestos de puntero.</td><td>Ningún gesto multipunto o basado en trayectoria es la única vía.</td></tr>
+      <tr><td>2.5.2 A</td><td>Cancelación del puntero.</td><td>Las acciones se ejecutan al soltar, no al presionar.</td></tr>
+      <tr><td>2.5.3 A</td><td>Etiqueta en el nombre.</td><td>El nombre accesible empieza por el texto visible del control.</td></tr>
+      <tr><td>2.5.7 AA</td><td>Movimientos de arrastre.</td><td>Alternativa con botones y campo de posición (§13.6).</td></tr>
+      <tr><td>2.5.8 AA</td><td>Tamaño del objetivo.</td><td>Mínimo elevado a 44 × 44&nbsp;px (§8.6).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 18.2</b> — Criterios del principio «operable» y su aplicación.</caption>
+  </table>
+
+  <h2 id="s18-4">18.4 Comprensible y robusto</h2>
+  <table class="compacta" id="t18-3">
+    <thead><tr><th style="width:12%">Criterio</th><th style="width:26%">Exigencia</th><th style="width:62%">Aplicación</th></tr></thead>
+    <tbody>
+      <tr><td>3.1.1 A</td><td>Idioma de la página.</td><td><code>lang="es"</code> en el documento (corrección del hallazgo H4).</td></tr>
+      <tr><td>3.1.2 AA</td><td>Idioma de las partes.</td><td>Nombres de equipos extranjeros marcados cuando difieren del idioma del documento.</td></tr>
+      <tr><td>3.2.1 A / 3.2.2 A</td><td>Sin cambios de contexto al enfocar o introducir datos.</td><td>Ningún campo navega ni envía al cambiar; los filtros aplican sin mover el foco.</td></tr>
+      <tr><td>3.2.3 AA / 3.2.4 AA</td><td>Navegación e identificación consistentes.</td><td>Posición invariable de la navegación; un mismo icono y una misma etiqueta para una misma función en todo el producto.</td></tr>
+      <tr><td>3.2.6 A</td><td>Ayuda consistente.</td><td>Acceso a ayuda en la misma posición relativa en todas las vistas (§9.4).</td></tr>
+      <tr><td>3.3.1 A / 3.3.3 AA</td><td>Identificación y sugerencia ante error.</td><td>Mensajes que nombran el campo y proponen corrección (§13.11).</td></tr>
+      <tr><td>3.3.2 A</td><td>Etiquetas o instrucciones.</td><td>Etiqueta visible siempre; formato esperado anticipado.</td></tr>
+      <tr><td>3.3.4 AA</td><td>Prevención de errores en acciones con consecuencia.</td><td>Confirmación con resumen y posibilidad de revisión antes de cerrar un torneo.</td></tr>
+      <tr><td>3.3.7 A</td><td>Entrada redundante.</td><td>Ningún dato se pide dos veces en el asistente (§13.3).</td></tr>
+      <tr><td>3.3.8 AA</td><td>Autenticación accesible.</td><td>Identidad federada sin prueba cognitiva; pegado permitido en el código de invitación (§13.4).</td></tr>
+      <tr><td>4.1.2 A</td><td>Nombre, función y valor.</td><td>Componentes construidos sobre elementos nativos; los personalizados declaran rol, estado y valor.</td></tr>
+      <tr><td>4.1.3 AA</td><td>Mensajes de estado.</td><td>Regiones vivas para carga, guardado, recuento de filtros y actualizaciones en tiempo real (§17.4).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 18.3</b> — Criterios de los principios «comprensible» y «robusto». El criterio 4.1.1 fue retirado en WCAG 2.2 y no se verifica.</caption>
+  </table>
+
+  <h2 id="s18-5">18.5 Reglas de uso de ARIA</h2>
+  <ol>
+    <li><b>No usar ARIA si existe un elemento nativo.</b> Un <code>&lt;button&gt;</code> trae rol,
+    foco, teclado y estado; un <code>&lt;div role="button"&gt;</code> obliga a reimplementarlo todo y
+    casi siempre se olvida algo.</li>
+    <li><b>No alterar la semántica nativa</b> salvo necesidad real.</li>
+    <li><b>Todo control interactivo debe ser utilizable con teclado.</b></li>
+    <li><b>No usar <code>role="presentation"</code> ni <code>aria-hidden="true"</code> sobre
+    elementos enfocables</b>: produce elementos alcanzables pero invisibles para la tecnología de
+    asistencia.</li>
+    <li><b>Todo elemento interactivo debe tener nombre accesible.</b></li>
+  </ol>
+  <p>A estas cinco reglas el documento añade una sexta propia: <b>ningún atributo ARIA sin una prueba
+  que lo verifique</b>. Un <code>aria-expanded</code> que no se actualiza es peor que su ausencia,
+  porque comunica información falsa.</p>
+
+  <h2 id="s18-6">18.6 Navegación por teclado</h2>
+  <table class="compacta" id="t18-4">
+    <thead><tr><th style="width:24%">Contexto</th><th style="width:30%">Teclas</th><th style="width:46%">Comportamiento</th></tr></thead>
+    <tbody>
+      <tr><td>Global</td><td><kbd>Tab</kbd> / <kbd>Mayús+Tab</kbd></td><td>Recorre elementos interactivos en orden lógico; el primero es el enlace de salto.</td></tr>
+      <tr><td>Listas de navegación</td><td><kbd>Inicio</kbd> / <kbd>Fin</kbd></td><td>Primer y último elemento de la lista.</td></tr>
+      <tr><td>Diálogo</td><td><kbd>Esc</kbd>, <kbd>Tab</kbd> confinado</td><td>Cierra y devuelve el foco; el tabulador circula dentro.</td></tr>
+      <tr><td>Menú</td><td>Flechas, <kbd>Esc</kbd>, <kbd>Enter</kbd></td><td>Patrón de menú de la guía ARIA; <kbd>Esc</kbd> devuelve el foco al disparador.</td></tr>
+      <tr><td>Tabla ordenable</td><td><kbd>Enter</kbd> / <kbd>Espacio</kbd> en el encabezado</td><td>Alterna orden y anuncia el nuevo criterio.</td></tr>
+      <tr><td>Cuadro eliminatorio</td><td>Flechas dentro del contenedor desplazable</td><td>El contenedor es enfocable y tiene nombre accesible (§18.8).</td></tr>
+      <tr><td>Formulario de marcador</td><td><kbd>Enter</kbd></td><td>Envía desde cualquier campo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 18.4</b> — Contratos de teclado por contexto. El detalle por componente está en el apéndice E.</caption>
+  </table>
+
+  <h2 id="s18-7">18.7 Contenido complejo del dominio</h2>
+  <dl>
+    <dt>Cuadro eliminatorio</dt>
+    <dd>Es información intrínsecamente bidimensional. Se publica en dos representaciones equivalentes
+    y sincronizadas: el lienzo visual, cuyo contenedor es enfocable, desplazable con teclado y tiene
+    nombre accesible; y una representación lineal —lista anidada de rondas y enfrentamientos— que es
+    la que recorren las tecnologías de asistencia y que está siempre presente en el árbol de
+    accesibilidad, no oculta tras un conmutador. Ambas se generan de la misma fuente de datos.</dd>
+    <dt>Clasificación</dt>
+    <dd>Tabla real con título que nombra torneo y fase, abreviaturas con desarrollo, y explicación del
+    criterio de desempate aplicado en la fila expandida. El resaltado de la fila propia no es sólo
+    visual: incluye texto accesible «tu posición».</dd>
+    <dt>Calendario</dt>
+    <dd>Lista agrupada por jornada con encabezados de nivel 3, no tabla: la relación entre partidos de
+    una jornada es de agrupación, no de filas y columnas.</dd>
+    <dt>Marcador</dt>
+    <dd>El nombre accesible del resultado es completo: «Marta 3, Luis 1, finalizado», no «3 – 1», que
+    fuera de contexto no significa nada.</dd>
+  </dl>
+
+  <h2 id="s18-8">18.8 Redacción accesible</h2>
+  <ul>
+    <li>Frases cortas, voz activa y vocabulario común; se evita la jerga técnica y la competitiva
+    innecesaria.</li>
+    <li>Las instrucciones nombran controles por su etiqueta visible.</li>
+    <li>Las abreviaturas se desarrollan en su primera aparición y en el marcado.</li>
+    <li>Los textos de error dicen qué ocurrió y qué hacer, sin culpar.</li>
+    <li>Ningún texto esencial vive sólo en una imagen, en un icono o en una animación.</li>
+    <li>Los enlaces tienen sentido fuera de contexto, porque muchas personas navegan por lista de
+    enlaces.</li>
+  </ul>
+
+  <h2 id="s18-9">18.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-ACC-01.</b> El producto DEBE cumplir todos los criterios de nivel A y AA de WCAG 2.2 aplicables.</li>
+    <li><b>RQ-ACC-02.</b> Los componentes DEBEN construirse sobre semántica nativa; ARIA se usa sólo cuando no existe equivalente.</li>
+    <li><b>RQ-ACC-03.</b> Todo atributo ARIA dinámico DEBE tener una prueba automatizada que verifique su actualización.</li>
+    <li><b>RQ-ACC-04.</b> El cuadro eliminatorio DEBE publicar una representación lineal equivalente permanentemente disponible.</li>
+    <li><b>RQ-ACC-05.</b> Ningún control DEBE perder su indicador de foco ni quedar oculto tras elementos fijos.</li>
+    <li><b>RQ-ACC-06.</b> Los nombres accesibles DEBEN comenzar por el texto visible del control.</li>
+  </ul>
+</section>

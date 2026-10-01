@@ -1,0 +1,141 @@
+<section class="capitulo" id="cap20">
+  <h1 id="h1-20"><span class="cnum">Capítulo 20</span>Modelo de amenazas y arquitectura de seguridad</h1>
+
+  <p class="entradilla">La seguridad de una aplicación sin servidor propio se juega en dos sitios: en
+  lo que el navegador permite ejecutar y en lo que la base de datos permite escribir. Este capítulo
+  establece los límites de confianza, identifica los activos, aplica un análisis sistemático de
+  amenazas y fija los principios y el nivel de verificación que gobiernan los tres capítulos
+  siguientes.</p>
+
+  <h2 id="s20-1">20.1 Premisa</h2>
+  <div class="riesgo">
+    <span class="et">Premisa fundamental</span>
+    <p>Todo el código que se ejecuta en el navegador es <b>público, legible y modificable</b> por
+    quien lo ejecuta. Las comprobaciones del cliente son ergonomía, no seguridad. Cualquier regla que
+    importe —quién puede escribir qué, con qué valores y en qué estado— debe verificarse en un lugar
+    que la persona usuaria no controle. En esta arquitectura ese lugar es el motor de reglas de la
+    base de datos y las funciones de servidor.</p>
+  </div>
+
+  <h2 id="s20-2">20.2 Activos y límites de confianza</h2>
+  <table class="compacta" id="t20-1">
+    <thead><tr><th style="width:26%">Activo</th><th style="width:22%">Propiedad a proteger</th><th style="width:52%">Impacto si se compromete</th></tr></thead>
+    <tbody>
+      <tr><td>Resultados y clasificación</td><td>Integridad</td><td>El producto pierde su función: un torneo con resultados alterados no es un torneo.</td></tr>
+      <tr><td>Palmarés histórico</td><td>Integridad y durabilidad</td><td>Pérdida de la memoria del grupo; daño reputacional difícil de reparar.</td></tr>
+      <tr><td>Identidad y sesión</td><td>Confidencialidad</td><td>Suplantación: escribir resultados en nombre de otra persona.</td></tr>
+      <tr><td>Datos personales (nombre, imagen, correo)</td><td>Confidencialidad y minimización</td><td>Exposición de datos de un grupo privado; obligaciones legales.</td></tr>
+      <tr><td>Disponibilidad del servicio</td><td>Disponibilidad</td><td>Molestia moderada; no hay criticidad operativa.</td></tr>
+      <tr><td>Cuota de la plataforma</td><td>Disponibilidad y coste</td><td>Agotamiento del nivel gratuito por lecturas abusivas: denegación de servicio por factura.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 20.1</b> — Activos y propiedades a proteger, ordenados por impacto.</caption>
+  </table>
+
+  <figure id="f20-1">
+    <svg viewBox="0 0 700 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="8" fill="#3C464D">
+        <rect x="6" y="28" width="180" height="120" rx="5" fill="#FBECEC" stroke="#9B1C1C" stroke-dasharray="4 3"/>
+        <text x="96" y="20" text-anchor="middle" font-weight="bold" fill="#9B1C1C">Zona no confiable</text>
+        <rect x="20" y="44" width="152" height="30" rx="4" fill="#FFFFFF" stroke="#9B1C1C"/>
+        <text x="96" y="63" text-anchor="middle">Navegador · código público</text>
+        <rect x="20" y="82" width="152" height="26" rx="4" fill="#FFFFFF" stroke="#9B1C1C"/>
+        <text x="96" y="99" text-anchor="middle">Extensiones y scripts de terceros</text>
+        <rect x="20" y="114" width="152" height="24" rx="4" fill="#FFFFFF" stroke="#9B1C1C"/>
+        <text x="96" y="130" text-anchor="middle">Almacenamiento local</text>
+
+        <rect x="246" y="28" width="196" height="120" rx="5" fill="#E9F0F8" stroke="#1B4E8C" stroke-dasharray="4 3"/>
+        <text x="344" y="20" text-anchor="middle" font-weight="bold" fill="#1B4E8C">Frontera de control</text>
+        <rect x="260" y="48" width="168" height="34" rx="4" fill="#FFFFFF" stroke="#1B4E8C"/>
+        <text x="344" y="63" text-anchor="middle">Reglas de la base de datos</text>
+        <text x="344" y="75" text-anchor="middle" font-size="7">autorización declarativa</text>
+        <rect x="260" y="92" width="168" height="34" rx="4" fill="#FFFFFF" stroke="#1B4E8C"/>
+        <text x="344" y="107" text-anchor="middle">Funciones de servidor</text>
+        <text x="344" y="119" text-anchor="middle" font-size="7">derivación y consolidación</text>
+
+        <rect x="502" y="28" width="192" height="120" rx="5" fill="#E8F3EE" stroke="#0B6E4F" stroke-dasharray="4 3"/>
+        <text x="598" y="20" text-anchor="middle" font-weight="bold" fill="#074733">Zona de confianza</text>
+        <rect x="516" y="48" width="164" height="30" rx="4" fill="#FFFFFF" stroke="#0B6E4F"/>
+        <text x="598" y="67" text-anchor="middle">Datos persistidos</text>
+        <rect x="516" y="86" width="164" height="30" rx="4" fill="#FFFFFF" stroke="#0B6E4F"/>
+        <text x="598" y="105" text-anchor="middle">Proveedor de identidad</text>
+        <text x="598" y="134" text-anchor="middle" font-size="7">emite y valida el testigo de sesión</text>
+
+        <line x1="186" y1="88" x2="244" y2="88" stroke="#15191C" stroke-width="1.2"/>
+        <text x="215" y="82" text-anchor="middle" font-size="7">toda escritura</text>
+        <line x1="442" y1="88" x2="500" y2="88" stroke="#15191C" stroke-width="1.2"/>
+        <text x="471" y="82" text-anchor="middle" font-size="7">verificada</text>
+        <text x="6" y="164" font-size="7.2" fill="#6B7780">Cada cruce de frontera exige autenticación, autorización y validación de datos; ninguna de las tres puede delegarse en el cliente.</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 20.1</b> — Zonas de confianza y fronteras. Todo lo que está a la izquierda de la frontera de control es territorio del adversario potencial.</figcaption>
+  </figure>
+
+  <h2 id="s20-3">20.3 Análisis sistemático de amenazas</h2>
+  <p>Se aplica el esquema de categorías de amenaza —suplantación, manipulación, repudio, revelación de
+  información, denegación de servicio y elevación de privilegios— a cada cruce de frontera.</p>
+  <table id="t20-2">
+    <thead><tr><th style="width:16%">Categoría</th><th style="width:36%">Amenaza concreta</th><th style="width:48%">Control especificado</th></tr></thead>
+    <tbody>
+      <tr><td><b>Suplantación</b></td><td>Usar la sesión de otra persona para registrar resultados.</td><td>Identidad federada con testigo de corta vida y renovación; ninguna credencial en almacenamiento persistente accesible por script (§22.2).</td></tr>
+      <tr><td><b>Manipulación</b></td><td>Escribir directamente en la clasificación o alterar un marcador consolidado.</td><td>Clasificación no escribible por clientes; marcadores con reglas de validación de rango y estado; auditoría inmutable (§22.6).</td></tr>
+      <tr><td><b>Manipulación</b></td><td>Inyectar código ejecutable mediante nombres de torneo o apodos.</td><td>Escapado por defecto del motor de interfaz; política de seguridad de contenido estricta; Trusted Types; prohibición de inserción de HTML sin sanear (§21.2).</td></tr>
+      <tr><td><b>Repudio</b></td><td>Negar haber registrado un resultado.</td><td>Autoría y marca temporal de servidor en cada escritura; registro de auditoría consultable por el grupo (§16.5).</td></tr>
+      <tr><td><b>Revelación</b></td><td>Leer torneos de grupos ajenos.</td><td>Lectura restringida a participantes del torneo; fin de la lectura global para cualquier cuenta autenticada (§22.6).</td></tr>
+      <tr><td><b>Revelación</b></td><td>Fuga de datos a terceros incrustados.</td><td>Autoalojamiento de fuentes y recursos; sin etiquetas de terceros; política de orígenes permitidos (§21.3).</td></tr>
+      <tr><td><b>Denegación</b></td><td>Agotar la cuota con lecturas o escrituras masivas.</td><td>Reglas que acotan el tamaño de documento; límites de escritura por minuto; verificación de aplicación legítima; alertas de consumo (§23.4).</td></tr>
+      <tr><td><b>Elevación</b></td><td>Obtener permisos de organización.</td><td>Roles con alcance de torneo verificados en servidor; prohibición de rol derivado de datos escribibles por el cliente (§22.5).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 20.2</b> — Modelo de amenazas por categoría, con el control que lo mitiga y la sección que lo especifica.</caption>
+  </table>
+
+  <h2 id="s20-4">20.4 Cobertura del catálogo de riesgos de referencia</h2>
+  <table class="compacta" id="t20-3">
+    <thead><tr><th style="width:34%">Categoría (Top 10:2025)</th><th style="width:30%">Relevancia aquí</th><th style="width:36%">Sección</th></tr></thead>
+    <tbody>
+      <tr><td>A01 Control de acceso roto</td><td><b>Crítica</b> — es el riesgo principal del producto.</td><td>§22.5, §22.6</td></tr>
+      <tr><td>A02 Configuración de seguridad deficiente</td><td>Alta — ausencia de cabeceras y política de contenido.</td><td>§21.3</td></tr>
+      <tr><td>A03 Fallos de la cadena de suministro</td><td>Alta — dependencia de decenas de paquetes.</td><td>§23.2</td></tr>
+      <tr><td>A04 Fallos criptográficos</td><td>Media — transporte cifrado y custodia de testigos.</td><td>§22.2</td></tr>
+      <tr><td>A05 Inyección</td><td>Media — superficie reducida pero existente en texto libre.</td><td>§21.2</td></tr>
+      <tr><td>A06 Diseño inseguro</td><td>Alta — autorización por identidad personal incrustada.</td><td>§20.1, §22.4</td></tr>
+      <tr><td>A07 Fallos de autenticación</td><td>Media — delegada en el proveedor de identidad.</td><td>§22.2, §22.3</td></tr>
+      <tr><td>A08 Fallos de integridad de software o datos</td><td>Alta — integridad de la réplica derivada y de los artefactos publicados.</td><td>§11.10, §23.3</td></tr>
+      <tr><td>A09 Fallos de registro y alerta</td><td>Media — sin registro no hay detección ni resolución de disputas.</td><td>§23.6</td></tr>
+      <tr><td>A10 Gestión de condiciones excepcionales</td><td>Media — fallo abierto ante error de red o de regla.</td><td>§21.7, §15.5</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 20.3</b> — Cobertura de las diez categorías del catálogo de riesgos de referencia vigente.</caption>
+  </table>
+
+  <h2 id="s20-5">20.5 Principios de seguridad adoptados</h2>
+  <ol>
+    <li><b>Mínimo privilegio.</b> Cada regla concede lo justo: campos concretos, estados concretos,
+    identidades concretas.</li>
+    <li><b>Denegación por defecto.</b> Lo que no está explícitamente permitido, está prohibido. Las
+    reglas terminan sin cláusula permisiva general.</li>
+    <li><b>Defensa en profundidad.</b> El cliente valida para ayudar; el servidor valida para
+    proteger; la auditoría permite detectar lo que ambos dejen pasar.</li>
+    <li><b>Fallo cerrado.</b> Ante error, ausencia de datos o condición imprevista, se deniega. Es la
+    respuesta directa a la categoría de condiciones excepcionales.</li>
+    <li><b>Superficie mínima.</b> Ninguna dependencia, ningún recurso de terceros y ningún permiso que
+    no esté justificado por un requisito.</li>
+    <li><b>Seguridad verificable.</b> Cada regla relevante tiene una prueba automatizada que
+    comprueba tanto el caso permitido como el denegado (§26.6).</li>
+  </ol>
+
+  <h2 id="s20-6">20.6 Nivel de verificación objetivo</h2>
+  <p>Se adopta como objetivo el <b>nivel 2</b> del estándar de verificación de seguridad de
+  aplicaciones, aplicado a los requisitos pertinentes para una aplicación sin servidor propio con
+  autenticación delegada. Los requisitos relativos a gestión de contraseñas, criptografía propia o
+  procesamiento de pagos no aplican y se declaran como tales —no como «cumplidos»—. La trazabilidad
+  requisito a requisito está en el apéndice C, con los identificadores citados con versión completa
+  para evitar ambigüedad entre ediciones del estándar.</p>
+
+  <h2 id="s20-7">20.7 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-SEG-01.</b> Ninguna decisión de autorización DEBE depender de código ejecutado en el navegador.</li>
+    <li><b>RQ-SEG-02.</b> Las reglas de servidor DEBEN denegar por defecto y fallar cerradas.</li>
+    <li><b>RQ-SEG-03.</b> Cada amenaza de la tabla 20.2 DEBE tener un control implementado y verificable.</li>
+    <li><b>RQ-SEG-04.</b> El modelo de amenazas DEBE revisarse ante cada cambio de arquitectura o de superficie de datos.</li>
+    <li><b>RQ-SEG-05.</b> Los requisitos no aplicables del estándar de verificación DEBEN declararse como no aplicables, nunca como cumplidos.</li>
+  </ul>
+</section>

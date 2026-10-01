@@ -1,0 +1,104 @@
+<section class="capitulo" id="cap17">
+  <h1 id="h1-17"><span class="cnum">Capítulo 17</span>Accesibilidad específica de la aplicación de página única</h1>
+
+  <p class="entradilla">Una aplicación de página única rompe por diseño tres mecanismos que el
+  navegador ofrecía de serie: el anuncio del cambio de página, la reinicialización del foco y la
+  restauración del desplazamiento. Nada de esto lo arregla una auditoría de contraste. Este capítulo
+  especifica cómo se reconstruyen esos mecanismos y cómo se tratan los contenidos que cambian sin
+  intervención de la persona.</p>
+
+  <h2 id="s17-1">17.1 El problema</h2>
+  <p>En una navegación tradicional el navegador carga un documento nuevo: el lector de pantalla
+  anuncia el título, el foco vuelve al inicio y el desplazamiento se restablece. En una aplicación de
+  página única no ocurre ninguna de las tres cosas: el documento es el mismo, el foco permanece donde
+  estaba —a menudo en un enlace que ya no existe, en cuyo caso pasa al cuerpo del documento— y la
+  persona que no ve la pantalla no tiene forma de saber que el contenido ha cambiado. El resultado,
+  observado una y otra vez en auditorías, es que la navegación por teclado queda a la deriva.</p>
+
+  <h2 id="s17-2">17.2 Protocolo de cambio de ruta</h2>
+  <p>Cada navegación ejecuta, en este orden, cinco pasos obligatorios:</p>
+  <ol>
+    <li><b>Actualizar el título del documento</b> con el patrón «&lt;contexto&gt; · FIFA Friends».</li>
+    <li><b>Anunciar el cambio</b> en una región viva cortés situada fuera del contenido que se
+    reemplaza, con el nombre de la vista cargada.</li>
+    <li><b>Trasladar el foco</b> al encabezado de nivel 1 de la vista nueva, que declara
+    <code>tabindex="-1"</code>, salvo en el caso de la variante de dos paneles del patrón
+    maestro&ndash;detalle (§11.8).</li>
+    <li><b>Restablecer el desplazamiento</b> al inicio en navegación hacia adelante y restaurar la
+    posición previa en retroceso.</li>
+    <li><b>Reanudar o cancelar suscripciones</b> según la vista destino (§15.3).</li>
+  </ol>
+  <pre>function AnuncioDeRuta() {
+  const ubicacion = useLocation();
+  const [mensaje, setMensaje] = useState('');
+  useEffect(() =&gt; {
+    const titulo = tituloDeRuta(ubicacion.pathname);   // misma fuente que document.title
+    document.title = `${titulo} · FIFA Friends`;
+    setMensaje(`${titulo}. Página cargada.`);
+    const h1 = document.querySelector&lt;HTMLElement&gt;('main h1[tabindex="-1"]');
+    h1?.focus({ preventScroll: true });
+  }, [ubicacion.key]);
+  return &lt;p role="status" aria-live="polite" class="visualmente-oculta"&gt;{mensaje}&lt;/p&gt;;
+}</pre>
+  <div class="aviso">
+    <span class="et">Dos errores frecuentes</span>
+    <p>El primero es anunciar con <code>aria-live="assertive"</code>, que interrumpe lo que la persona
+    esté escuchando; el cambio de ruta es cortés por definición, porque lo ha provocado ella. El
+    segundo es colocar la región viva dentro del contenedor que se reemplaza: al desmontarse y
+    volver a montarse, muchos lectores no anuncian nada. La región vive en el armazón, no en la
+    vista.</p>
+  </div>
+
+  <h2 id="s17-3">17.3 Gestión del foco por situación</h2>
+  <table id="t17-1">
+    <thead><tr><th style="width:28%">Situación</th><th style="width:34%">Destino del foco</th><th style="width:38%">Motivo</th></tr></thead>
+    <tbody>
+      <tr><td>Navegación a vista nueva</td><td>Encabezado de nivel 1 de la vista.</td><td>Reproduce la carga de documento y sitúa en el inicio del contenido.</td></tr>
+      <tr><td>Selección en maestro&ndash;detalle de dos paneles</td><td>Permanece en el enlace.</td><td>Permite recorrer la colección sin reposicionar manualmente.</td></tr>
+      <tr><td>Selección en maestro&ndash;detalle apilado</td><td>Encabezado del detalle.</td><td>La lista ya no está en pantalla.</td></tr>
+      <tr><td>Retorno desde el detalle</td><td>Enlace del elemento de origen.</td><td>Evita volver al principio de una lista larga.</td></tr>
+      <tr><td>Apertura de diálogo</td><td>Primer elemento interactivo o encabezado.</td><td>Patrón de diálogo modal de la guía de prácticas ARIA.</td></tr>
+      <tr><td>Cierre de diálogo</td><td>Elemento que lo abrió.</td><td>Restaura el contexto previo.</td></tr>
+      <tr><td>Eliminación del elemento enfocado</td><td>Elemento hermano siguiente, o contenedor.</td><td>Si el foco se pierde, pasa al cuerpo del documento y se pierde la orientación.</td></tr>
+      <tr><td>Envío de formulario con error</td><td>Resumen de errores.</td><td>Permite recorrer los errores desde un único punto.</td></tr>
+      <tr><td>Envío correcto</td><td>Mensaje de confirmación o contenido resultante.</td><td>Confirma el resultado sin obligar a buscarlo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 17.1</b> — Matriz de gestión del foco. Es la tabla que se verifica una a una en la auditoría manual de §19.3.</caption>
+  </table>
+
+  <h2 id="s17-4">17.4 Contenido que cambia solo</h2>
+  <p>Las actualizaciones en tiempo real son el caso más delicado: un contenido que cambia sin que la
+  persona lo haya pedido puede desorientar, mover objetivos bajo el dedo o inundar de anuncios al
+  lector de pantalla. Reglas:</p>
+  <ul>
+    <li>Los cambios que afectan a la vista <b>activa</b> y son relevantes (un resultado registrado por
+    otra persona) se anuncian de forma cortés y agregada: «La clasificación se ha actualizado», no un
+    anuncio por cada campo.</li>
+    <li>Los cambios que <b>reordenan</b> una lista no se aplican de inmediato si la lista tiene el
+    foco o el puntero encima: se acumulan y se ofrece un control «Mostrar 3 cambios nuevos».</li>
+    <li>Ningún cambio automático mueve el foco. El criterio 3.2.2 prohíbe los cambios de contexto no
+    solicitados.</li>
+    <li>Las regiones vivas se declaran al montar la vista, vacías; insertar la región y el texto a la
+    vez impide que muchos lectores lo anuncien.</li>
+    <li>Los anuncios se limitan a uno cada dos segundos; por encima, la información deja de ser
+    utilizable.</li>
+  </ul>
+
+  <h2 id="s17-5">17.5 Enlaces, botones y rutas</h2>
+  <p>En una aplicación de página única la distinción entre enlace y botón se difumina en el código
+  —ambos acaban llamando a una función— pero no en la experiencia. La regla es inequívoca: <b>si
+  produce un cambio de URL, es un enlace</b> (y debe ser un elemento <code>&lt;a&gt;</code> con
+  <code>href</code> real, interceptado para navegar sin recarga); si no lo produce, es un botón. Un
+  enlace con <code>href</code> real permite abrir en pestaña nueva, copiar la dirección, previsualizar
+  y funcionar si el script falla. Esta regla es, por sí sola, responsable de buena parte de la
+  diferencia entre una aplicación navegable y otra que no lo es.</p>
+
+  <h2 id="s17-6">17.6 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-SPA-07.</b> Todo cambio de ruta DEBE actualizar el título, anunciar la vista y trasladar el foco según la tabla 17.1.</li>
+    <li><b>RQ-SPA-08.</b> La región viva de navegación DEBE residir en el armazón y ser cortés.</li>
+    <li><b>RQ-SPA-09.</b> Ningún cambio automático de contenido DEBE mover el foco ni reordenar una lista con foco o puntero encima.</li>
+    <li><b>RQ-SPA-10.</b> Todo elemento que cambie la URL DEBE ser un enlace con <code>href</code> real.</li>
+    <li><b>RQ-SPA-11.</b> Los anuncios automáticos DEBEN agregarse y limitarse a uno cada dos segundos.</li>
+  </ul>
+</section>

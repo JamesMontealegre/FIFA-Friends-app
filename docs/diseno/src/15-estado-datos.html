@@ -1,0 +1,167 @@
+<section class="capitulo" id="cap15">
+  <h1 id="h1-15"><span class="cnum">Capítulo 15</span>Gestión de estado y de datos</h1>
+
+  <p class="entradilla">La mayor parte de los defectos de una aplicación de página única no están en
+  la presentación sino en el estado: datos que se quedan atrás, pantallas que muestran cifras
+  distintas, escrituras que se pierden al perder la red. Este capítulo clasifica los tipos de estado,
+  asigna a cada uno un mecanismo, especifica la política de caché y de tiempo real, el tratamiento de
+  las mutaciones y de los conflictos, y resuelve dónde deben calcularse los datos derivados.</p>
+
+  <h2 id="s15-1">15.1 Taxonomía del estado</h2>
+  <table id="t15-1">
+    <thead><tr><th style="width:20%">Tipo</th><th style="width:26%">Ejemplos</th><th style="width:24%">Mecanismo</th><th style="width:30%">Regla</th></tr></thead>
+    <tbody>
+      <tr><td><b>De servidor</b></td><td>Torneos, partidos, clasificación, equipos, palmarés.</td><td>Caché de consultas con revalidación.</td><td>Nunca se copia a estado local: se consulta. Copiarlo crea una segunda verdad.</td></tr>
+      <tr><td><b>De navegación</b></td><td>Ruta, selección, filtros, pestaña activa.</td><td>URL.</td><td>Todo lo compartible vive aquí (§9.2).</td></tr>
+      <tr><td><b>De sesión</b></td><td>Identidad, roles del usuario en cada torneo.</td><td>Contexto de autenticación.</td><td>Derivado del proveedor de identidad; nunca se confía en él para autorizar (§22.4).</td></tr>
+      <tr><td><b>De formulario</b></td><td>Valores en edición, errores, estado de envío.</td><td>Estado local del formulario.</td><td>Se descarta al enviar con éxito; se preserva ante navegación accidental.</td></tr>
+      <tr><td><b>De interfaz</b></td><td>Menú abierto, sección plegada, densidad.</td><td>Estado local del componente.</td><td>No se eleva salvo que dos componentes lo necesiten.</td></tr>
+      <tr><td><b>De preferencia</b></td><td>Tema, densidad, orden preferido.</td><td>Almacenamiento local del dispositivo.</td><td>Nunca contiene datos personales ni credenciales (§21.5).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 15.1</b> — Taxonomía del estado. La confusión entre estado de servidor y estado de cliente es el origen de la mayoría de las inconsistencias observadas en aplicaciones de este tipo.</caption>
+  </table>
+
+  <h2 id="s15-2">15.2 Política de caché</h2>
+  <p>Cada consulta declara su clave, su tiempo de frescura y su tiempo de retención. La clave se
+  construye jerárquicamente, de lo general a lo específico, para permitir invalidaciones parciales.</p>
+  <table class="compacta" id="t15-2">
+    <thead><tr><th style="width:30%">Clave</th><th style="width:16%">Frescura</th><th style="width:16%">Retención</th><th style="width:38%">Justificación</th></tr></thead>
+    <tbody>
+      <tr><td><code>['equipos']</code></td><td>24 h</td><td>7 días</td><td>Catálogo prácticamente inmutable; se revalida sólo al publicar versión.</td></tr>
+      <tr><td><code>['torneos', filtros]</code></td><td>60 s</td><td>15 min</td><td>Cambia al crear o cerrar torneos; no requiere tiempo real.</td></tr>
+      <tr><td><code>['torneo', id]</code></td><td>30 s</td><td>15 min</td><td>Metadatos del torneo; cambia poco durante una sesión.</td></tr>
+      <tr><td><code>['torneo', id, 'partidos']</code></td><td>tiempo real</td><td>15 min</td><td>Es el dato que cambia durante la reunión: se suscribe mientras la vista está visible.</td></tr>
+      <tr><td><code>['torneo', id, 'clasificacion']</code></td><td>tiempo real</td><td>15 min</td><td>Derivado de los partidos; se suscribe junto con ellos.</td></tr>
+      <tr><td><code>['palmares']</code></td><td>5 min</td><td>1 h</td><td>Sólo cambia al cerrar un torneo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 15.2</b> — Política de caché por consulta. La frescura no es una preferencia: determina el número de lecturas facturables y el consumo de batería.</caption>
+  </table>
+  <pre>export const claves = {
+  equipos:        ['equipos'] as const,
+  torneos:        (f: FiltroTorneos) =&gt; ['torneos', f] as const,
+  torneo:         (id: string) =&gt; ['torneo', id] as const,
+  partidos:       (id: string) =&gt; ['torneo', id, 'partidos'] as const,
+  clasificacion:  (id: string) =&gt; ['torneo', id, 'clasificacion'] as const,
+};
+<span class="c">// Invalidar todo lo de un torneo tras una mutación relevante:
+// cliente.invalidateQueries({ queryKey: ['torneo', id] })</span></pre>
+
+  <h2 id="s15-3">15.3 Tiempo real: cuándo sí y cuándo no</h2>
+  <p>La suscripción en tiempo real es cómoda y cara. Criterios de decisión:</p>
+  <ul>
+    <li>Se suscribe <b>sólo</b> lo que puede cambiar por acción de otra persona <i>mientras</i> se
+    está mirando: partidos y clasificación del torneo abierto, y la lista de participantes durante la
+    inscripción.</li>
+    <li>La suscripción se cancela al abandonar la vista, al ocultarse la pestaña y tras cinco minutos
+    de inactividad, con reanudación al volver.</li>
+    <li>Todo lo demás usa consulta con revalidación al recuperar el foco de la ventana, que cubre el
+    99&nbsp;% de los casos con una fracción del coste.</li>
+    <li>Las suscripciones se limitan por consulta acotada —la jornada visible, no el torneo
+    entero— cuando el número de documentos supera 100.</li>
+  </ul>
+  <div class="nota">
+    <span class="et">Presupuesto de lecturas</span>
+    <p>Una sesión típica de consulta no debe superar <b>40 lecturas de documento</b>; una sesión de
+    organización durante una jornada, <b>250</b>. Estos límites forman parte del presupuesto de
+    rendimiento (apéndice D) porque en esta plataforma el coste de lectura y el consumo de batería
+    son la misma magnitud: documentos leídos.</p>
+  </div>
+
+  <h2 id="s15-4">15.4 Mutaciones y actualización optimista</h2>
+  <p>Registrar un resultado debe sentirse instantáneo aunque la red tarde. El patrón es siempre el
+  mismo y está especificado para evitar las dos patologías habituales —parpadeo al confirmar y
+  estados fantasma al fallar—:</p>
+  <ol>
+    <li>Cancelar revalidaciones en curso de las claves afectadas.</li>
+    <li>Guardar una instantánea del estado previo.</li>
+    <li>Aplicar el cambio en la caché y mostrarlo con un indicador sutil de «guardando».</li>
+    <li>Enviar la escritura con identificador de operación para que el servidor pueda descartar
+    duplicados.</li>
+    <li>Si falla, restaurar la instantánea, explicar el error y <b>conservar los datos introducidos</b>
+    para reintentar.</li>
+    <li>Al terminar, invalidar la rama de claves del torneo y dejar que la verdad del servidor
+    prevalezca.</li>
+  </ol>
+  <pre>const registrar = useMutation({
+  mutationFn: (r: Resultado) =&gt; servicioPartidos.registrar(r, { idOperacion: r.idOperacion }),
+  onMutate: async (r) =&gt; {
+    await cliente.cancelQueries({ queryKey: claves.partidos(r.torneoId) });
+    const previo = cliente.getQueryData(claves.partidos(r.torneoId));
+    cliente.setQueryData(claves.partidos(r.torneoId), aplicar(r));
+    return { previo };
+  },
+  onError: (_e, r, ctx) =&gt; cliente.setQueryData(claves.partidos(r.torneoId), ctx!.previo),
+  onSettled: (_d, _e, r) =&gt; cliente.invalidateQueries({ queryKey: ['torneo', r.torneoId] }),
+});</pre>
+  <p>La <b>idempotencia</b> es obligatoria: cada mutación lleva un identificador de operación generado
+  en el cliente, y el servidor ignora una segunda llegada con el mismo identificador. Sin esa
+  garantía, un reintento de red duplica goles.</p>
+
+  <h2 id="s15-5">15.5 Sin conexión y conflictos</h2>
+  <table class="compacta" id="t15-3">
+    <thead><tr><th style="width:26%">Situación</th><th style="width:34%">Comportamiento</th><th style="width:40%">Señal a la persona</th></tr></thead>
+    <tbody>
+      <tr><td>Pérdida de red con escritura pendiente</td><td>La escritura queda encolada y se reintenta con retroceso exponencial.</td><td>Banner persistente «sin conexión» y marca «pendiente» en el partido afectado.</td></tr>
+      <tr><td>Recuperación de red</td><td>Se envía la cola en orden; cada operación es idempotente.</td><td>Confirmación agregada: «2 resultados enviados».</td></tr>
+      <tr><td>Cierre de la aplicación con cola pendiente</td><td>La cola persiste en almacenamiento local y se reanuda al volver.</td><td>Aviso al cerrar si hay escrituras sin enviar.</td></tr>
+      <tr><td>Conflicto: dos personas registran el mismo partido</td><td>Gana la primera escritura confirmada; la segunda se rechaza con el estado actual.</td><td>Diálogo con ambos valores y elección explícita, nunca sobrescritura silenciosa.</td></tr>
+      <tr><td>Datos obsoletos tras suspensión</td><td>Revalidación al recuperar visibilidad.</td><td>Ninguna si no hay cambios; actualización silenciosa si los hay.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 15.3</b> — Comportamiento ante red inestable y conflictos. «La última escritura gana» está prohibido como política por defecto: en este dominio produce resultados alterados sin rastro.</caption>
+  </table>
+
+  <h2 id="s15-6">15.6 Datos derivados: dónde se calculan</h2>
+  <p>La regla general es sencilla: <b>se deriva en el cliente lo que es barato y privado; se deriva en
+  el servidor lo que es compartido y autoritativo</b>.</p>
+  <table class="compacta" id="t15-4">
+    <thead><tr><th style="width:26%">Dato derivado</th><th style="width:16%">Dónde</th><th style="width:58%">Motivo</th></tr></thead>
+    <tbody>
+      <tr><td>Orden y filtrado de listas</td><td>Cliente</td><td>Barato, depende de preferencias locales y no es compartido.</td></tr>
+      <tr><td>Próximo partido de la persona</td><td>Cliente</td><td>Proyección personal de datos ya cargados.</td></tr>
+      <tr><td>Clasificación del torneo</td><td><b>Servidor</b></td><td>Es compartida y autoritativa: determina quién gana. No puede depender del navegador (§11.10).</td></tr>
+      <tr><td>Progresión del cuadro eliminatorio</td><td><b>Servidor</b></td><td>Altera emparejamientos futuros: una divergencia cambiaría el torneo.</td></tr>
+      <tr><td>Palmarés</td><td><b>Servidor</b></td><td>Consolidado histórico; debe escribirse una sola vez al cerrar el torneo.</td></tr>
+      <tr><td>Estadísticas de la ficha personal</td><td>Servidor (agregado) + cliente (presentación)</td><td>Agregado materializado para evitar leer todo el histórico en cada visita.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 15.4</b> — Ubicación del cálculo de datos derivados.</caption>
+  </table>
+  <p>La función de servidor que recalcula la clasificación se dispara ante cualquier escritura en la
+  colección de partidos del torneo, lee todos los partidos finalizados, aplica el algoritmo de
+  ordenación y desempate y escribe el documento de clasificación completo. Es un recálculo total, no
+  incremental: cuesta más, pero es idempotente, resistente a eventos perdidos o repetidos y
+  verificable con una sola prueba. Con decenas de partidos por torneo, esa decisión no tiene coste
+  observable.</p>
+
+  <h2 id="s15-7">15.7 Esquemas y validación de entrada</h2>
+  <p>Los datos que llegan de la base de datos son datos externos: pueden faltar campos, haber
+  quedado de una versión anterior del esquema o haber sido escritos por un cliente manipulado. Toda
+  lectura se valida contra un esquema declarado antes de entrar en la caché; los documentos que no
+  validan se descartan con registro del incidente en lugar de propagar valores imposibles a la
+  interfaz. Ese mismo esquema genera los tipos de TypeScript, de modo que una sola definición cubre
+  validación en ejecución y comprobación estática.</p>
+
+  <h2 id="s15-8">15.8 Antipatrones de estado</h2>
+  <ol>
+    <li><b>Copiar datos de servidor a estado local</b> «para poder editarlos»: produce pantallas que
+    no se actualizan y cifras divergentes.</li>
+    <li><b>Un contexto global para todo</b>: cualquier cambio repinta la aplicación entera.</li>
+    <li><b>Efectos que sincronizan estados</b>: dos fuentes de verdad con un efecto que intenta
+    igualarlas acaban oscilando.</li>
+    <li><b>Invalidación total tras cada mutación</b>: convierte cada escritura en una tormenta de
+    lecturas.</li>
+    <li><b>Suscripciones sin cancelación</b>: fugas de memoria y de coste que sólo aparecen en
+    sesiones largas.</li>
+    <li><b>Escribir datos derivados desde el cliente</b>: el hallazgo H8 (§11.10).</li>
+  </ol>
+
+  <h2 id="s15-9">15.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-EST-01.</b> El estado de servidor NO DEBE copiarse a estado local de componentes.</li>
+    <li><b>RQ-EST-02.</b> Cada consulta DEBE declarar clave jerárquica, frescura y retención.</li>
+    <li><b>RQ-EST-03.</b> Las suscripciones en tiempo real DEBEN cancelarse al perder visibilidad y limitarse a datos que cambian durante la sesión.</li>
+    <li><b>RQ-EST-04.</b> Toda mutación DEBE ser idempotente mediante identificador de operación.</li>
+    <li><b>RQ-EST-05.</b> Ninguna escritura DEBE perderse en silencio: existe cola persistente y señal visible.</li>
+    <li><b>RQ-EST-06.</b> Los datos compartidos y autoritativos DEBEN derivarse en servidor con recálculo total idempotente.</li>
+    <li><b>RQ-EST-07.</b> Toda lectura DEBE validarse contra esquema antes de usarse.</li>
+  </ul>
+</section>

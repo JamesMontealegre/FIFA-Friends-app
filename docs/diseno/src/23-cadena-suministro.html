@@ -1,0 +1,129 @@
+<section class="capitulo" id="cap23">
+  <h1 id="h1-23"><span class="cnum">Capítulo 23</span>Cadena de suministro, secretos, privacidad y respuesta</h1>
+
+  <p class="entradilla">Una aplicación moderna incorpora, por vía de dependencias, código de cientos
+  de personas desconocidas, y lo ejecuta tanto en el equipo de desarrollo como en el navegador de
+  quien la usa. Este capítulo especifica la política de dependencias y de construcción, la gestión de
+  secretos, el tratamiento de datos personales y el procedimiento de respuesta ante incidentes.</p>
+
+  <h2 id="s23-1">23.1 Por qué la cadena de suministro es ahora un riesgo de primer orden</h2>
+  <p>El catálogo de riesgos de referencia incorporó en su edición de 2025 una categoría propia para
+  los fallos de la cadena de suministro de software, elevándola a la tercera posición. La razón es
+  empírica: durante 2025 el ecosistema de paquetes de JavaScript sufrió campañas de propagación
+  automática en las que paquetes legítimos y ampliamente usados fueron publicados con cargas
+  maliciosas que se ejecutaban en los <i>scripts</i> de ciclo de vida de la instalación, robaban
+  credenciales de desarrollo y de integración continua y las utilizaban para publicar nuevas versiones
+  comprometidas de otros paquetes. El vector no requiere ningún error del equipo que consume la
+  dependencia: basta instalar una versión nueva.</p>
+
+  <h2 id="s23-2">23.2 Política de dependencias</h2>
+  <table class="compacta" id="t23-1">
+    <thead><tr><th style="width:30%">Control</th><th style="width:34%">Regla</th><th style="width:36%">Verificación</th></tr></thead>
+    <tbody>
+      <tr><td>Instalación reproducible</td><td>Instalación estricta desde el fichero de bloqueo; nunca resolución libre en integración ni en despliegue.</td><td>El flujo de construcción falla si el fichero de bloqueo cambia.</td></tr>
+      <tr><td><i>Scripts</i> de ciclo de vida</td><td>Desactivados por defecto en integración; se permiten de forma nominal y justificada para los paquetes que realmente los necesiten.</td><td>Configuración del gestor de paquetes revisada en cada auditoría.</td></tr>
+      <tr><td>Periodo de cuarentena</td><td>No se adoptan versiones publicadas hace menos de 72 horas, salvo corrección de seguridad.</td><td>Política del robot de actualización de dependencias.</td></tr>
+      <tr><td>Procedencia</td><td>Se prefieren paquetes con atestación de procedencia verificable y publicación sin credenciales de larga vida.</td><td>Revisión en la incorporación de cada dependencia nueva.</td></tr>
+      <tr><td>Superficie mínima</td><td>Una dependencia nueva requiere justificación: qué resuelve, qué pesa, cuántas transitivas añade y qué alternativa de plataforma existe.</td><td>Revisión de arquitectura; el presupuesto de tamaño actúa de freno natural.</td></tr>
+      <tr><td>Vulnerabilidades conocidas</td><td>Exploración continua; las de severidad alta o crítica con explotación plausible se corrigen en 72 horas.</td><td>Informe automático en cada integración.</td></tr>
+      <tr><td>Fijación de versiones</td><td>Versiones exactas en dependencias de construcción; intervalos acotados sólo en las de desarrollo.</td><td>Revisión del manifiesto.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 23.1</b> — Política de dependencias y de construcción.</caption>
+  </table>
+  <div class="aviso">
+    <span class="et">Credenciales de integración continua</span>
+    <p>Las campañas observadas tuvieron como objetivo principal las credenciales presentes en los
+    entornos de construcción. De ahí tres reglas: los flujos de integración se ejecutan con permisos
+    mínimos y de sólo lectura salvo en el paso de publicación; se usan credenciales de corta vida
+    emitidas por federación en lugar de testigos permanentes; y ningún flujo disparado por una
+    propuesta de cambio externa tiene acceso a secretos.</p>
+  </div>
+
+  <h2 id="s23-3">23.3 Integridad de lo publicado</h2>
+  <ul>
+    <li>Construcción reproducible desde una confirmación identificada; el artefacto publicado se puede
+    rastrear hasta su origen exacto.</li>
+    <li>Los recursos con huella de contenido en el nombre son inmutables; el documento raíz nunca se
+    cachea de forma persistente (§21.3).</li>
+    <li>La publicación es automática desde la rama principal tras pasar todas las verificaciones; no
+    existe publicación manual desde un equipo personal.</li>
+    <li>Toda publicación es reversible a la versión anterior en un paso, y la reversión no requiere
+    reconstrucción.</li>
+  </ul>
+
+  <h2 id="s23-4">23.4 Secretos y configuración</h2>
+  <p>La configuración de acceso a la plataforma de datos que viaja al navegador <b>no es secreta</b>:
+  es un identificador público, y tratarla como secreto genera una falsa sensación de seguridad. Lo
+  que protege los datos son las reglas de autorización, no la ocultación de esa configuración. Sí son
+  secretos, y nunca entran en el repositorio ni en el paquete del cliente: las claves de
+  administración, las credenciales de despliegue, las claves de firma y cualquier credencial de
+  servicio con privilegios. Se custodian en el almacén de secretos del entorno, con rotación
+  documentada y con exploración automática del repositorio para detectar filtraciones.</p>
+  <table class="compacta" id="t23-2">
+    <thead><tr><th style="width:34%">Elemento</th><th style="width:20%">¿Secreto?</th><th style="width:46%">Dónde vive</th></tr></thead>
+    <tbody>
+      <tr><td>Identificadores de la aplicación cliente</td><td>No</td><td>Variables de construcción; viajan al navegador.</td></tr>
+      <tr><td>Clave de cuenta de servicio</td><td><b>Sí</b></td><td>Almacén de secretos del entorno de funciones; nunca en el repositorio.</td></tr>
+      <tr><td>Credenciales de despliegue</td><td><b>Sí</b></td><td>Secretos del sistema de integración, de corta vida.</td></tr>
+      <tr><td>Claves de verificación de integridad de la aplicación</td><td>Parcial</td><td>Clave pública en el cliente; secreto de depuración fuera del repositorio.</td></tr>
+      <tr><td>Datos de prueba</td><td>No, pero sí sensibles</td><td>Sintéticos; nunca copias de datos reales de personas.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 23.2</b> — Clasificación de la configuración y custodia correspondiente.</caption>
+  </table>
+
+  <h2 id="s23-5">23.5 Privacidad y datos personales</h2>
+  <p>El producto trata el conjunto mínimo de datos personales que su función exige: nombre visible,
+  imagen de perfil y dirección de correo procedente de la identidad federada, más los datos de
+  actividad competitiva. Principios aplicados:</p>
+  <dl>
+    <dt>Minimización</dt>
+    <dd>No se recogen datos que no sean necesarios para una función concreta. En particular, no se
+    recoge ubicación, agenda de contactos ni identificadores de dispositivo.</dd>
+    <dt>Limitación de finalidad</dt>
+    <dd>Los datos se usan para operar el torneo y mostrar el histórico; no se usan para perfilado ni
+    se ceden a terceros.</dd>
+    <dt>Transparencia</dt>
+    <dd>Aviso de privacidad accesible desde el menú utilitario, en lenguaje llano, que enumera qué se
+    guarda, para qué, durante cuánto tiempo y quién puede verlo.</dd>
+    <dt>Derechos</dt>
+    <dd>La interfaz permite exportar los datos propios en formato legible por máquina y eliminar la
+    cuenta. La eliminación borra el perfil y seudonimiza la participación histórica —el resultado de
+    un partido afecta a otra persona y no puede desaparecer sin alterar su histórico—, sustituyendo
+    nombre e imagen por una identidad anónima estable.</dd>
+    <dt>Retención</dt>
+    <dd>Los datos de investigación, doce meses (§3.9); los registros técnicos, 30 días; los datos del
+    dominio, mientras exista la cuenta o hasta la eliminación del torneo.</dd>
+    <dt>Visibilidad entre personas</dt>
+    <dd>El contenido de un torneo sólo es visible para quienes participan u organizan (§22.6). No
+    existe perfil público.</dd>
+  </dl>
+
+  <h2 id="s23-6">23.6 Registro, detección y respuesta</h2>
+  <table class="compacta" id="t23-3">
+    <thead><tr><th style="width:26%">Evento</th><th style="width:28%">Dónde se registra</th><th style="width:46%">Acción</th></tr></thead>
+    <tbody>
+      <tr><td>Denegación de regla</td><td>Registro de la plataforma de datos</td><td>Alerta al superar umbral por identidad y hora.</td></tr>
+      <tr><td>Error no capturado en cliente</td><td>Servicio de errores, sin datos personales</td><td>Agregación y seguimiento; identificador mostrado a la persona para soporte.</td></tr>
+      <tr><td>Cambio de organizadores</td><td>Auditoría del torneo</td><td>Visible para el grupo; alerta si es masivo.</td></tr>
+      <tr><td>Consumo anómalo de cuota</td><td>Métricas de la plataforma</td><td>Alerta y límite temporal de escrituras.</td></tr>
+      <tr><td>Informe de violación de la política de contenido</td><td>Extremo de informes</td><td>Revisión semanal; indicio de inyección o de extensión hostil.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 23.3</b> — Eventos registrados y respuesta. Los registros no contienen testigos, contraseñas ni contenido de mensajes.</caption>
+  </table>
+  <p>El procedimiento ante incidente consta de seis pasos: <b>contener</b> (revertir la publicación o
+  endurecer reglas), <b>evaluar</b> (qué datos y qué personas), <b>erradicar</b> (corregir la causa),
+  <b>recuperar</b> (restaurar servicio y datos), <b>comunicar</b> (a las personas afectadas, en
+  lenguaje llano y sin demora injustificada) y <b>aprender</b> (análisis sin culpabilización, con
+  acciones concretas y fechadas). La comunicación no se omite por ser un producto recreativo: la
+  confianza del grupo es el activo real.</p>
+
+  <h2 id="s23-7">23.7 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-SUM-01.</b> La instalación de dependencias DEBE ser estricta desde el fichero de bloqueo y con <i>scripts</i> de ciclo de vida desactivados por defecto.</li>
+    <li><b>RQ-SUM-02.</b> Los flujos de integración DEBEN usar credenciales de corta vida y permisos mínimos.</li>
+    <li><b>RQ-SUM-03.</b> Toda publicación DEBE ser trazable a una confirmación y reversible en un paso.</li>
+    <li><b>RQ-SUM-04.</b> Ningún secreto DEBE residir en el repositorio ni en el paquete del cliente.</li>
+    <li><b>RQ-SUM-05.</b> El producto DEBE ofrecer exportación y eliminación de los datos propios.</li>
+    <li><b>RQ-SUM-06.</b> Los registros NO DEBEN contener credenciales ni datos personales innecesarios.</li>
+  </ul>
+</section>

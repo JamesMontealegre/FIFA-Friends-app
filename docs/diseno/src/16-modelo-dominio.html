@@ -1,0 +1,128 @@
+<section class="capitulo" id="cap16">
+  <h1 id="h1-16"><span class="cnum">Capítulo 16</span>Modelo de dominio y contratos de datos</h1>
+
+  <p class="entradilla">La interfaz sólo puede ser consistente si el modelo que la alimenta lo es.
+  Este capítulo fija las entidades, sus campos y restricciones, las invariantes que ninguna operación
+  puede violar, la estrategia de identificadores y de marcas temporales, el registro de auditoría y
+  la política de evolución del esquema.</p>
+
+  <h2 id="s16-1">16.1 Entidades y relaciones</h2>
+  <p>El modelo tiene cinco entidades persistidas y dos proyecciones derivadas. La frontera entre unas
+  y otras es la frontera de autoridad descrita en §11.10.</p>
+  <table class="compacta" id="t16-1">
+    <thead><tr><th style="width:22%">Entidad</th><th style="width:16%">Naturaleza</th><th style="width:28%">Ubicación</th><th style="width:34%">Quién escribe</th></tr></thead>
+    <tbody>
+      <tr><td><code>usuario</code></td><td>Persistida</td><td><code>/users/{uid}</code></td><td>La propia persona (perfil) y el sistema (sellos).</td></tr>
+      <tr><td><code>torneo</code></td><td>Persistida</td><td><code>/tournaments/{id}</code></td><td>Organización del torneo; incorporación acotada por participantes.</td></tr>
+      <tr><td><code>participación</code></td><td>Persistida</td><td><code>/tournaments/{id}/players/{uid}</code></td><td>La propia persona al inscribirse; organización al gestionar.</td></tr>
+      <tr><td><code>partido</code></td><td>Persistida</td><td><code>/tournaments/{id}/matches/{mid}</code></td><td>Organización; propuesta de participantes sujeta a validación.</td></tr>
+      <tr><td><code>equipo</code></td><td>Persistida (catálogo)</td><td><code>/teams/{id}</code></td><td>Sólo administración de plataforma.</td></tr>
+      <tr><td><code>clasificación</code></td><td><b>Derivada</b></td><td><code>/tournaments/{id}/standings/actual</code></td><td><b>Sólo función de servidor.</b></td></tr>
+      <tr><td><code>palmarés</code></td><td><b>Derivada</b></td><td><code>/palmares/{uid}</code></td><td><b>Sólo función de servidor</b>, al cerrar un torneo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 16.1</b> — Entidades, ubicación y autoridad de escritura. La columna derecha es el insumo directo de las reglas de seguridad de §22.6.</caption>
+  </table>
+  <div class="decision">
+    <span class="et">Cambio respecto a la implementación actual</span>
+    <p>La participación pasa de ser un arreglo dentro del documento de torneo a ser una subcolección.
+    El motivo es de seguridad y de concurrencia: un arreglo obliga a conceder permiso de escritura
+    sobre el campo completo —y por tanto a permitir que alguien borre a los demás (hallazgo H3)— y
+    produce conflictos de escritura simultánea. Con subcolección, la regla se expresa como «cada
+    persona sólo puede crear y borrar su propio documento de participación», que es verificable y
+    mínima.</p>
+  </div>
+
+  <h2 id="s16-2">16.2 Contrato: torneo</h2>
+  <table class="compacta" id="t16-2">
+    <thead><tr><th style="width:20%">Campo</th><th style="width:16%">Tipo</th><th style="width:28%">Restricción</th><th style="width:36%">Notas</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>cadena</td><td>26 caracteres, ordenable por tiempo</td><td>Generado en cliente para permitir escritura optimista.</td></tr>
+      <tr><td><code>nombre</code></td><td>cadena</td><td>1–60 caracteres, sin control</td><td>Se normaliza y se recorta el espacio sobrante.</td></tr>
+      <tr><td><code>formato</code></td><td>enumerado</td><td><code>liga</code> · <code>ligaIdaVuelta</code> · <code>gruposEliminatoria</code> · <code>eliminatoria</code></td><td>Inmutable una vez generado el calendario.</td></tr>
+      <tr><td><code>estado</code></td><td>enumerado</td><td><code>borrador</code> → <code>activo</code> → <code>eliminatoria</code> → <code>cerrado</code></td><td>Transiciones sólo hacia adelante (figura 1.1).</td></tr>
+      <tr><td><code>organizadores</code></td><td>lista de uid</td><td>1–5 elementos, siempre no vacía</td><td>Sustituye la autorización por correo electrónico (hallazgo H1).</td></tr>
+      <tr><td><code>codigoInvitacion</code></td><td>cadena</td><td>8 caracteres, alfabeto reducido</td><td>Regenerable; se invalida al pasar a activo.</td></tr>
+      <tr><td><code>puntos</code></td><td>objeto</td><td><code>victoria</code> 3, <code>empate</code> 1, <code>derrota</code> 0</td><td>Configurable en la creación; inmutable después.</td></tr>
+      <tr><td><code>desempates</code></td><td>lista</td><td>orden de criterios</td><td>Por defecto: diferencia, goles a favor, enfrentamiento directo, alfabético.</td></tr>
+      <tr><td><code>creadoEn</code> / <code>actualizadoEn</code></td><td>marca temporal</td><td>Sello de servidor</td><td>Nunca se acepta una marca temporal del cliente.</td></tr>
+      <tr><td><code>version</code></td><td>entero</td><td>≥ 1</td><td>Versión del esquema; habilita migraciones (§16.7).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 16.2</b> — Contrato del documento de torneo.</caption>
+  </table>
+
+  <h2 id="s16-3">16.3 Contrato: partido</h2>
+  <table class="compacta" id="t16-3">
+    <thead><tr><th style="width:20%">Campo</th><th style="width:16%">Tipo</th><th style="width:28%">Restricción</th><th style="width:36%">Notas</th></tr></thead>
+    <tbody>
+      <tr><td><code>fase</code> / <code>jornada</code></td><td>enumerado / entero</td><td>jornada ≥ 1</td><td>Determinan agrupación y orden en la interfaz.</td></tr>
+      <tr><td><code>local</code> / <code>visitante</code></td><td>uid</td><td>Distintos entre sí; ambos participantes del torneo</td><td>Se almacena también el equipo asignado en ese momento.</td></tr>
+      <tr><td><code>golesLocal</code> / <code>golesVisitante</code></td><td>entero o nulo</td><td>0–99; ambos nulos o ambos presentes</td><td>Nulo significa «no jugado», no «cero».</td></tr>
+      <tr><td><code>estado</code></td><td>enumerado</td><td><code>pendiente</code> · <code>finalizado</code> · <code>enDisputa</code></td><td>Derivable del marcador salvo en disputa.</td></tr>
+      <tr><td><code>registradoPor</code> / <code>registradoEn</code></td><td>uid / marca</td><td>Obligatorios al finalizar</td><td>Base del registro de auditoría y de la resolución de impugnaciones.</td></tr>
+      <tr><td><code>idOperacion</code></td><td>cadena</td><td>único por escritura</td><td>Garantiza idempotencia (§15.4).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 16.3</b> — Contrato del documento de partido.</caption>
+  </table>
+
+  <h2 id="s16-4">16.4 Invariantes del dominio</h2>
+  <ol>
+    <li>Un torneo activo tiene al menos dos participantes y un calendario no vacío.</li>
+    <li>Ningún partido enfrenta a una persona consigo misma.</li>
+    <li>En formato de liga, cada par de participantes se enfrenta exactamente una vez (o dos en ida y
+    vuelta).</li>
+    <li>El marcador es completo o inexistente: nunca un solo lado.</li>
+    <li>La suma de partidos jugados en la clasificación coincide con el número de partidos
+    finalizados multiplicado por dos.</li>
+    <li>Un torneo cerrado no admite escrituras en sus partidos.</li>
+    <li>El palmarés de una persona contiene como máximo una entrada por torneo.</li>
+    <li>La clasificación es función pura de los partidos finalizados y de la configuración de puntos y
+    desempates.</li>
+  </ol>
+  <p>Las invariantes 1 a 6 se comprueban en las reglas de servidor y en las pruebas de dominio; la 7 y
+  la 8, en la función que consolida resultados. Una invariante que no se verifica en algún punto
+  ejecutable es una aspiración, no una invariante.</p>
+
+  <h2 id="s16-5">16.5 Identificadores, marcas temporales y auditoría</h2>
+  <ul>
+    <li><b>Identificadores</b> ordenables lexicográficamente por tiempo de creación, generados en
+    cliente: permiten escritura optimista sin esperar al servidor y evitan puntos calientes de
+    escritura.</li>
+    <li><b>Marcas temporales</b> siempre de servidor. Una marca de cliente puede estar desfasada
+    horas y, en un dominio con disputas, es manipulable.</li>
+    <li><b>Auditoría</b>: toda modificación de un marcador consolidado escribe una entrada en
+    <code>/tournaments/{id}/auditoria/{entradaId}</code> con autor, instante, valor anterior y valor
+    nuevo. Es inmutable: sólo admite creación. La interfaz la muestra en el detalle del partido
+    (§12.5), porque la transparencia resuelve más conflictos que cualquier restricción.</li>
+  </ul>
+
+  <h2 id="s16-6">16.6 Consistencia de las proyecciones</h2>
+  <p>Cada documento derivado almacena la versión del origen a partir de la cual se calculó
+  (<code>calculadoDesde</code>, el identificador de la última escritura de partido incorporada) y el
+  instante del cálculo. La interfaz compara esa marca con la última escritura conocida de partidos y,
+  si detecta desfase, muestra «actualizando clasificación» en lugar de cifras que podrían ser
+  erróneas. Esto convierte una inconsistencia temporal —inevitable en un sistema con derivación
+  asíncrona— en información honesta en lugar de en un error silencioso.</p>
+
+  <h2 id="s16-7">16.7 Evolución del esquema</h2>
+  <table class="compacta" id="t16-4">
+    <thead><tr><th style="width:26%">Tipo de cambio</th><th style="width:34%">Procedimiento</th><th style="width:40%">Compatibilidad</th></tr></thead>
+    <tbody>
+      <tr><td>Añadir campo opcional</td><td>Se despliega el lector tolerante antes que el escritor.</td><td>Total; no requiere migración.</td></tr>
+      <tr><td>Añadir campo obligatorio</td><td>Se escribe con valor por defecto en lectura y se rellena con migración diferida.</td><td>El esquema acepta ambas formas durante una versión.</td></tr>
+      <tr><td>Renombrar campo</td><td>Doble escritura durante una versión; lectura de ambos; retirada del antiguo después.</td><td>Nunca se renombra «en caliente».</td></tr>
+      <tr><td>Cambiar estructura (arreglo → subcolección)</td><td>Migración por lotes con verificación, ventana de doble lectura y retirada.</td><td>Caso de la participación (§16.1).</td></tr>
+      <tr><td>Eliminar campo</td><td>Se deja de leer una versión antes de dejar de escribir.</td><td>Permite revertir la publicación sin pérdida.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 16.4</b> — Política de evolución del esquema. La regla general: el lector tolerante se despliega siempre antes que el escritor nuevo.</caption>
+  </table>
+
+  <h2 id="s16-8">16.8 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-DOM-01.</b> Las marcas temporales DEBEN generarse en servidor.</li>
+    <li><b>RQ-DOM-02.</b> La participación DEBE modelarse como subcolección con documento por persona.</li>
+    <li><b>RQ-DOM-03.</b> Toda modificación de un marcador consolidado DEBE registrar entrada de auditoría inmutable.</li>
+    <li><b>RQ-DOM-04.</b> Las proyecciones derivadas DEBEN almacenar el origen y el instante de cálculo.</li>
+    <li><b>RQ-DOM-05.</b> Las invariantes de §16.4 DEBEN verificarse en reglas de servidor o en pruebas ejecutables.</li>
+    <li><b>RQ-DOM-06.</b> Todo documento DEBE incluir versión de esquema y seguir la política de evolución.</li>
+  </ul>
+</section>

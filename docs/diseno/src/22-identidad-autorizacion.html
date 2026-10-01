@@ -1,0 +1,227 @@
+<section class="capitulo" id="cap22">
+  <h1 id="h1-22"><span class="cnum">Capítulo 22</span>Identidad, sesión y autorización</h1>
+
+  <p class="entradilla">Este es el capítulo del que depende la integridad del producto. Especifica
+  cómo se autentica a las personas, cómo se custodia la sesión, cómo se modelan los roles y —sobre
+  todo— cómo se expresan las reglas de autorización en el único lugar donde son efectivas: el
+  servidor. Incluye la sustitución completa de las reglas vigentes, que constituyen la deuda de
+  seguridad más grave identificada en el diagnóstico.</p>
+
+  <h2 id="s22-1">22.1 Modelo de identidad</h2>
+  <p>La autenticación se delega en un proveedor de identidad federado. El producto no almacena
+  contraseñas, no implementa recuperación de cuenta y no gestiona segundo factor: hereda lo que el
+  proveedor ofrezca. A cambio asume dos obligaciones: validar el testigo en cada operación de
+  servidor —cosa que hace el motor de reglas— y no construir ninguna autorización sobre atributos del
+  perfil que la persona pueda modificar.</p>
+  <div class="riesgo">
+    <span class="et">Hallazgo H1 — la regla a eliminar</span>
+    <p>Las reglas vigentes conceden permisos de administración comparando
+    <code>request.auth.token.email</code> con una dirección literal. Tres defectos: el correo
+    electrónico es un atributo del perfil y no una autorización; la regla no admite delegación —si
+    esa persona no está disponible, el torneo se bloquea—; y el privilegio no deja rastro de
+    concesión ni de revocación. Su sustitución por roles con alcance de torneo es el requisito
+    bloqueante <b>RQ-AUT-04</b>.</p>
+  </div>
+
+  <h2 id="s22-2">22.2 Flujo de autenticación y custodia de la sesión</h2>
+  <ol>
+    <li>La persona inicia sesión mediante el proveedor federado en ventana emergente o redirección;
+    el producto nunca ve credenciales.</li>
+    <li>El proveedor devuelve un testigo de identidad de vida corta, que la biblioteca cliente renueva
+    de forma transparente mientras la sesión siga siendo válida.</li>
+    <li>Cada operación contra la base de datos envía ese testigo; el motor de reglas lo valida y expone
+    su contenido verificado a las reglas.</li>
+    <li>El cierre de sesión revoca localmente el estado, purga cachés, cola de escrituras y
+    preferencias ligadas a la identidad, y cancela suscripciones en tiempo real.</li>
+    <li>La sesión caduca por inactividad prolongada; antes de caducar se avisa con posibilidad de
+    prolongarla, sin perder el trabajo en curso (criterio 2.2.1).</li>
+  </ol>
+  <p>Las prácticas actuales de seguridad para clientes públicos exigen, cuando se implementa el flujo
+  directamente: código de autorización con prueba de clave (PKCE) obligatorio, prohibición del flujo
+  implícito, verificación estricta de los destinos de redirección y defensa frente a confusión de
+  servidores de autorización. En este producto el flujo lo implementa la biblioteca del proveedor,
+  pero la obligación permanece: si alguna vez se sustituye por una implementación propia, debe
+  cumplir esas condiciones.</p>
+
+  <h2 id="s22-3">22.3 Autenticación accesible</h2>
+  <p>El criterio 3.3.8 prohíbe exigir pruebas cognitivas —recordar, transcribir, resolver acertijos—
+  sin alternativa. La identidad federada lo cumple de forma natural. Las obligaciones derivadas para
+  el producto son: permitir el pegado en cualquier campo relacionado con el acceso, incluido el código
+  de invitación; no imponer temporizadores cortos en la pantalla de acceso; no usar imágenes de
+  verificación; y mantener el botón de acceso con nombre accesible explícito que nombre el proveedor,
+  no un icono sin texto.</p>
+
+  <h2 id="s22-4">22.4 Modelo de roles</h2>
+  <table class="compacta" id="t22-1">
+    <thead><tr><th style="width:22%">Rol</th><th style="width:22%">Alcance</th><th style="width:26%">Fuente de verdad</th><th style="width:30%">Concesión y revocación</th></tr></thead>
+    <tbody>
+      <tr><td><code>participante</code></td><td>Un torneo</td><td>Existencia del documento <code>/tournaments/{id}/players/{uid}</code></td><td>Autoconcedido al unirse con código válido en estado borrador; revocable por la organización.</td></tr>
+      <tr><td><code>organizador</code></td><td>Un torneo</td><td>Pertenencia al arreglo <code>organizadores</code> del documento de torneo</td><td>Lo concede quien crea el torneo o un organizador existente; queda registrado en auditoría.</td></tr>
+      <tr><td><code>plataforma</code></td><td>Global</td><td>Reclamación personalizada en el testigo de identidad</td><td>Se concede fuera de banda mediante proceso administrativo; uso excepcional y auditado.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 22.1</b> — Modelo de roles. Ningún rol se deriva de datos que el propio cliente pueda escribir sin restricción: ésa es la condición que impide la elevación de privilegios.</caption>
+  </table>
+  <p>La decisión de almacenar la organización en el documento de torneo —y no como reclamación en el
+  testigo— responde a tres razones: el rol es por torneo y no global; cambia con frecuencia y las
+  reclamaciones se propagan con retardo hasta la renovación del testigo; y queda consultable y
+  auditable por el grupo. El coste es una lectura adicional por evaluación de regla, asumible dado el
+  volumen (ADR-05, apéndice H).</p>
+
+  <h2 id="s22-5">22.5 Incorporación segura a un torneo</h2>
+  <p>La regla vigente permite a cualquier persona autenticada escribir el arreglo completo de
+  participantes mientras el torneo esté en borrador. Eso autoriza, literalmente, a eliminar a los
+  demás (hallazgo H3). Con el modelo de subcolección de §16.1 la operación se reduce a su mínimo
+  legítimo: <i>crear un documento cuyo identificador es la propia identidad</i>, y sólo si el torneo
+  está en borrador, el código aportado coincide y no se ha superado el límite de participantes. Nada
+  más.</p>
+
+  <h2 id="s22-6">22.6 Reglas de autorización</h2>
+  <p>Las reglas siguientes sustituyen íntegramente a las vigentes. Están escritas para ser legibles y
+  verificables: funciones con nombre de dominio, denegación por defecto y validación de forma además
+  de autorización.</p>
+  <pre class="larga">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- funciones de apoyo ----------
+    function autenticado()      { return request.auth != null; }
+    function yo()               { return request.auth.uid; }
+    function esPlataforma()     { return autenticado() &amp;&amp; request.auth.token.plataforma == true; }
+    function torneo(id)         { return get(/databases/$(database)/documents/tournaments/$(id)).data; }
+    function esOrganizador(id)  { return autenticado() &amp;&amp; yo() in torneo(id).organizadores; }
+    function esParticipante(id) {
+      return autenticado() &amp;&amp;
+        exists(/databases/$(database)/documents/tournaments/$(id)/players/$(yo()));
+    }
+    function puedeVer(id)       { return esParticipante(id) || esOrganizador(id) || esPlataforma(); }
+    function soloCampos(permitidos) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(permitidos);
+    }
+    function selloValido() { return request.resource.data.actualizadoEn == request.time; }
+
+    // ---------- perfiles ----------
+    match /users/{uid} {
+      allow get: if autenticado();
+      allow list: if false;                         // no se enumera el directorio de personas
+      allow create, update: if yo() == uid
+        &amp;&amp; request.resource.data.keys().hasOnly(['nombre','foto','actualizadoEn'])
+        &amp;&amp; request.resource.data.nombre is string
+        &amp;&amp; request.resource.data.nombre.size() &gt;= 1
+        &amp;&amp; request.resource.data.nombre.size() &lt;= 40
+        &amp;&amp; selloValido();
+      allow delete: if yo() == uid;                 // derecho de supresión (§23.5)
+    }
+
+    // ---------- torneos ----------
+    match /tournaments/{id} {
+      allow get, list: if puedeVer(id);
+      allow create: if autenticado()
+        &amp;&amp; request.resource.data.organizadores == [yo()]
+        &amp;&amp; request.resource.data.estado == 'borrador'
+        &amp;&amp; request.resource.data.nombre is string
+        &amp;&amp; request.resource.data.nombre.size() &lt;= 60
+        &amp;&amp; request.resource.data.formato in ['liga','ligaIdaVuelta','gruposEliminatoria','eliminatoria'];
+      allow update: if esOrganizador(id)
+        &amp;&amp; request.resource.data.estado in ['borrador','activo','eliminatoria','cerrado']
+        &amp;&amp; resource.data.estado != 'cerrado'      // un torneo cerrado es inmutable
+        &amp;&amp; selloValido();
+      allow delete: if esOrganizador(id) &amp;&amp; resource.data.estado == 'borrador';
+
+      // ---------- participación ----------
+      match /players/{uid} {
+        allow get, list: if puedeVer(id);
+        allow create: if autenticado() &amp;&amp; uid == yo()
+          &amp;&amp; torneo(id).estado == 'borrador'
+          &amp;&amp; request.resource.data.codigo == torneo(id).codigoInvitacion
+          &amp;&amp; torneo(id).numeroParticipantes &lt; torneo(id).maxParticipantes;
+        allow delete: if (uid == yo() &amp;&amp; torneo(id).estado == 'borrador') || esOrganizador(id);
+        allow update: if esOrganizador(id) &amp;&amp; soloCampos(['equipoId','grupo','orden']);
+      }
+
+      // ---------- partidos ----------
+      match /matches/{mid} {
+        allow get, list: if puedeVer(id);
+        allow create, delete: if esOrganizador(id) &amp;&amp; torneo(id).estado != 'cerrado';
+        allow update: if esOrganizador(id)
+          &amp;&amp; torneo(id).estado != 'cerrado'
+          &amp;&amp; soloCampos(['golesLocal','golesVisitante','estado','registradoPor','registradoEn','idOperacion'])
+          &amp;&amp; request.resource.data.golesLocal is int
+          &amp;&amp; request.resource.data.golesLocal &gt;= 0 &amp;&amp; request.resource.data.golesLocal &lt;= 99
+          &amp;&amp; request.resource.data.golesVisitante is int
+          &amp;&amp; request.resource.data.golesVisitante &gt;= 0 &amp;&amp; request.resource.data.golesVisitante &lt;= 99
+          &amp;&amp; request.resource.data.registradoPor == yo()
+          &amp;&amp; request.resource.data.registradoEn == request.time;
+      }
+
+      // ---------- auditoría: sólo se añade, nunca se altera ----------
+      match /auditoria/{entradaId} {
+        allow get, list: if puedeVer(id);
+        allow create: if esOrganizador(id) &amp;&amp; request.resource.data.autor == yo();
+        allow update, delete: if false;
+      }
+
+      // ---------- proyección derivada: sólo servidor ----------
+      match /standings/{docId} {
+        allow get, list: if puedeVer(id);
+        allow write: if false;        // escrita exclusivamente por función con privilegios
+      }
+    }
+
+    // ---------- catálogo y palmarés ----------
+    match /teams/{teamId}  { allow get, list: if autenticado(); allow write: if esPlataforma(); }
+    match /palmares/{uid}  { allow get, list: if autenticado(); allow write: if false; }
+
+    // ---------- denegación por defecto ----------
+    match /{document=**} { allow read, write: if false; }
+  }
+}</pre>
+  <table class="compacta" id="t22-2">
+    <thead><tr><th style="width:34%">Cambio respecto a las reglas vigentes</th><th style="width:32%">Riesgo que elimina</th><th style="width:34%">Coste</th></tr></thead>
+    <tbody>
+      <tr><td>Rol de organización por torneo en lugar de correo literal</td><td>Privilegio no delegable, no auditable y ligado a una persona (H1)</td><td>Una lectura adicional por evaluación.</td></tr>
+      <tr><td>Participación como documento propio</td><td>Escritura del arreglo completo de participantes (H3)</td><td>Migración de datos (§16.7).</td></tr>
+      <tr><td>Lectura restringida a participantes</td><td>Cualquier cuenta autenticada podía leer todos los torneos</td><td>Requiere comprobar pertenencia; las consultas deben filtrar por torneos propios.</td></tr>
+      <tr><td>Clasificación no escribible por clientes</td><td>Manipulación directa de la tabla (H8)</td><td>Exige función de servidor (§15.6).</td></tr>
+      <tr><td>Validación de rango y de campos</td><td>Marcadores imposibles y campos arbitrarios</td><td>Reglas más largas.</td></tr>
+      <tr><td>Inmutabilidad del torneo cerrado</td><td>Alteración del histórico tras la consolidación</td><td>Obliga a reabrir explícitamente para corregir.</td></tr>
+      <tr><td>Denegación por defecto explícita</td><td>Colecciones nuevas accesibles por olvido</td><td>Ninguno.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 22.2</b> — Cambios introducidos por las reglas nuevas, riesgo eliminado y coste asumido.</caption>
+  </table>
+
+  <h2 id="s22-7">22.7 Verificación de las reglas</h2>
+  <p>Las reglas se prueban con el emulador en una suite que, para cada operación, comprueba el caso
+  permitido <b>y</b> el denegado. La cobertura mínima exigida es: cada <code>allow</code> con al menos
+  una prueba positiva y una negativa por cada condición que lo compone. Las pruebas se ejecutan en
+  integración continua y bloquean la publicación. Una regla sin prueba negativa no demuestra nada:
+  lo que hay que demostrar es que lo prohibido se rechaza.</p>
+  <pre>test('un participante no puede editar el marcador', async () =&gt; {
+  const ctx = entornoPrueba.authenticatedContext('luis');
+  await assertFails(
+    ctx.firestore().doc('tournaments/t1/matches/m1').update({ golesLocal: 9, golesVisitante: 0 })
+  );
+});
+test('la clasificación no es escribible por ningún cliente', async () =&gt; {
+  const ctx = entornoPrueba.authenticatedContext('organizadora');
+  await assertFails(ctx.firestore().doc('tournaments/t1/standings/actual').set({ filas: [] }));
+});</pre>
+
+  <h2 id="s22-8">22.8 Detección y respuesta</h2>
+  <p>Se registran y alertan: denegaciones de reglas por encima de un umbral por identidad y hora
+  —indicio de exploración—; escrituras de marcador fuera de la ventana temporal del torneo; cambios en
+  el arreglo de organizadores; y consumo anómalo de lecturas. La protección de la aplicación frente a
+  clientes no legítimos se refuerza con verificación de integridad de la aplicación en el acceso a la
+  base de datos, de modo que un testigo robado desde un entorno distinto al cliente oficial sea
+  rechazado.</p>
+
+  <h2 id="s22-9">22.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-AUT-01.</b> Toda escritura DEBE autorizarse en servidor conforme a la tabla 1.3.</li>
+    <li><b>RQ-AUT-02.</b> Las reglas DEBEN denegar por defecto y validar forma y rango además de identidad.</li>
+    <li><b>RQ-AUT-03.</b> La lectura DEBE restringirse a quienes participan u organizan el torneo.</li>
+    <li><b>RQ-AUT-04.</b> La autorización por dirección de correo literal DEBE eliminarse antes de cualquier ampliación funcional.</li>
+    <li><b>RQ-AUT-05.</b> Cada regla DEBE tener prueba positiva y negativa automatizadas.</li>
+    <li><b>RQ-AUT-06.</b> Los documentos derivados NO DEBEN ser escribibles por ningún cliente.</li>
+    <li><b>RQ-AUT-07.</b> Un torneo cerrado DEBE ser inmutable salvo reapertura explícita y auditada.</li>
+  </ul>
+</section>

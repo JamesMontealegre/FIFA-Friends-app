@@ -1,0 +1,122 @@
+<section class="capitulo" id="cap19">
+  <h1 id="h1-19"><span class="cnum">Capítulo 19</span>Accesibilidad operativa: auditoría, pruebas y declaración</h1>
+
+  <p class="entradilla">Un documento que declare conformidad sin un procedimiento para comprobarla no
+  vale nada. Este capítulo define quién verifica qué y cuándo, qué parte del trabajo puede
+  automatizarse y qué parte no, el protocolo de auditoría manual con sus combinaciones de tecnología
+  de asistencia, la clasificación y los plazos de los hallazgos, y el contenido de la declaración de
+  accesibilidad.</p>
+
+  <h2 id="s19-1">19.1 Reparto de responsabilidades</h2>
+  <table class="compacta" id="t19-1">
+    <thead><tr><th style="width:22%">Fase</th><th style="width:26%">Responsable</th><th style="width:52%">Verificación</th></tr></thead>
+    <tbody>
+      <tr><td>Diseño</td><td>Diseño de producto</td><td>Contraste de la paleta aplicada, orden de lectura, tamaño de objetivos, textos alternativos previstos, estados de error redactados.</td></tr>
+      <tr><td>Especificación de componente</td><td>Arquitectura de experiencia</td><td>Semántica, teclado y nombre accesible definidos antes de implementar (§12.1).</td></tr>
+      <tr><td>Implementación</td><td>Ingeniería front-end</td><td>Analizador estático, pruebas de componente con verificación automática y recorrido por teclado.</td></tr>
+      <tr><td>Integración</td><td>Automatización</td><td>Verificación por ruta sobre la aplicación construida; bloquea la publicación ante incumplimiento.</td></tr>
+      <tr><td>Aceptación</td><td>Responsable de accesibilidad</td><td>Auditoría manual de los recorridos críticos según §19.3.</td></tr>
+      <tr><td>Producción</td><td>Producto</td><td>Canal de incidencias accesible y revisión semestral.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 19.1</b> — Reparto de responsabilidades. La accesibilidad no es tarea de una persona al final: es una comprobación en cada fase.</caption>
+  </table>
+
+  <h2 id="s19-2">19.2 Qué puede y qué no puede automatizarse</h2>
+  <p>Las herramientas automáticas detectan de forma fiable una minoría de los incumplimientos
+  —típicamente entre un tercio y la mitad, según el conjunto de reglas y el tipo de interfaz—. Son
+  excelentes para lo sintáctico: contraste calculable, atributos ausentes, nombres accesibles vacíos,
+  encabezados con saltos de nivel, campos sin etiqueta. Son ciegas para lo semántico: si el texto
+  alternativo <i>describe</i> la imagen, si el orden del foco es <i>lógico</i>, si el mensaje de error
+  es <i>comprensible</i>, si el anuncio de la región viva llega en el momento adecuado o si el patrón
+  de interacción elegido es el correcto. La automatización es la red que evita regresiones; la
+  auditoría manual es la que establece la conformidad.</p>
+  <table class="compacta" id="t19-2">
+    <thead><tr><th style="width:30%">Nivel</th><th style="width:34%">Ámbito</th><th style="width:36%">Frecuencia y efecto</th></tr></thead>
+    <tbody>
+      <tr><td>Analizador estático de marcado</td><td>Reglas de accesibilidad en el código fuente.</td><td>En cada guardado y en cada integración; error bloqueante.</td></tr>
+      <tr><td>Prueba por componente</td><td>Cada componente del catálogo, en todos sus estados.</td><td>En cada integración; bloquea la fusión.</td></tr>
+      <tr><td>Prueba por ruta</td><td>Las once rutas con datos reales de prueba.</td><td>En cada integración; bloquea la publicación.</td></tr>
+      <tr><td>Verificación de contraste de tokens</td><td>Mapa semántico completo en ambos modos.</td><td>En cada integración (§6.9).</td></tr>
+      <tr><td>Regresión visual en escala de grises</td><td>Vistas principales.</td><td>Nocturna; revisión manual de diferencias.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 19.2</b> — Niveles de verificación automatizada.</caption>
+  </table>
+
+  <h2 id="s19-3">19.3 Protocolo de auditoría manual</h2>
+  <p>Se audita sobre los tres recorridos críticos: <b>unirse a un torneo</b>, <b>consultar la
+  clasificación</b> y <b>registrar un resultado</b>. Cada recorrido se recorre completo en las cinco
+  configuraciones siguientes, y el resultado se consigna en la plantilla del apéndice G.</p>
+  <ol>
+    <li><b>Sólo teclado</b>, sin ratón ni gestos: se comprueba alcance de todos los controles, orden
+    lógico, visibilidad permanente del foco, ausencia de trampas, y la matriz de foco de la tabla
+    17.1.</li>
+    <li><b>Lector de pantalla en escritorio</b>, al menos dos combinaciones de lector y navegador
+    distintas, verificando nombre, rol y valor de cada control, anuncios de cambio de ruta, regiones
+    vivas y encabezados.</li>
+    <li><b>Lector de pantalla en móvil</b> con gestos de exploración, verificando el orden de
+    exploración táctil y el tamaño de los objetivos.</li>
+    <li><b>Ampliación</b>: 200&nbsp;% de texto y 400&nbsp;% de página a 1280&nbsp;px —equivalente a
+    320&nbsp;px de ancho—, comprobando reflujo, ausencia de desplazamiento en dos ejes y persistencia
+    de la funcionalidad.</li>
+    <li><b>Modos de alto contraste y contraste forzado</b>, más la hoja de estilo de prueba de
+    espaciado de texto del criterio 1.4.12.</li>
+  </ol>
+  <div class="nota">
+    <span class="et">Sobre la elección de tecnologías de asistencia</span>
+    <p>Las combinaciones se eligen por cuota de uso real y por diversidad de motor de renderizado, no
+    por comodidad de quien audita. Verificar sólo con el lector integrado en el sistema del equipo de
+    desarrollo produce conformidad aparente: cada lector resuelve de forma distinta los casos
+    ambiguos, y lo ambiguo es exactamente donde fallan las interfaces ricas.</p>
+  </div>
+
+  <h2 id="s19-4">19.4 Participación de personas con discapacidad</h2>
+  <p>La auditoría técnica comprueba conformidad; no comprueba utilidad. Al menos una vez al año, y
+  siempre que se introduzca un patrón de interacción nuevo, se realiza una sesión de prueba con
+  personas usuarias de tecnología de asistencia, remunerada y con el mismo protocolo ético de §3.9. Lo
+  que se busca no es validar el cumplimiento, sino detectar aquello que cumple y aun así no
+  funciona: un orden de foco correcto pero desconcertante, un anuncio técnicamente adecuado pero
+  inútil, un patrón conforme pero agotador.</p>
+
+  <h2 id="s19-5">19.5 Clasificación de hallazgos y plazos</h2>
+  <table class="compacta" id="t19-3">
+    <thead><tr><th style="width:16%">Severidad</th><th style="width:40%">Definición</th><th style="width:20%">Plazo</th><th style="width:24%">Efecto</th></tr></thead>
+    <tbody>
+      <tr><td><b>Crítica</b></td><td>Impide completar un recorrido crítico con alguna tecnología de asistencia.</td><td>Inmediato</td><td>Bloquea la publicación; si está en producción, se revierte.</td></tr>
+      <tr><td><b>Alta</b></td><td>Incumplimiento de nivel A o AA con alternativa costosa.</td><td>≤ 5 días</td><td>Bloquea la publicación del incremento.</td></tr>
+      <tr><td><b>Media</b></td><td>Incumplimiento con alternativa razonable disponible.</td><td>≤ 20 días</td><td>Se registra y se planifica.</td></tr>
+      <tr><td><b>Baja</b></td><td>Mejora sobre el nivel exigido o incumplimiento de nivel AAA adoptado voluntariamente.</td><td>Backlog</td><td>Se acumula para la revisión semestral.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 19.3</b> — Clasificación de hallazgos de accesibilidad y plazos de corrección.</caption>
+  </table>
+
+  <h2 id="s19-6">19.6 Observaciones abiertas en la aprobación de esta línea base</h2>
+  <p>La aprobación del documento por la función de accesibilidad se emitió con tres observaciones,
+  que constituyen deuda reconocida y con plazo:</p>
+  <ol>
+    <li><b>Cuadro eliminatorio.</b> La representación lineal equivalente está especificada (§18.8)
+    pero no implementada. Hasta que lo esté, la vista de cuadro no puede considerarse conforme.
+    Plazo: antes de la primera competición con fase eliminatoria.</li>
+    <li><b>Idioma del documento.</b> El atributo declara inglés con contenido castellano (H4).
+    Corrección inmediata, de coste nulo y efecto inmediato en la calidad de la síntesis de voz.</li>
+    <li><b>Anuncio de cambio de ruta.</b> Especificado en §17.2 y ausente en la implementación (H6).
+    Plazo: siguiente incremento.</li>
+  </ol>
+
+  <h2 id="s19-7">19.7 Declaración de accesibilidad</h2>
+  <p>El producto publica una declaración accesible desde el menú utilitario, redactada en lenguaje
+  llano, que contiene: el estándar y nivel aplicados (WCAG 2.2 AA); el estado de conformidad
+  —conforme, parcialmente conforme o no conforme— con la lista explícita de contenidos no conformes y
+  su motivo; la fecha de la última evaluación y el método empleado; el canal de contacto para
+  notificar barreras, con compromiso de respuesta en diez días hábiles; y la vía de reclamación si la
+  respuesta no satisface. Una declaración que oculte lo que no cumple es peor que no tenerla:
+  traslada el coste de descubrir la barrera a quien la sufre.</p>
+
+  <h2 id="s19-8">19.8 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-ACO-01.</b> La verificación automatizada DEBE ejecutarse en cada integración y bloquear ante incumplimiento.</li>
+    <li><b>RQ-ACO-02.</b> Los tres recorridos críticos DEBEN auditarse manualmente en las cinco configuraciones de §19.3 antes de cada publicación mayor.</li>
+    <li><b>RQ-ACO-03.</b> Los hallazgos críticos y altos DEBEN bloquear la publicación.</li>
+    <li><b>RQ-ACO-04.</b> El producto DEBE publicar declaración de accesibilidad veraz y actualizada con canal de contacto.</li>
+    <li><b>RQ-ACO-05.</b> DEBE realizarse al menos una sesión anual de prueba con personas usuarias de tecnología de asistencia.</li>
+  </ul>
+</section>

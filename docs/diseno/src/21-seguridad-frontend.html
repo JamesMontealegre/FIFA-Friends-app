@@ -1,0 +1,154 @@
+<section class="capitulo" id="cap21">
+  <h1 id="h1-21"><span class="cnum">Capítulo 21</span>Seguridad del cliente web</h1>
+
+  <p class="entradilla">El cliente no puede autorizar, pero sí puede ser el vehículo de un ataque
+  contra quien lo usa. Este capítulo especifica los controles que reducen la superficie del
+  navegador: prevención de ejecución de código inyectado, política de seguridad de contenido,
+  cabeceras de respuesta, custodia de datos en el dispositivo, protección frente a encuadre y
+  redirección abierta, y política de terceros.</p>
+
+  <h2 id="s21-1">21.1 Superficie de ataque</h2>
+  <table class="compacta" id="t21-1">
+    <thead><tr><th style="width:26%">Vector</th><th style="width:34%">Origen en este producto</th><th style="width:40%">Control</th></tr></thead>
+    <tbody>
+      <tr><td>Texto libre de personas usuarias</td><td>Nombre de torneo, apodo, nombre visible del proveedor de identidad.</td><td>Escapado por defecto; longitud y conjunto de caracteres validados en servidor (§21.6).</td></tr>
+      <tr><td>Parámetros de URL</td><td><code>destino</code>, <code>code</code>, filtros.</td><td>Validación con lista de permitidos; nunca se usan para construir marcado.</td></tr>
+      <tr><td>Contenido remoto</td><td>Imágenes de perfil y escudos de equipo.</td><td>Orígenes restringidos por política; sin SVG remoto.</td></tr>
+      <tr><td>Dependencias</td><td>Paquetes y sus transitivos.</td><td>Capítulo 23.</td></tr>
+      <tr><td>Extensiones del navegador</td><td>Fuera de control del producto.</td><td>Se asume comprometido el entorno: nada sensible se guarda en el dispositivo (§21.5).</td></tr>
+      <tr><td>Enlaces salientes</td><td>Compartir y soporte.</td><td><code>rel="noopener noreferrer"</code> obligatorio.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 21.1</b> — Vectores y controles del cliente web.</caption>
+  </table>
+
+  <h2 id="s21-2">21.2 Ejecución de código inyectado</h2>
+  <p>El motor de interfaz escapa por defecto el texto que interpola, lo que elimina la clase más
+  común de inyección. Las excepciones son explícitas y por eso peligrosas:</p>
+  <ul>
+    <li><b>Inserción directa de HTML.</b> Prohibida. Si alguna vez fuera imprescindible, exigiría
+    saneamiento con biblioteca especializada, lista blanca estricta y revisión de seguridad
+    registrada.</li>
+    <li><b>Atributos de URL.</b> Un enlace cuyo destino proceda de datos debe validarse: sólo se
+    admiten esquemas <code>https:</code> y rutas relativas. Un <code>javascript:</code> en un
+    <code>href</code> ejecuta código.</li>
+    <li><b>SVG de origen externo.</b> Prohibido: un SVG es un documento con capacidad de ejecución. Los
+    iconos propios se empaquetan; los escudos remotos se sirven como imágenes rasterizadas.</li>
+    <li><b>Evaluación dinámica.</b> Prohibidas las funciones que evalúan cadenas como código, directa
+    o indirectamente.</li>
+    <li><b>Interpolación en estilos.</b> Los valores de usuario nunca se concatenan en propiedades
+    personalizadas que acaben en una función de obtención de recursos.</li>
+  </ul>
+  <p>Como red de seguridad se activan <b>Trusted Types</b>, que convierten en error cualquier
+  asignación de cadena a un punto de inyección del DOM salvo que pase por una política declarada.
+  Esto protege también frente a dependencias de terceros que hagan lo que el código propio tiene
+  prohibido.</p>
+  <pre>// seguridad/politicaTiposConfiables.ts
+if (window.trustedTypes?.createPolicy) {
+  window.trustedTypes.createPolicy('default', {
+    createHTML: () =&gt; { throw new Error('Inserción de HTML no permitida'); },
+    createScriptURL: (url) =&gt; {
+      const u = new URL(url, location.origin);
+      if (u.origin !== location.origin) throw new Error('Script externo bloqueado: ' + u.origin);
+      return url;
+    },
+    createScript: () =&gt; { throw new Error('Script dinámico no permitido'); },
+  });
+}</pre>
+
+  <h2 id="s21-3">21.3 Política de seguridad de contenido y cabeceras</h2>
+  <p>La aplicación se sirve como contenido estático; la política se inyecta en el borde, lo que
+  permite emitir un <i>nonce</i> distinto por respuesta. Con <code>strict-dynamic</code>, los scripts
+  cargados por un script de confianza heredan la confianza, de modo que la división de código
+  funciona sin listar cada fragmento.</p>
+  <pre>Content-Security-Policy:
+  default-src 'self';
+  script-src 'nonce-{ALEATORIO}' 'strict-dynamic' https: 'unsafe-inline';
+  style-src 'self' 'nonce-{ALEATORIO}';
+  img-src 'self' data: https://lh3.googleusercontent.com;
+  font-src 'self';
+  connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;
+  frame-ancestors 'none';
+  base-uri 'none';
+  form-action 'self';
+  object-src 'none';
+  require-trusted-types-for 'script';
+  trusted-types default;
+  upgrade-insecure-requests;
+  report-to csp-endpoint</pre>
+  <p class="peq"><code>'unsafe-inline'</code> figura únicamente como alternativa para navegadores
+  antiguos que no entienden <i>nonce</i>; los que sí lo entienden lo ignoran. Esa combinación es la
+  recomendada para políticas estrictas compatibles.</p>
+  <table class="compacta" id="t21-2">
+    <thead><tr><th style="width:30%">Cabecera</th><th style="width:30%">Valor</th><th style="width:40%">Qué evita</th></tr></thead>
+    <tbody>
+      <tr><td><code>Strict-Transport-Security</code></td><td><code>max-age=31536000; includeSubDomains; preload</code></td><td>Degradación a conexión sin cifrar.</td></tr>
+      <tr><td><code>X-Content-Type-Options</code></td><td><code>nosniff</code></td><td>Interpretación de un recurso como tipo distinto del declarado.</td></tr>
+      <tr><td><code>Referrer-Policy</code></td><td><code>strict-origin-when-cross-origin</code></td><td>Fuga de rutas —que incluyen identificadores de torneo— a terceros.</td></tr>
+      <tr><td><code>Permissions-Policy</code></td><td><code>camera=(), microphone=(), geolocation=(), interest-cohort=()</code></td><td>Acceso a capacidades que el producto no necesita.</td></tr>
+      <tr><td><code>Cross-Origin-Opener-Policy</code></td><td><code>same-origin-allow-popups</code></td><td>Manipulación de la ventana por un origen distinto; el valor permite la ventana emergente de identidad.</td></tr>
+      <tr><td><code>Cross-Origin-Resource-Policy</code></td><td><code>same-origin</code></td><td>Inclusión de recursos propios desde otros sitios.</td></tr>
+      <tr><td><code>Cache-Control</code> (documento)</td><td><code>no-cache</code></td><td>Servir una versión antigua del armazón tras una publicación.</td></tr>
+      <tr><td><code>Cache-Control</code> (recursos con huella)</td><td><code>public, max-age=31536000, immutable</code></td><td>Revalidaciones innecesarias (§24.8).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 21.2</b> — Conjunto de cabeceras de respuesta exigido. Su ausencia actual es el hallazgo H2.</caption>
+  </table>
+
+  <h2 id="s21-4">21.4 Datos en el dispositivo</h2>
+  <table class="compacta" id="t21-3">
+    <thead><tr><th style="width:28%">Dato</th><th style="width:26%">Dónde</th><th style="width:46%">Justificación</th></tr></thead>
+    <tbody>
+      <tr><td>Testigo de acceso</td><td>Memoria del proceso</td><td>No accesible tras cerrar la pestaña; minimiza la ventana de robo.</td></tr>
+      <tr><td>Testigo de renovación</td><td>Almacén gestionado por la biblioteca de identidad</td><td>Necesario para mantener la sesión; su compromiso exige ya ejecución de código en el origen, escenario que la política de contenido mitiga.</td></tr>
+      <tr><td>Preferencias (tema, densidad)</td><td>Almacenamiento local</td><td>No sensibles; su manipulación no tiene impacto.</td></tr>
+      <tr><td>Cola de escrituras pendientes</td><td>Almacenamiento estructurado local</td><td>Necesaria para no perder resultados sin conexión; contiene datos del dominio, no credenciales.</td></tr>
+      <tr><td>Datos personales de terceros</td><td><b>En ningún sitio</b></td><td>No se cachean nombres ni imágenes de otras personas más allá de la sesión.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 21.3</b> — Política de almacenamiento en el dispositivo. Al cerrar sesión se purgan cola, cachés y preferencias ligadas a la identidad.</caption>
+  </table>
+
+  <h2 id="s21-5">21.5 Encuadre, redirección y enlaces</h2>
+  <ul>
+    <li><b>Encuadre.</b> <code>frame-ancestors 'none'</code> impide incrustar la aplicación en otro
+    sitio, cerrando los ataques de superposición de interfaz.</li>
+    <li><b>Redirección abierta.</b> El parámetro <code>destino</code> se valida contra la lista de
+    rutas conocidas (tabla 9.1); cualquier valor absoluto o desconocido se sustituye por la raíz. Sin
+    esa validación, el enlace de inicio de sesión del producto sirve para enviar a cualquier sitio
+    con apariencia de confianza.</li>
+    <li><b>Enlaces salientes.</b> <code>rel="noopener noreferrer"</code> y
+    <code>target="_blank"</code> sólo cuando esté justificado.</li>
+    <li><b>Mensajería entre ventanas.</b> No se usa; si la ventana emergente de identidad la emplea,
+    la gestiona íntegramente la biblioteca del proveedor y el producto no escucha mensajes
+    propios.</li>
+  </ul>
+
+  <h2 id="s21-6">21.6 Validación de entrada y gestión de condiciones excepcionales</h2>
+  <p>Toda entrada se valida en tres puntos: el control la restringe (ergonomía), el cliente la
+  comprueba antes de enviar (ergonomía) y el servidor la rechaza si no cumple (seguridad). Las reglas
+  de validación son parte del contrato de datos (§16.2) y no pueden relajarse en el cliente «para
+  probar».</p>
+  <p>La gestión de condiciones excepcionales merece mención propia porque es una categoría de riesgo
+  por derecho propio: ante error de red, respuesta inesperada o regla que no se puede evaluar, el
+  comportamiento especificado es <b>denegar y comunicar</b>, nunca continuar asumiendo éxito. Los
+  mensajes mostrados no revelan detalles internos —rutas, consultas, identificadores de
+  infraestructura— y lo que se registra para diagnóstico no viaja al navegador (§23.6).</p>
+
+  <h2 id="s21-7">21.7 Terceros</h2>
+  <p>Política: <b>cero terceros en la ruta crítica</b>. No se cargan fuentes, analítica, mapas,
+  widgets ni etiquetas de márketing desde dominios ajenos. La única comunicación externa es con los
+  servicios de la plataforma de datos e identidad, declarados explícitamente en
+  <code>connect-src</code>. Si en el futuro se incorpora analítica, debe ser autoalojada o
+  proxificada en el propio origen, sin cookies de terceros y con medición agregada sin perfilado
+  individual. Cualquier excepción a esta política requiere decisión de arquitectura registrada y
+  revisión de seguridad.</p>
+
+  <h2 id="s21-8">21.8 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-SEC-01.</b> El despliegue DEBE emitir la política de contenido y el conjunto de cabeceras de la tabla 21.2.</li>
+    <li><b>RQ-SEC-02.</b> La inserción directa de HTML y la evaluación dinámica de código están PROHIBIDAS; se verifica con análisis estático.</li>
+    <li><b>RQ-SEC-03.</b> Trusted Types DEBE estar activo en modo de aplicación.</li>
+    <li><b>RQ-SEC-04.</b> Ningún testigo de acceso DEBE almacenarse en almacenamiento accesible por script fuera de la gestión de la biblioteca de identidad.</li>
+    <li><b>RQ-SEC-05.</b> Los parámetros de redirección DEBEN validarse contra lista de rutas conocidas.</li>
+    <li><b>RQ-SEC-06.</b> Ante condición excepcional, el sistema DEBE denegar y comunicar, nunca continuar.</li>
+    <li><b>RQ-SEC-07.</b> NO DEBEN cargarse recursos de terceros en la ruta crítica.</li>
+  </ul>
+</section>

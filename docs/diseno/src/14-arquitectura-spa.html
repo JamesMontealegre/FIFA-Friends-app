@@ -1,0 +1,170 @@
+<section class="capitulo" id="cap14">
+  <h1 id="h1-14"><span class="cnum">Capítulo 14</span>Arquitectura de aplicación de página única</h1>
+
+  <p class="entradilla">Una aplicación de página única traslada al navegador responsabilidades que
+  tradicionalmente eran del servidor: enrutamiento, composición de vistas y gestión de estado. Ese
+  traslado tiene ventajas reales y costes reales. Este capítulo explica por qué es la arquitectura
+  adecuada para este producto, especifica el modelo de ejecución, el enrutamiento, la división de
+  código y los límites de error, y documenta qué se pierde y cómo se compensa.</p>
+
+  <h2 id="s14-1">14.1 Por qué una aplicación de página única</h2>
+  <table id="t14-1">
+    <thead><tr><th style="width:20%">Arquitectura</th><th style="width:28%">Fortaleza</th><th style="width:28%">Coste</th><th style="width:24%">Encaje aquí</th></tr></thead>
+    <tbody>
+      <tr><td>Páginas renderizadas en servidor</td><td>Primer pintado rápido, indexable, degradación natural.</td><td>Recarga completa en cada interacción; requiere servidor de aplicación.</td><td>No: no hay servidor propio y la interacción es intensiva.</td></tr>
+      <tr><td>Renderizado en servidor con hidratación</td><td>Lo mejor de ambos mundos en contenido público.</td><td>Complejidad alta; coste de ejecución por visita; doble modelo mental.</td><td>No por ahora: el contenido es privado y el tráfico, reducido.</td></tr>
+      <tr><td>Componentes de servidor</td><td>Reduce el código enviado al cliente y acerca los datos.</td><td>Exige plataforma de ejecución y rediseño del modelo de datos.</td><td>Candidata futura si el producto se abre al público (§27.6).</td></tr>
+      <tr><td><b>Página única sobre CDN estática</b></td><td>Despliegue trivial, coste casi nulo, navegación instantánea tras la carga, actualizaciones en tiempo real naturales.</td><td>Primer pintado dependiente de JavaScript; sin indexación; todo el código es público.</td><td><b>Elegida.</b> El contenido exige sesión, la interacción es intensiva y el presupuesto operativo es mínimo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 14.1</b> — Comparación de arquitecturas de entrega y justificación de la elección (ADR-01, apéndice H).</caption>
+  </table>
+  <div class="aviso">
+    <span class="et">Consecuencia no negociable</span>
+    <p>Si el primer pintado depende de JavaScript, el presupuesto de JavaScript de la ruta de entrada
+    deja de ser una métrica de rendimiento y pasa a ser un requisito funcional. De ahí los límites
+    estrictos de §24.4 y la división de código de §14.5.</p>
+  </div>
+
+  <h2 id="s14-2">14.2 Modelo de ejecución</h2>
+  <figure id="f14-1">
+    <svg viewBox="0 0 700 150" width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="7.6" fill="#3C464D">
+        <line x1="10" y1="100" x2="690" y2="100" stroke="#6B7780" stroke-width="1"/>
+        <g font-size="7">
+          <text x="10" y="114">0 ms</text><text x="150" y="114">~200 ms</text><text x="300" y="114">~600 ms</text>
+          <text x="450" y="114">~1200 ms</text><text x="600" y="114">~1800 ms</text>
+        </g>
+        <rect x="10" y="78" width="130" height="18" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="75" y="91" text-anchor="middle" fill="#1B4E8C">documento + CSS</text>
+        <rect x="146" y="78" width="140" height="18" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="216" y="91" text-anchor="middle" fill="#1B4E8C">JS del armazón</text>
+        <rect x="292" y="78" width="140" height="18" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="362" y="91" text-anchor="middle" fill="#074733">armazón visible</text>
+        <rect x="438" y="78" width="140" height="18" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="508" y="91" text-anchor="middle" fill="#074733">datos de la ruta</text>
+        <rect x="584" y="78" width="106" height="18" rx="3" fill="#FBF2E2" stroke="#8A5300"/>
+        <text x="637" y="91" text-anchor="middle" fill="#8A5300">interactiva</text>
+
+        <text x="10" y="24" font-size="8.5" font-weight="bold" fill="#15191C">Ruta crítica de la carga en frío y dónde actúa cada optimización</text>
+        <text x="10" y="40">① Precarga de fuente y del módulo de entrada · ② Armazón e identidad en el mismo fragmento</text>
+        <text x="10" y="52">③ Esqueleto con geometría final (sin desplazamiento acumulado) · ④ Datos de ruta en paralelo, no en cascada</text>
+        <text x="10" y="64">⑤ Código de la vista dividido por ruta: el resto se precarga cuando el hilo principal está libre</text>
+        <line x1="75" y1="70" x2="75" y2="76" stroke="#1B4E8C"/><line x1="216" y1="70" x2="216" y2="76" stroke="#1B4E8C"/>
+        <line x1="362" y1="70" x2="362" y2="76" stroke="#0B6E4F"/><line x1="508" y1="70" x2="508" y2="76" stroke="#0B6E4F"/>
+        <text x="300" y="134" font-size="7" fill="#6B7780">Valores de referencia en red móvil de 4G simulada con CPU limitada ×4; objetivo de la tabla 24.2.</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 14.1</b> — Secuencia de carga en frío. Las dos barras verdes son las que la persona percibe; las azules son coste puro y por eso se minimizan.</figcaption>
+  </figure>
+  <p>El modelo tiene tres propiedades que condicionan todo lo demás. <b>Un solo hilo principal</b>:
+  cualquier cálculo largo bloquea la respuesta a la interacción y degrada directamente la métrica de
+  capacidad de respuesta (§25.3). <b>Un único documento</b>: la navegación no recarga, luego el
+  estado persiste pero también persisten las fugas, los temporizadores y las suscripciones no
+  limpiadas. <b>El código es público</b>: todo lo que viaja al navegador es legible e inspeccionable,
+  de modo que ninguna decisión de seguridad puede depender de él (§21.1).</p>
+
+  <h2 id="s14-3">14.3 Enrutamiento</h2>
+  <p>El enrutador es declarativo y anidado: el armazón de la aplicación es una ruta padre que
+  contiene las vistas, de modo que cambiar de vista no desmonta la cabecera ni la navegación. Las
+  reglas:</p>
+  <ul>
+    <li>Las rutas se declaran en un único módulo, que es la traducción literal de la tabla 9.1.</li>
+    <li>Cada ruta declara su <b>componente perezoso</b>, su <b>límite de error</b> y su
+    <b>respaldo de carga</b>. Un fallo al cargar una vista no derriba la aplicación: muestra el error
+    dentro del armazón, con la navegación intacta.</li>
+    <li>La protección de rutas se implementa como componente envolvente que decide entre contenido,
+    redirección a inicio de sesión conservando el destino, o estado «sin permiso». <b>Nunca</b> es un
+    control de seguridad: sólo evita mostrar interfaz inútil (§21.1).</li>
+    <li>Los parámetros de consulta se leen y escriben mediante una utilidad tipada que valida los
+    valores y aplica los predeterminados, de modo que una URL manipulada nunca produzca estados
+    imposibles.</li>
+  </ul>
+  <pre>const rutas = [
+  { path: '/', element: &lt;Armazon /&gt;, errorElement: &lt;ErrorDeRuta /&gt;, children: [
+    { index: true,            lazy: () =&gt; import('./vistas/Ahora') },
+    { path: 'tournaments',    lazy: () =&gt; import('./vistas/Torneos') },
+    { path: 'tournaments/new',lazy: () =&gt; import('./vistas/CrearTorneo'), handle: { rol: 'organizador' } },
+    { path: 'tournaments/:id',lazy: () =&gt; import('./vistas/DetalleTorneo'), children: [
+      { path: 'matches/:matchId', lazy: () =&gt; import('./vistas/DetallePartido') },
+    ]},
+    { path: '*', lazy: () =&gt; import('./vistas/NoEncontrada') },
+  ]},
+];</pre>
+
+  <h2 id="s14-4">14.4 División de código</h2>
+  <table class="compacta" id="t14-2">
+    <thead><tr><th style="width:24%">Fragmento</th><th style="width:30%">Contenido</th><th style="width:20%">Presupuesto</th><th style="width:26%">Estrategia de carga</th></tr></thead>
+    <tbody>
+      <tr><td>Armazón</td><td>Enrutador, armazón visual, identidad, tokens, primitivas usadas por el armazón.</td><td>≤ 110&nbsp;KB comprimidos</td><td>Carga inmediata; es la ruta crítica.</td></tr>
+      <tr><td>Vista de entrada</td><td>Vista «Ahora» y sus componentes de dominio.</td><td>≤ 45&nbsp;KB</td><td>Carga inmediata en paralelo con el armazón.</td></tr>
+      <tr><td>Vistas restantes</td><td>Una por ruta.</td><td>≤ 60&nbsp;KB cada una</td><td>Carga perezosa; precarga por intención al apuntar o enfocar el enlace.</td></tr>
+      <tr><td>Cuadro eliminatorio</td><td>Representación en lienzo y cálculo de posiciones.</td><td>≤ 35&nbsp;KB</td><td>Perezosa dentro de la vista de torneo; sólo si existe fase eliminatoria.</td></tr>
+      <tr><td>Biblioteca de fechas</td><td>Formato y cálculo de calendario.</td><td>≤ 12&nbsp;KB</td><td>Importación selectiva por función; nunca el paquete completo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 14.2</b> — División de código y presupuesto por fragmento. Los valores se verifican en integración continua (§26.7) y su incumplimiento falla la construcción.</caption>
+  </table>
+  <p>Tres reglas adicionales: no se divide por debajo de 15&nbsp;KB, porque el coste de una petición
+  adicional supera el ahorro; las dependencias compartidas por tres o más vistas se agrupan en un
+  fragmento común para evitar duplicación; y la precarga por intención se cancela si la red declara
+  modo de ahorro de datos.</p>
+
+  <h2 id="s14-5">14.5 Renderizado y reconciliación</h2>
+  <ul>
+    <li><b>Claves estables.</b> Toda lista se identifica por el identificador del documento, nunca por
+    el índice: con índices, insertar un partido al principio reordena el estado de todas las filas.</li>
+    <li><b>Memoización automática.</b> El compilador de la biblioteca de interfaz introduce la
+    memoización necesaria; no se añaden envoltorios manuales salvo que una medición demuestre su
+    necesidad. Optimizar sin medir añade complejidad sin beneficio.</li>
+    <li><b>Estado al nivel más bajo posible.</b> El estado que sólo afecta a un componente vive en él;
+    elevarlo provoca repintados en cascada.</li>
+    <li><b>Listas largas.</b> Virtualización sólo por encima de 150 elementos (§11.9).</li>
+    <li><b>Cálculos costosos.</b> La generación de calendario y el cálculo de posiciones del cuadro se
+    ejecutan fuera del hilo principal cuando superan 50&nbsp;ms medidos, o se trocean con cesión
+    explícita del hilo (§25.3).</li>
+  </ul>
+
+  <h2 id="s14-6">14.6 Límites de error y estados de suspensión</h2>
+  <p>Se definen tres niveles de contención, de modo que ningún fallo tenga alcance mayor que su
+  causa:</p>
+  <table class="compacta" id="t14-3">
+    <thead><tr><th style="width:22%">Nivel</th><th style="width:34%">Qué contiene</th><th style="width:44%">Qué muestra</th></tr></thead>
+    <tbody>
+      <tr><td>Aplicación</td><td>Fallos del armazón y de la identidad.</td><td>Pantalla de error con recarga y enlace de soporte; registra el incidente.</td></tr>
+      <tr><td>Ruta</td><td>Fallos de carga o de ejecución de una vista.</td><td>Error dentro del armazón, con navegación operativa y reintento.</td></tr>
+      <tr><td>Región</td><td>Fallos de un panel o de una pestaña (clasificación, cuadro).</td><td>Error local; el resto de la vista sigue funcionando.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 14.3</b> — Niveles de contención de errores. Un fallo al calcular el cuadro no debe impedir ver la clasificación.</caption>
+  </table>
+
+  <h2 id="s14-7">14.7 Navegación percibida</h2>
+  <p>La ventaja principal de esta arquitectura es la navegación sin recarga; perderla por esperar
+  datos la anula. Reglas: la vista se muestra inmediatamente con los datos ya cacheados y revalida en
+  segundo plano; una navegación nunca deja la pantalla en blanco más de 200&nbsp;ms; las transiciones
+  entre vistas usan la interfaz de transiciones del navegador cuando está disponible y se omiten
+  silenciosamente cuando no; y la posición de desplazamiento se restaura al retroceder y se reinicia
+  al avanzar, salvo en el patrón maestro&ndash;detalle, donde rige §11.7.</p>
+
+  <h2 id="s14-8">14.8 Degradación y compatibilidad</h2>
+  <table class="compacta" id="t14-4">
+    <thead><tr><th style="width:26%">Situación</th><th style="width:34%">Comportamiento especificado</th><th style="width:40%">Justificación</th></tr></thead>
+    <tbody>
+      <tr><td>JavaScript deshabilitado</td><td>Mensaje en <code>&lt;noscript&gt;</code> explicando el requisito y ofreciendo contacto.</td><td>Honestidad frente a pantalla en blanco; el producto no puede funcionar sin él.</td></tr>
+      <tr><td>Navegador sin transiciones de vista</td><td>Navegación sin animación.</td><td>Mejora progresiva: la animación nunca es funcional.</td></tr>
+      <tr><td>Navegador sin consultas de contenedor</td><td>Se usa el punto de ruptura de ventana equivalente.</td><td>Degradación de precisión, no de función.</td></tr>
+      <tr><td>Restauración desde la caché de retroceso</td><td>La aplicación revalida datos al restaurarse y reanuda suscripciones.</td><td>Evita mostrar datos obsoletos tras volver con el botón atrás.</td></tr>
+      <tr><td>Pestaña en segundo plano</td><td>Se pausan suscripciones en tiempo real y temporizadores.</td><td>Ahorro de batería y de lecturas facturables (§15.4).</td></tr>
+      <tr><td>Versión nueva publicada</td><td>Se detecta el cambio de versión y se ofrece recargar; nunca se recarga sin avisar.</td><td>Una recarga forzada durante el registro de un resultado destruiría el trabajo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 14.4</b> — Matriz de degradación. Cada fila es verificable manualmente y figura en la lista de regresión (§26.8).</caption>
+  </table>
+
+  <h2 id="s14-9">14.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-SPA-01.</b> Cada ruta DEBE cargarse de forma perezosa y declarar su límite de error y su estado de carga.</li>
+    <li><b>RQ-SPA-02.</b> El fragmento del armazón NO DEBE superar su presupuesto; el incumplimiento falla la construcción.</li>
+    <li><b>RQ-SPA-03.</b> La protección de rutas NO DEBE considerarse control de seguridad.</li>
+    <li><b>RQ-SPA-04.</b> Los parámetros de consulta DEBEN validarse y tener valores por defecto tolerantes.</li>
+    <li><b>RQ-SPA-05.</b> Las listas DEBEN usar claves estables basadas en identidad de dominio.</li>
+    <li><b>RQ-SPA-06.</b> La publicación de una versión nueva NO DEBE forzar recarga sin consentimiento.</li>
+  </ul>
+</section>
