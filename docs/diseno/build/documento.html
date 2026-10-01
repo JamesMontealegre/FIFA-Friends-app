@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Documento de Diseño de Interfaz, Accesibilidad, Seguridad y Rendimiento — Plataforma FIFA Friends</title>
+<link rel="stylesheet" href="../assets/doc.css">
+</head>
+<body>
+<section class="portada">
+  <p class="marca">Documento técnico de diseño · Edición 1.0</p>
+  <div class="bloque">
+    <h1>Diseño de Interfaz,<br>Accesibilidad, Seguridad<br>y Rendimiento Web</h1>
+    <div class="regla"></div>
+    <p class="sub">Especificación integral de experiencia de usuario, sistema visual, arquitectura
+    de aplicación de página única y patrones maestro&ndash;detalle para la plataforma de
+    torneos <b>FIFA&nbsp;Friends</b>.</p>
+  </div>
+  <div class="meta">
+    <p><b>Elaborado por:</b> Unidad de Arquitectura de Experiencia Digital y Front-End</p>
+    <p><b>Clasificación:</b> Interno — distribución a equipos de producto, diseño, desarrollo y seguridad</p>
+    <p><b>Versión:</b> 1.0 &nbsp;·&nbsp; <b>Fecha de emisión:</b> 1 de octubre de 2026</p>
+    <p><b>Marcos de referencia:</b> ISO 9241-210 · ISO/IEC 25010 · WCAG 2.2 AA · WAI-ARIA 1.2 / ARIA APG
+      · EN 301 549 V4.1.1 · OWASP Top 10:2025 · OWASP ASVS 5.0 · Core Web Vitals</p>
+  </div>
+  <div class="pleca"></div>
+</section>
+
+<section class="liminar" id="control">
+  <h1>Control del documento</h1>
+
+  <p class="entradilla">Este documento es la fuente única de verdad del diseño de la interfaz y de
+  los atributos de calidad transversales —accesibilidad, seguridad, rendimiento y mantenibilidad—
+  de la plataforma FIFA Friends. Toda decisión de producto, diseño o implementación que contradiga
+  lo aquí especificado requiere una enmienda registrada en la tabla de versiones.</p>
+
+  <h2 id="ctrl-ident">Identificación</h2>
+  <table class="compacta">
+    <tbody>
+      <tr><td style="width:24%"><b>Título</b></td><td>Documento de Diseño de Interfaz, Accesibilidad, Seguridad y Rendimiento — Plataforma FIFA Friends</td></tr>
+      <tr><td><b>Código</b></td><td>DDS-FF-UI-2026-001</td></tr>
+      <tr><td><b>Versión</b></td><td>1.0 (línea base aprobada)</td></tr>
+      <tr><td><b>Estado</b></td><td>Vigente</td></tr>
+      <tr><td><b>Autoría</b></td><td>Unidad de Arquitectura de Experiencia Digital y Front-End (documento corporativo; no se atribuye autoría individual)</td></tr>
+      <tr><td><b>Custodia</b></td><td>Comité de Sistema de Diseño</td></tr>
+      <tr><td><b>Audiencia</b></td><td>Diseño de producto, ingeniería front-end, ingeniería de plataforma, seguridad de aplicaciones, control de calidad, dirección de producto</td></tr>
+      <tr><td><b>Revisión</b></td><td>Semestral, o ante cambio normativo (publicación de WCAG, OWASP Top 10, EN 301 549) o cambio mayor de arquitectura</td></tr>
+      <tr><td><b>Ámbito técnico</b></td><td>Aplicación web de página única (React 19 · TypeScript · Vite · Tailwind CSS 4 · TanStack Query 5 · Firebase Authentication y Cloud Firestore · despliegue en CDN perimetral)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="ctrl-ver">Historial de versiones</h2>
+  <table class="compacta">
+    <thead><tr><th style="width:12%">Versión</th><th style="width:17%">Fecha</th><th style="width:52%">Cambios sustantivos</th><th style="width:19%">Estado</th></tr></thead>
+    <tbody>
+      <tr><td>0.1</td><td>2026-07-14</td><td>Esqueleto, alcance y marco normativo. Inventario de componentes existentes.</td><td>Borrador</td></tr>
+      <tr><td>0.4</td><td>2026-08-06</td><td>Sistema visual: teoría del color aplicada, paleta en OKLCH, escala tipográfica modular, retícula y espaciado.</td><td>Borrador</td></tr>
+      <tr><td>0.6</td><td>2026-08-28</td><td>Arquitectura de información, distribución de componentes, especificación del patrón maestro&ndash;detalle.</td><td>Revisión interna</td></tr>
+      <tr><td>0.8</td><td>2026-09-12</td><td>Arquitectura de aplicación de página única, gestión de estado servidor/cliente, contratos de datos.</td><td>Revisión interna</td></tr>
+      <tr><td>0.9</td><td>2026-09-23</td><td>Accesibilidad WCAG 2.2 AA criterio por criterio; modelo de amenazas; presupuestos de rendimiento.</td><td>Revisión cruzada</td></tr>
+      <tr><td>1.0</td><td>2026-10-01</td><td>Línea base aprobada. Apéndices normativos: tokens, listas de verificación, patrones ARIA, matriz de trazabilidad, decisiones de arquitectura, glosario y bibliografía.</td><td>Vigente</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="ctrl-aprob">Aprobaciones</h2>
+  <table class="compacta">
+    <thead><tr><th style="width:26%">Función</th><th style="width:52%">Responsabilidad sobre el documento</th><th style="width:22%">Decisión</th></tr></thead>
+    <tbody>
+      <tr><td>Dirección de Producto</td><td>Alcance funcional, prioridades y criterios de aceptación de negocio</td><td>Aprobado</td></tr>
+      <tr><td>Arquitectura de Experiencia</td><td>Sistema visual, patrones de interacción, gobernanza del sistema de diseño</td><td>Aprobado</td></tr>
+      <tr><td>Arquitectura Front-End</td><td>Modelo de componentes, estado, enrutamiento y presupuestos de rendimiento</td><td>Aprobado</td></tr>
+      <tr><td>Accesibilidad</td><td>Conformidad WCAG 2.2 AA y procedimiento de auditoría</td><td>Aprobado con observaciones (§19.6)</td></tr>
+      <tr><td>Seguridad de Aplicaciones</td><td>Modelo de amenazas, controles ASVS y reglas de autorización</td><td>Aprobado</td></tr>
+      <tr><td>Calidad</td><td>Estrategia de pruebas y Definición de Terminado</td><td>Aprobado</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="ctrl-conv">Convenciones del documento</h2>
+  <p>Las palabras clave <b>DEBE</b>, <b>NO DEBE</b>, <b>DEBERÍA</b>, <b>NO DEBERÍA</b> y <b>PUEDE</b>
+  se interpretan conforme a la práctica establecida en BCP 14 (RFC 2119 y RFC 8174):</p>
+  <table class="compacta">
+    <thead><tr><th style="width:24%">Término</th><th style="width:76%">Significado normativo en este documento</th></tr></thead>
+    <tbody>
+      <tr><td><b>DEBE</b> / <b>NO DEBE</b></td><td>Requisito absoluto. Su incumplimiento bloquea la aprobación de una entrega (véase la Definición de Terminado, §27.4).</td></tr>
+      <tr><td><b>DEBERÍA</b></td><td>Recomendación fuerte. Puede omitirse sólo con justificación registrada como decisión de arquitectura (apéndice H).</td></tr>
+      <tr><td><b>PUEDE</b></td><td>Opción legítima; ninguna alternativa es preferente.</td></tr>
+    </tbody>
+  </table>
+  <p>Las referencias cruzadas internas usan el signo § seguido del número de sección (por ejemplo,
+  §11.4). Las fuentes externas se citan de forma abreviada en el cuerpo del texto —por ejemplo
+  (W3C, <i>WCAG 2.2</i>, 2.5.8)— y se desarrollan con dirección completa en el apéndice J,
+  «Bibliografía y fuentes consultadas». Los identificadores de requisito siguen el formato
+  <code>RQ-&lt;dominio&gt;-&lt;número&gt;</code>; los de componente, <code>CMP-&lt;familia&gt;-&lt;nombre&gt;</code>;
+  los de decisión de arquitectura, <code>ADR-&lt;número&gt;</code>. El código fuente de ejemplo se
+  presenta en TypeScript y CSS; los fragmentos son ilustrativos de la especificación y no sustituyen
+  al repositorio.</p>
+
+  <div class="nota">
+    <span class="et">Nota terminológica</span>
+    <p>El documento emplea <b>maestro&ndash;detalle</b> (en inglés <i>master&ndash;detail</i> o
+    <i>list&ndash;detail</i>) para designar el patrón de interfaz en el que un panel de selección
+    gobierna el contenido de un panel dependiente. Se evita el par <i>maestro/esclavo</i> en la
+    descripción de componentes de software y réplicas de datos, siguiendo las recomendaciones de
+    lenguaje inclusivo adoptadas por la IETF y por las comunidades de Linux, Python y Redis, que
+    prefieren pares como <i>primario/réplica</i> o <i>primario/secundario</i>; cuando el término
+    heredado es imprescindible para localizar literatura previa, se indica entre paréntesis. El
+    capítulo 11 trata explícitamente esta equivalencia terminológica.</p>
+  </div>
+</section>
+
+<section class="liminar" id="resumen">
+  <h1>Resumen ejecutivo</h1>
+
+  <p class="entradilla">FIFA Friends es una aplicación web de página única para organizar torneos
+  recreativos entre grupos de amistades: creación de competiciones, sorteo y asignación de equipos,
+  generación de calendario, registro de resultados, clasificaciones automáticas, cuadros eliminatorios
+  y palmarés histórico. Este documento especifica cómo debe verse, comportarse, defenderse y rendir
+  esa interfaz, y por qué cada decisión es la correcta a la luz de la evidencia disponible.</p>
+
+  <h2 id="res-problema">El problema de diseño</h2>
+  <p>La aplicación tiene tres características que condicionan todo el diseño. Primero, es
+  <b>intensiva en datos tabulares y jerárquicos</b>: clasificaciones, calendarios, cuadros de
+  eliminación y estadísticas acumuladas. Segundo, su uso real ocurre <b>en movilidad y en sesiones
+  cortas</b> —consultar quién juega, registrar un resultado durante la partida, comprobar la tabla—
+  mayoritariamente desde teléfono y con conectividad irregular. Tercero, tiene <b>dos perfiles con
+  poderes radicalmente distintos</b>: participantes que leen y se inscriben, y organizadores que
+  modifican el estado competitivo de todos los demás. Un diseño que ignore cualquiera de los tres
+  rasgos produce una interfaz densa e ilegible en pantalla pequeña, lenta en la red real, o
+  insegura en el límite de confianza entre cliente y base de datos.</p>
+
+  <h2 id="res-tesis">Tesis del documento</h2>
+  <p>La calidad de esta interfaz no se obtiene acumulando buenas prácticas sueltas, sino derivando
+  todas las decisiones de un pequeño conjunto de invariantes verificables. El documento sostiene y
+  desarrolla seis:</p>
+  <ol>
+    <li><b>El sistema visual es un sistema de tokens, no un catálogo de pantallas.</b> Color,
+    tipografía, espaciado, radios, elevación y movimiento se definen como variables con semántica
+    explícita (§6, §7, §8, apéndice A), expresadas en un espacio de color perceptualmente uniforme
+    (OKLCH) para que las escalas de luminosidad sean predecibles y el contraste calculable a priori.</li>
+    <li><b>La accesibilidad es un requisito funcional, no una revisión final.</b> El objetivo es
+    conformidad WCAG 2.2 nivel AA sin excepciones, con los nueve criterios nuevos de la versión 2.2
+    tratados uno a uno (§18), patrones de teclado tomados de la guía de prácticas ARIA del W3C
+    (apéndice E) y verificación automatizada integrada en la cadena de entrega (§26).</li>
+    <li><b>La seguridad de una aplicación de página única vive en el servidor.</b> El cliente es
+    código público e inspeccionable: toda regla que importe debe ser inexpugnable desde el navegador.
+    Se especifica un modelo de amenazas STRIDE (§20), una política de seguridad de contenido estricta
+    basada en <i>nonce</i> con <code>strict-dynamic</code> y Trusted Types (§21), y un modelo de
+    autorización declarativa en el motor de reglas de la base de datos con control de acceso basado en
+    roles por torneo (§22), que sustituye la autorización por dirección de correo electrónico
+    incrustada en las reglas actuales.</li>
+    <li><b>El rendimiento es un presupuesto, no una aspiración.</b> Se fijan objetivos en percentil 75
+    de campo alineados con Core Web Vitals —LCP ≤ 2,5 s; INP ≤ 200 ms; CLS ≤ 0,1— y presupuestos de
+    transferencia por ruta que fallan la integración continua cuando se exceden (§24, §25,
+    apéndice D).</li>
+    <li><b>El patrón maestro&ndash;detalle es la columna vertebral de la navegación.</b> Las tres
+    superficies principales —torneos, partidos y equipos— son instancias del mismo patrón, con una
+    especificación única de sincronización de selección, representación del estado en la URL,
+    comportamiento adaptativo entre uno y dos paneles, y gestión de foco al cambiar de elemento
+    (§11).</li>
+    <li><b>La interfaz se compone por regiones estables.</b> La distribución de componentes se define
+    por regiones semánticas y plantillas de página reutilizables, con jerarquía atómica explícita
+    (fundamentos, primitivas, compuestos, patrones, plantillas, vistas) y reglas de propiedad y
+    dependencia que impiden el acoplamiento accidental entre dominios (§10, §12).</li>
+  </ol>
+
+  <h2 id="res-hallazgos">Hallazgos sobre la implementación actual</h2>
+  <p>El diagnóstico del código existente identifica nueve brechas respecto a esta especificación. Se
+  resumen aquí con su tratamiento detallado:</p>
+  <table class="compacta" id="t0-1">
+    <thead><tr><th style="width:7%">#</th><th style="width:65%">Hallazgo</th><th style="width:14%">Severidad</th><th style="width:14%">Sección</th></tr></thead>
+    <tbody>
+      <tr><td>H1</td><td>La autorización administrativa está codificada como una dirección de correo literal en las reglas de la base de datos: no es auditable, no admite delegación y acopla la seguridad a una identidad personal.</td><td>Crítica</td><td>§22.4</td></tr>
+      <tr><td>H2</td><td>No existe política de seguridad de contenido ni cabeceras de seguridad en el despliegue perimetral.</td><td>Alta</td><td>§21.3</td></tr>
+      <tr><td>H3</td><td>La regla de incorporación a un torneo en estado borrador permite escribir el arreglo de participantes completo, sin acotar la mutación a la propia identidad de quien la solicita.</td><td>Alta</td><td>§22.5</td></tr>
+      <tr><td>H4</td><td>El idioma declarado del documento es inglés mientras la interfaz es castellana, lo que degrada la pronunciación de los lectores de pantalla y la separación silábica.</td><td>Media</td><td>§18.3</td></tr>
+      <tr><td>H5</td><td>La fuente tipográfica se carga desde un tercero en la ruta crítica, sin autoalojamiento ni subconjunto, lo que introduce una dependencia de red y una fuga de metadatos de navegación.</td><td>Media</td><td>§7.7, §24.5</td></tr>
+      <tr><td>H6</td><td>No hay anuncio de cambio de ruta ni traslado de foco al navegar, con la pérdida de contexto que ello supone en lector de pantalla.</td><td>Alta</td><td>§17.3</td></tr>
+      <tr><td>H7</td><td>No existe división de código por ruta: el paquete inicial carga vistas que la mayoría de sesiones nunca visita.</td><td>Media</td><td>§14.6</td></tr>
+      <tr><td>H8</td><td>Las clasificaciones se recalculan y escriben desde el cliente, lo que permite divergencia entre réplica y fuente y abre una vía de manipulación.</td><td>Alta</td><td>§15.7, §16.6</td></tr>
+      <tr><td>H9</td><td>No hay suite de pruebas ni verificación automatizada de accesibilidad o rendimiento en integración continua.</td><td>Media</td><td>§26</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 0.1</b> — Hallazgos del diagnóstico inicial, severidad y sección donde se especifica el tratamiento.</caption>
+  </table>
+
+  <h2 id="res-estructura">Cómo leer este documento</h2>
+  <p>El documento se organiza en ocho partes. La parte I establece el marco metodológico y normativo
+  y los principios de diseño. La parte II define el sistema visual: color, tipografía, retícula y
+  movimiento. La parte III especifica la arquitectura de la interfaz: información, distribución de
+  componentes, patrón maestro&ndash;detalle, catálogo de componentes y patrones de interacción. La
+  parte IV describe la arquitectura de la aplicación de página única, la gestión de estado y datos y
+  el modelo de dominio. La parte V desarrolla la accesibilidad. La parte VI, la seguridad. La parte
+  VII, el rendimiento, la calidad y la gobernanza. La parte VIII reúne los apéndices normativos, que
+  son la parte operativa del documento: tablas de tokens, listas de verificación, mapas de patrones
+  ARIA, matriz de trazabilidad, decisiones de arquitectura, glosario y bibliografía.</p>
+  <p>Cada capítulo comienza con una entradilla que resume su contenido y termina con una síntesis de
+  requisitos identificados. Los perfiles con menos tiempo disponible encontrarán el núcleo operativo
+  en los apéndices A a D y en las síntesis de los capítulos 11, 18, 21 y 24.</p>
+</section>
+
+<section class="liminar toc" id="toc"><h1>Índice de contenido</h1>
+<ul>
+<li class="n2"><a href="#ctrl-ident">Identificación</a></li>
+<li class="n2"><a href="#ctrl-ver">Historial de versiones</a></li>
+<li class="n2"><a href="#ctrl-aprob">Aprobaciones</a></li>
+<li class="n2"><a href="#ctrl-conv">Convenciones del documento</a></li>
+<li class="n2"><a href="#res-problema">El problema de diseño</a></li>
+<li class="n2"><a href="#res-tesis">Tesis del documento</a></li>
+<li class="n2"><a href="#res-hallazgos">Hallazgos sobre la implementación actual</a></li>
+<li class="n2"><a href="#res-estructura">Cómo leer este documento</a></li>
+<li class="n1 pt"><a href="#parte1">Parte I — Fundamentos, marco normativo y proceso</a></li>
+<li class="n1"><a href="#h1-1">Introducción, alcance y contexto del producto</a></li>
+<li class="n2"><a href="#s1-1">1.1 Propósito</a></li>
+<li class="n2"><a href="#s1-2">1.2 Alcance</a></li>
+<li class="n2"><a href="#s1-3">1.3 El dominio: vocabulario controlado</a></li>
+<li class="n2"><a href="#s1-4">1.4 Contexto de uso</a></li>
+<li class="n2"><a href="#s1-5">1.5 Perfiles y matriz de permisos</a></li>
+<li class="n2"><a href="#s1-6">1.6 Restricciones</a></li>
+<li class="n2"><a href="#s1-7">1.7 Atributos de calidad y escenarios medibles</a></li>
+<li class="n2"><a href="#s1-8">1.8 Supuestos y riesgos de diseño</a></li>
+<li class="n2"><a href="#s1-9">1.9 Síntesis de requisitos del capítulo</a></li>
+<li class="n1"><a href="#h1-2">Marco normativo y de referencia</a></li>
+<li class="n2"><a href="#s2-1">2.1 Tipología de las fuentes</a></li>
+<li class="n2"><a href="#s2-2">2.2 Usabilidad y diseño centrado en las personas</a></li>
+<li class="n2"><a href="#s2-3">2.3 Accesibilidad</a></li>
+<li class="n2"><a href="#s2-4">2.4 Seguridad</a></li>
+<li class="n2"><a href="#s2-5">2.5 Rendimiento</a></li>
+<li class="n2"><a href="#s2-6">2.6 Plataforma web y sistema de diseño</a></li>
+<li class="n2"><a href="#s2-7">2.7 Jerarquía de resolución de conflictos</a></li>
+<li class="n2"><a href="#s2-8">2.8 Síntesis de requisitos del capítulo</a></li>
+<li class="n1"><a href="#h1-3">Proceso de diseño centrado en las personas</a></li>
+<li class="n2"><a href="#s3-1">3.1 Modelo de proceso</a></li>
+<li class="n2"><a href="#s3-2">3.2 Investigación: métodos y alcance</a></li>
+<li class="n2"><a href="#s3-3">3.3 Arquetipos de usuario</a></li>
+<li class="n2"><a href="#s3-4">3.4 Trabajos por realizar y escenarios</a></li>
+<li class="n2"><a href="#s3-5">3.5 Mapa de recorrido y puntos de dolor</a></li>
+<li class="n2"><a href="#s3-6">3.6 Prototipado y fidelidad</a></li>
+<li class="n2"><a href="#s3-7">3.7 Protocolo de evaluación</a></li>
+<li class="n2"><a href="#s3-8">3.8 Métricas de experiencia</a></li>
+<li class="n2"><a href="#s3-9">3.9 Ética, consentimiento y datos de investigación</a></li>
+<li class="n2"><a href="#s3-10">3.10 Síntesis de requisitos del capítulo</a></li>
+<li class="n1"><a href="#h1-4">Principios de diseño y leyes de la interacción</a></li>
+<li class="n2"><a href="#s4-1">4.1 Principios del producto</a></li>
+<li class="n2"><a href="#s4-2">4.2 Heurísticas de usabilidad aplicadas</a></li>
+<li class="n2"><a href="#s4-3">4.3 Regularidades empíricas con consecuencia métrica</a></li>
+<li class="n2"><a href="#s4-4">4.4 Principios de agrupación perceptiva</a></li>
+<li class="n2"><a href="#s4-5">4.5 Carga cognitiva</a></li>
+<li class="n2"><a href="#s4-6">4.6 Relación señal/ruido y jerarquía visual</a></li>
+<li class="n2"><a href="#s4-7">4.7 Significantes, restricciones y retroalimentación</a></li>
+<li class="n2"><a href="#s4-8">4.8 Cuándo romper la convención</a></li>
+<li class="n2"><a href="#s4-9">4.9 Síntesis de requisitos del capítulo</a></li>
+<li class="n1 pt"><a href="#parte2">Parte II — Sistema visual: color, tipografía y composición</a></li>
+<li class="n1"><a href="#h1-5">Teoría del color aplicada a interfaces</a></li>
+<li class="n2"><a href="#s5-1">5.1 Luz, superficie y síntesis aditiva</a></li>
+<li class="n2"><a href="#s5-2">5.2 El observador: cómo vemos el color</a></li>
+<li class="n2"><a href="#s5-3">5.3 Espacios de color y su idoneidad</a></li>
+<li class="n2"><a href="#s5-4">5.4 Luminancia relativa y relación de contraste</a></li>
+<li class="n2"><a href="#s5-5">5.5 Armonías cromáticas</a></li>
+<li class="n2"><a href="#s5-6">5.6 Semántica y convención</a></li>
+<li class="n2"><a href="#s5-7">5.7 Color, superficie y profundidad</a></li>
+<li class="n2"><a href="#s5-8">5.8 Contraste en situaciones difíciles</a></li>
+<li class="n2"><a href="#s5-9">5.9 Deficiencias de visión del color</a></li>
+<li class="n2"><a href="#s5-10">5.10 Síntesis de requisitos del capítulo</a></li>
+<li class="n1"><a href="#h1-6">Sistema de color del producto</a></li>
+<li class="n2"><a href="#s6-1">6.1 Arquitectura de tokens</a></li>
+<li class="n2"><a href="#s6-2">6.2 Nomenclatura</a></li>
+<li class="n2"><a href="#s6-3">6.3 Paleta primitiva</a></li>
+<li class="n2"><a href="#s6-4">6.4 Tokens semánticos: modo claro</a></li>
+<li class="n2"><a href="#s6-5">6.5 Indicador de foco</a></li>
+<li class="n2"><a href="#s6-6">6.6 Modo oscuro</a></li>
+<li class="n2"><a href="#s6-7">6.7 Superficies, elevación y sombra</a></li>
+<li class="n2"><a href="#s6-8">6.8 Implementación</a></li>
+<li class="n2"><a href="#s6-9">6.9 Verificación automática</a></li>
+<li class="n2"><a href="#s6-10">6.10 Síntesis de requisitos del capítulo</a></li>
+<li class="n1"><a href="#h1-7">Tipografía y legibilidad</a></li>
+<li class="n2"><a href="#s7-1">7.1 Qué debe resolver la tipografía aquí</a></li>
+<li class="n2"><a href="#s7-2">7.2 Criterios de selección de familia</a></li>
+<li class="n2"><a href="#s7-3">7.3 Escala modular</a></li>
+<li class="n2"><a href="#s7-4">7.4 Composición: medida, interlineado y alineación</a></li>
+<li class="n2"><a href="#s7-5">7.5 Tratamiento de cifras</a></li>
+<li class="n2"><a href="#s7-6">7.6 Carga y rendimiento tipográfico</a></li>
+<li class="n2"><a href="#s7-7">7.7 Accesibilidad tipográfica</a></li>
+<li class="n2"><a href="#s7-8">7.8 Contenido real y casos límite</a></li>
+<li class="n2"><a href="#s7-9">7.9 Síntesis de requisitos del capítulo</a></li>
+<li class="n1"><a href="#h1-8">Retícula, espaciado, iconografía y movimiento</a></li>
+<li class="n2"><a href="#s8-1">8.1 Escala de espaciado</a></li>
+<li class="n2"><a href="#s8-2">8.2 Retícula y contenedores</a></li>
+<li class="n2"><a href="#s8-3">8.3 Puntos de ruptura</a></li>
+<li class="n2"><a href="#s8-4">8.4 Densidad</a></li>
+<li class="n2"><a href="#s8-5">8.5 Radios, bordes y sombras</a></li>
+<li class="n2"><a href="#s8-6">8.6 Objetivos interactivos</a></li>
+<li class="n2"><a href="#s8-7">8.7 Iconografía</a></li>
+<li class="n2"><a href="#s8-8">8.8 Movimiento</a></li>
+<li class="n2"><a href="#s8-9">8.9 Síntesis de requisitos del capítulo</a></li>
+<li class="n1 pt"><a href="#parte3">Parte III — Arquitectura de la interfaz</a></li>
+<li class="n1 pt"><a href="#parte4">Parte IV — Arquitectura de aplicación de página única</a></li>
+<li class="n1 pt"><a href="#parte5">Parte V — Accesibilidad</a></li>
+<li class="n1 pt"><a href="#parte6">Parte VI — Seguridad</a></li>
+<li class="n1 pt"><a href="#parte7">Parte VII — Rendimiento, calidad y gobernanza</a></li>
+<li class="n1 pt"><a href="#parte8">Parte VIII — Apéndices normativos</a></li>
+</ul>
+</section>
+
+
+<section class="parte" id="parte1">
+  <p class="et">Parte I</p>
+  <h1>Fundamentos, marco normativo y proceso</h1>
+  <p class="res">Qué problema resuelve el producto, con qué estándares se mide, mediante qué proceso
+  se diseña y bajo qué principios se decide cuando dos buenas prácticas entran en conflicto.</p>
+  <ol>
+    <li>Introducción, alcance y contexto del producto</li>
+    <li>Marco normativo y de referencia</li>
+    <li>Proceso de diseño centrado en las personas</li>
+    <li>Principios de diseño y leyes de la interacción</li>
+  </ol>
+</section>
+
+<section class="capitulo" id="cap1">
+  <h1 id="h1-1"><span class="cnum">Capítulo 1</span><span class="ctit">Introducción, alcance y contexto del producto</span></h1>
+
+  <p class="entradilla">Un documento de diseño sólo es útil si delimita con precisión qué decide y
+  qué deja abierto. Este capítulo fija el propósito y el alcance de la especificación, describe el
+  dominio competitivo que la aplicación modela, caracteriza el contexto de uso conforme a
+  ISO 9241-11, enumera las restricciones que acotan el espacio de soluciones y traduce los atributos
+  de calidad de ISO/IEC 25010 en escenarios medibles que el resto del documento debe satisfacer.</p>
+
+  <h2 id="s1-1">1.1 Propósito</h2>
+  <p>Este documento especifica el diseño de la interfaz de usuario y los atributos de calidad
+  transversales de FIFA Friends, una aplicación web para organizar y seguir torneos recreativos de
+  videojuego de fútbol entre grupos de personas conocidas. Persigue cuatro objetivos simultáneos:</p>
+  <ol>
+    <li><b>Prescribir.</b> Define, con nivel de detalle suficiente para implementar sin negociación
+    adicional, cómo son los componentes, cómo se comportan, cómo se combinan y qué valores
+    concretos —color, tamaño, espacio, tiempo— los parametrizan.</li>
+    <li><b>Justificar.</b> Cada prescripción se apoya en una norma, una guía oficial de plataforma o
+    un resultado de investigación citado, no en preferencia estética. Donde la evidencia es débil o
+    contradictoria, se indica explícitamente y se adopta la opción más conservadora para el usuario.</li>
+    <li><b>Verificar.</b> Toda afirmación relevante se expresa de modo que pueda comprobarse: un
+    umbral numérico, una lista de verificación, una prueba automatizada o un procedimiento de
+    auditoría manual reproducible.</li>
+    <li><b>Perdurar.</b> El documento separa lo que cambia con frecuencia (contenido, catálogo de
+    equipos, reglas de competición) de lo que debe permanecer estable (tokens, patrones, contratos),
+    de modo que la evolución del producto no obligue a reescribirlo entero.</li>
+  </ol>
+
+  <div class="clave">
+    <span class="et">Criterio rector</span>
+    <p>Ante un conflicto entre dos recomendaciones de este documento, prevalece el orden siguiente:
+    <b>(1)</b> seguridad de las personas y de sus datos; <b>(2)</b> accesibilidad; <b>(3)</b>
+    corrección funcional del dominio competitivo; <b>(4)</b> rendimiento percibido; <b>(5)</b>
+    consistencia del sistema de diseño; <b>(6)</b> preferencia estética. Este orden no es retórico:
+    se aplica literalmente en la revisión de diseño (apéndice G).</p>
+  </div>
+
+  <h2 id="s1-2">1.2 Alcance</h2>
+  <p>Queda <b>dentro</b> del alcance: el sistema visual completo (color, tipografía, retícula,
+  espaciado, iconografía, movimiento); la arquitectura de información y la navegación; la
+  distribución de componentes en pantalla y las plantillas de página; el catálogo de componentes con
+  sus estados, propiedades y comportamiento accesible; el patrón maestro&ndash;detalle y sus
+  variantes adaptativas; la arquitectura de la aplicación de página única, incluidos enrutamiento,
+  división de código, gestión de estado y sincronización con la base de datos; la accesibilidad
+  conforme a WCAG 2.2 nivel AA; la seguridad del cliente web y el modelo de autorización ejercido en
+  servidor; los presupuestos y técnicas de rendimiento; y la estrategia de pruebas y gobernanza.</p>
+  <p>Queda <b>fuera</b> del alcance: la estrategia comercial y de monetización; el diseño de
+  campañas de adquisición; la implementación concreta de los algoritmos de generación de calendario,
+  que se tratan sólo en lo que afectan a la interfaz y a los contratos de datos (§16); la
+  administración de la infraestructura de nube más allá de su configuración de seguridad y de caché;
+  y la localización a idiomas distintos del castellano, para la cual el documento se limita a fijar
+  los requisitos de internacionalización que no deben cerrarse prematuramente (§9.8).</p>
+
+  <h2 id="s1-3">1.3 El dominio: vocabulario controlado</h2>
+  <p>La primera obligación de una interfaz es hablar el idioma de quien la usa (Nielsen, heurística
+  2). Eso exige un vocabulario único y estable, compartido por interfaz, documentación, código y
+  base de datos. La tabla 1.1 fija ese vocabulario; cualquier sinónimo que aparezca en el producto
+  debe considerarse un defecto.</p>
+
+  <table id="t1-1">
+    <thead><tr><th style="width:18%">Término</th><th style="width:60%">Definición operativa</th><th style="width:22%">Identificador</th></tr></thead>
+    <tbody>
+      <tr><td><b>Torneo</b></td><td>Competición con un conjunto cerrado de participantes, un formato y un ciclo de vida propio. Unidad de agregación y de permisos.</td><td><code>tournament</code></td></tr>
+      <tr><td><b>Participante</b></td><td>Persona inscrita en un torneo concreto. Distinto de «usuario»: una cuenta puede ser participante en unos torneos y no en otros.</td><td><code>player</code></td></tr>
+      <tr><td><b>Organizador</b></td><td>Participante con permisos de administración sobre un torneo: edita el calendario, valida resultados y cierra la competición.</td><td><code>organizer</code></td></tr>
+      <tr><td><b>Equipo</b></td><td>Selección o club del videojuego asignado a un participante, con atributos de valoración y liga de procedencia.</td><td><code>team</code></td></tr>
+      <tr><td><b>Formato</b></td><td>Estructura competitiva: liga de ida, liga de ida y vuelta, grupos más eliminatoria, o eliminatoria directa.</td><td><code>format</code></td></tr>
+      <tr><td><b>Fase</b></td><td>Tramo del torneo con reglas homogéneas: fase de grupos, octavos, cuartos, semifinal, final.</td><td><code>stage</code></td></tr>
+      <tr><td><b>Jornada</b></td><td>Conjunto de partidos programados para disputarse en paralelo dentro de una fase de liga.</td><td><code>round</code></td></tr>
+      <tr><td><b>Partido</b></td><td>Enfrentamiento entre dos participantes con marcador, estado y metadatos de registro.</td><td><code>match</code></td></tr>
+      <tr><td><b>Calendario</b></td><td>Conjunto ordenado de partidos generado al iniciar el torneo a partir del formato y de los participantes.</td><td><code>fixture</code></td></tr>
+      <tr><td><b>Clasificación</b></td><td>Tabla derivada de los partidos finalizados: puntos, partidos jugados, diferencia de goles y criterios de desempate.</td><td><code>standings</code></td></tr>
+      <tr><td><b>Cuadro</b></td><td>Representación en árbol de la fase eliminatoria, con emparejamientos y progresión de ganadores.</td><td><code>bracket</code></td></tr>
+      <tr><td><b>Palmarés</b></td><td>Histórico agregado por persona a lo largo de todos los torneos: títulos, finales, goles, racha.</td><td><code>palmares</code></td></tr>
+      <tr><td><b>Código de invitación</b></td><td>Cadena corta que permite incorporarse a un torneo en estado borrador sin invitación nominal.</td><td><code>inviteCode</code></td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.1</b> — Vocabulario controlado del dominio. La columna derecha fija el identificador canónico en código y en el modelo de datos; la interfaz castellana y el código inglés mantienen una correspondencia uno a uno.</caption>
+  </table>
+
+  <h3 id="s1-3-1">1.3.1 Ciclo de vida del torneo</h3>
+  <p>El torneo es una máquina de estados explícita. Las transiciones no son reversibles salvo donde
+  se indica, y cada una habilita o inhabilita operaciones de la interfaz. Esta máquina es la fuente
+  de verdad para decidir qué controles se muestran, cuáles se deshabilitan y qué reglas de
+  autorización aplican en servidor (§22.6).</p>
+
+  <figure id="f1-1">
+    <svg viewBox="0 0 700 150" width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="fl" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#3C464D"/></marker></defs>
+      <g font-family="DejaVu Sans" font-size="11" text-anchor="middle">
+        <rect x="6" y="46" width="112" height="40" rx="5" fill="#E8F3EE" stroke="#0B6E4F" stroke-width="1.2"/>
+        <text x="62" y="64" fill="#074733" font-weight="bold">borrador</text>
+        <text x="62" y="78" fill="#3C464D" font-size="8.5">inscripción abierta</text>
+
+        <rect x="178" y="46" width="112" height="40" rx="5" fill="#E9F0F8" stroke="#1B4E8C" stroke-width="1.2"/>
+        <text x="234" y="64" fill="#1B4E8C" font-weight="bold">activo</text>
+        <text x="234" y="78" fill="#3C464D" font-size="8.5">calendario generado</text>
+
+        <rect x="350" y="46" width="112" height="40" rx="5" fill="#E9F0F8" stroke="#1B4E8C" stroke-width="1.2"/>
+        <text x="406" y="64" fill="#1B4E8C" font-weight="bold">eliminatoria</text>
+        <text x="406" y="78" fill="#3C464D" font-size="8.5">cuadro vigente</text>
+
+        <rect x="522" y="46" width="112" height="40" rx="5" fill="#F4F7F8" stroke="#6B7780" stroke-width="1.2"/>
+        <text x="578" y="64" fill="#15191C" font-weight="bold">cerrado</text>
+        <text x="578" y="78" fill="#3C464D" font-size="8.5">palmarés consolidado</text>
+
+        <line x1="120" y1="66" x2="172" y2="66" stroke="#3C464D" stroke-width="1.2" marker-end="url(#fl)"/>
+        <line x1="292" y1="66" x2="344" y2="66" stroke="#3C464D" stroke-width="1.2" marker-end="url(#fl)"/>
+        <line x1="464" y1="66" x2="516" y2="66" stroke="#3C464D" stroke-width="1.2" marker-end="url(#fl)"/>
+        <text x="146" y="40" font-size="8" fill="#3C464D">iniciar</text>
+        <text x="318" y="40" font-size="8" fill="#3C464D">clasificar</text>
+        <text x="490" y="40" font-size="8" fill="#3C464D">final</text>
+        <path d="M 234 92 C 234 128, 406 128, 406 92" fill="none" stroke="#9B1C1C" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#fl)"/>
+        <text x="320" y="140" font-size="8" fill="#9B1C1C">liga directa sin fase eliminatoria (formato «liga»)</text>
+        <text x="62" y="30" font-size="8" fill="#0B6E4F" text-anchor="middle">escritura por participantes</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 1.1</b> — Ciclo de vida del torneo. Sólo en estado <i>borrador</i> una persona no organizadora puede escribir, y únicamente para incorporarse a sí misma; a partir de <i>activo</i> toda escritura competitiva queda reservada a la organización (§22.5).</figcaption>
+  </figure>
+
+  <h2 id="s1-4">1.4 Contexto de uso</h2>
+  <p>ISO 9241-11 define la usabilidad como el grado en que un sistema puede ser usado por usuarios
+  específicos para alcanzar objetivos específicos con eficacia, eficiencia y satisfacción
+  <i>en un contexto de uso específico</i>. La última cláusula es la que con más frecuencia se omite
+  y la que más decisiones condiciona. La tabla 1.2 describe el contexto real de esta aplicación.</p>
+
+  <table id="t1-2">
+    <thead><tr><th style="width:16%">Dimensión</th><th style="width:42%">Caracterización</th><th style="width:42%">Consecuencia de diseño</th></tr></thead>
+    <tbody>
+      <tr><td><b>Usuarios</b></td><td>Grupos de 4 a 24 personas con vínculo social previo; alfabetización digital media-alta; sin formación en el producto; rotación baja.</td><td>No hay presupuesto de aprendizaje: la interfaz debe ser autoevidente en la primera sesión (§4.3). No se diseñan tutoriales obligatorios.</td></tr>
+      <tr><td><b>Tareas</b></td><td>Consultar el calendario y la clasificación; registrar un resultado; inscribirse; crear y configurar un torneo; revisar el palmarés.</td><td>Las dos primeras concentran la mayoría de las sesiones y determinan la ruta de entrada y el presupuesto de rendimiento (§24.3).</td></tr>
+      <tr><td><b>Equipamiento</b></td><td>Predominio de teléfono (pantallas de 360–430&nbsp;px CSS de ancho), uso secundario en portátil; navegadores actuales con soporte de módulos ES.</td><td>Diseño con prioridad móvil real, no adaptación posterior; dos paneles sólo a partir de 1024&nbsp;px (§11.5).</td></tr>
+      <tr><td><b>Entorno físico</b></td><td>Salón doméstico con iluminación variable, a menudo baja; pantalla a 40–60&nbsp;cm; uso con una sola mano; posible ruido y atención dividida.</td><td>Modo oscuro de primera clase (§6.6); contraste por encima del mínimo legal; objetivos táctiles amplios (§8.6); nada que dependa sólo del color.</td></tr>
+      <tr><td><b>Entorno de red</b></td><td>Wifi doméstica o red móvil; latencias de 50–300&nbsp;ms; episodios de pérdida de conectividad durante la partida.</td><td>Caché declarada con revalidación, actualización optimista y reconciliación explícita de conflictos (§15.5, §15.6).</td></tr>
+      <tr><td><b>Entorno social</b></td><td>El resultado de un partido tiene consecuencias reputacionales dentro del grupo; existe incentivo para disputar o alterar marcadores.</td><td>Trazabilidad de quién registró cada resultado y cuándo; autorización en servidor; historial de cambios (§16.5, §22.7).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.2</b> — Contexto de uso según el esquema de ISO 9241-11 y su traducción directa a decisiones de diseño verificables.</caption>
+  </table>
+
+  <h2 id="s1-5">1.5 Perfiles y matriz de permisos</h2>
+  <p>El producto reconoce cuatro perfiles. Los permisos se definen aquí en términos de producto y se
+  implementan como control de acceso basado en roles con alcance de torneo en §22.6.</p>
+
+  <table class="compacta" id="t1-3">
+    <thead><tr><th style="width:24%">Operación</th><th style="width:17%">Visitante</th><th style="width:21%">Participante</th><th style="width:20%">Organizador</th><th style="width:18%">Administración</th></tr></thead>
+    <tbody>
+      <tr><td>Ver torneo público</td><td>No</td><td>Sí</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Incorporarse con código</td><td>No (requiere sesión)</td><td>Sí, sólo a sí misma, sólo en borrador</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Crear torneo</td><td>No</td><td>Sí (pasa a organizar el suyo)</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Generar calendario</td><td>No</td><td>No</td><td>Sí, en su torneo</td><td>Sí</td></tr>
+      <tr><td>Registrar resultado</td><td>No</td><td>Propuesta sujeta a validación</td><td>Sí, en su torneo</td><td>Sí</td></tr>
+      <tr><td>Editar resultado consolidado</td><td>No</td><td>No</td><td>Sí, con registro de auditoría</td><td>Sí</td></tr>
+      <tr><td>Cerrar torneo y consolidar palmarés</td><td>No</td><td>No</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Gestionar roles de un torneo</td><td>No</td><td>No</td><td>Sí, delegar organización</td><td>Sí</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.3</b> — Matriz de permisos por perfil. La columna «Administración» corresponde a operación de plataforma y debe ser excepcional, auditada y nunca la vía ordinaria de trabajo.</caption>
+  </table>
+
+  <div class="riesgo">
+    <span class="et">Hallazgo H1 — deuda de seguridad heredada</span>
+    <p>La implementación vigente concede la totalidad de la columna «Organizador» y «Administración»
+    a una dirección de correo literal escrita en las reglas de la base de datos. Esto impide delegar,
+    rompe si la persona cambia de cuenta, no deja rastro de auditoría y convierte una identidad
+    personal en un privilegio estructural. El capítulo 22 especifica su sustitución por roles con
+    alcance de torneo verificados en servidor; es el único cambio que este documento clasifica como
+    bloqueante antes de cualquier ampliación funcional.</p>
+  </div>
+
+  <h2 id="s1-6">1.6 Restricciones</h2>
+  <dl>
+    <dt>R1 · Plataforma</dt>
+    <dd>Aplicación de página única en React 19 con TypeScript, empaquetada con Vite y desplegada
+    como contenido estático en una red de distribución perimetral con reescritura a
+    <code>index.html</code>. No existe servidor de aplicación propio; toda lógica privilegiada debe
+    residir en el motor de reglas de la base de datos o en funciones gestionadas.</dd>
+    <dt>R2 · Datos</dt>
+    <dd>Cloud Firestore como almacén documental con suscripciones en tiempo real y reglas de
+    seguridad declarativas. Las consultas no admiten uniones; la desnormalización es la norma y
+    exige una estrategia explícita de consistencia (§16.4).</dd>
+    <dt>R3 · Identidad</dt>
+    <dd>Autenticación federada mediante proveedor externo con identificador de token en el cliente.
+    No se almacenan contraseñas propias. El token se gestiona en memoria por la biblioteca cliente
+    y se renueva de forma transparente (§22.2).</dd>
+    <dt>R4 · Equipo y ritmo</dt>
+    <dd>Equipo reducido y dedicación parcial. La especificación debe ser implementable por
+    incrementos independientes y priorizar soluciones de plataforma sobre dependencias nuevas.</dd>
+    <dt>R5 · Coste</dt>
+    <dd>Operación dentro de los niveles gratuitos o de bajo coste de la plataforma: el número de
+    lecturas de documento por sesión es una restricción de diseño, no sólo de rendimiento
+    (§15.4).</dd>
+    <dt>R6 · Legal</dt>
+    <dd>Tratamiento de datos personales mínimo (nombre visible, imagen de perfil, correo de la
+    identidad federada). Aplican los principios de minimización y limitación de finalidad; la
+    interfaz debe permitir ejercer supresión y portabilidad (§23.5).</dd>
+  </dl>
+
+  <h2 id="s1-7">1.7 Atributos de calidad y escenarios medibles</h2>
+  <p>ISO/IEC 25010 describe la calidad del producto software en características y subcaracterísticas.
+  Un documento de diseño que se limite a declarar «la aplicación será usable, segura y rápida» no
+  decide nada. La tabla 1.4 convierte cada atributo priorizado en un escenario de calidad con
+  estímulo, respuesta y medida, que es lo que después se verifica en el apéndice D y en §26.</p>
+
+  <table id="t1-4">
+    <thead><tr><th style="width:18%">Atributo (25010)</th><th style="width:45%">Escenario</th><th style="width:37%">Medida de aceptación</th></tr></thead>
+    <tbody>
+      <tr><td><b>Usabilidad</b><br><small>Aprendibilidad</small></td><td>Una persona que nunca ha usado el producto recibe un enlace de invitación y debe inscribirse en un torneo.</td><td>≥ 90&nbsp;% completa la tarea sin ayuda externa en ≤ 90&nbsp;s (prueba moderada con 8 participantes, §3.7).</td></tr>
+      <tr><td><b>Usabilidad</b><br><small>Operabilidad</small></td><td>Una organizadora registra el marcador de un partido desde el teléfono, de pie, con una mano.</td><td>≤ 4 toques desde la pantalla de torneo; todos los objetivos ≥ 44 × 44&nbsp;px; sin desplazamiento horizontal.</td></tr>
+      <tr><td><b>Accesibilidad</b></td><td>Una persona usuaria de lector de pantalla navega del listado de partidos al detalle y vuelve.</td><td>Cero incidencias de nivel A/AA en auditoría manual (apéndice B); anuncio de cambio de ruta en ≤ 1&nbsp;s.</td></tr>
+      <tr><td><b>Eficiencia</b><br><small>Comportamiento temporal</small></td><td>Visita en frío a la vista de clasificación desde red móvil de referencia.</td><td>LCP ≤ 2,5&nbsp;s e INP ≤ 200&nbsp;ms en percentil 75 de campo; transferencia de ruta ≤ 180&nbsp;KB comprimidos.</td></tr>
+      <tr><td><b>Fiabilidad</b><br><small>Tolerancia a fallos</small></td><td>Se pierde la conectividad mientras se envía un resultado.</td><td>La interfaz conserva el dato, informa del estado y reintenta; ninguna escritura se pierde en silencio (§15.6).</td></tr>
+      <tr><td><b>Seguridad</b><br><small>Integridad</small></td><td>Un participante manipula la petición de red para alterar la clasificación.</td><td>La escritura es rechazada por reglas de servidor; el intento queda registrado (§22.8). Cobertura ASVS nivel 2 en los controles aplicables.</td></tr>
+      <tr><td><b>Mantenibilidad</b><br><small>Modularidad</small></td><td>Se añade un formato de competición nuevo.</td><td>Ningún cambio en componentes de presentación genéricos; superficie tocada ≤ 3 módulos de dominio (§12.8).</td></tr>
+      <tr><td><b>Compatibilidad</b></td><td>Uso en las dos últimas versiones mayores de los navegadores de hoja perenne y en modo de contraste forzado.</td><td>Paridad funcional; degradación controlada documentada por característica (§14.9).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.4</b> — Escenarios de calidad derivados de ISO/IEC 25010. Cada medida de aceptación es rastreable hasta una prueba concreta en el apéndice F.</caption>
+  </table>
+
+  <h2 id="s1-8">1.8 Supuestos y riesgos de diseño</h2>
+  <p>Se asume que el grupo de personas usuarias de un torneo se conoce previamente, lo que permite
+  un modelo de confianza intermedio: no hay anonimato, pero tampoco verificación de identidad
+  fuerte. Se asume también que el volumen de datos por torneo es pequeño —decenas de partidos, no
+  miles—, lo que autoriza a resolver en cliente ordenaciones y agregaciones que en otro producto
+  exigirían servidor. Ambos supuestos se revisan si el producto se abre a grupos desconocidos entre
+  sí, escenario en el que varias decisiones de este documento (notablemente §15.7 y §22.5) dejarían
+  de ser suficientes.</p>
+  <table class="compacta" id="t1-5">
+    <thead><tr><th style="width:7%">ID</th><th style="width:38%">Riesgo</th><th style="width:9%">Prob.</th><th style="width:9%">Impacto</th><th style="width:37%">Mitigación especificada</th></tr></thead>
+    <tbody>
+      <tr><td>RG-1</td><td>Divergencia entre la clasificación mostrada y los partidos registrados</td><td>Media</td><td>Alto</td><td>Derivación en servidor y recálculo idempotente; §15.7, §16.6</td></tr>
+      <tr><td>RG-2</td><td>Manipulación de resultados por participantes</td><td>Media</td><td>Alto</td><td>Autorización por rol en servidor, auditoría y validación cruzada; §22.6</td></tr>
+      <tr><td>RG-3</td><td>Degradación de rendimiento al crecer el histórico de palmarés</td><td>Alta</td><td>Medio</td><td>Agregados materializados y paginación por cursor; §15.4, §24.7</td></tr>
+      <tr><td>RG-4</td><td>Deriva visual entre componentes por falta de tokens</td><td>Alta</td><td>Medio</td><td>Tokens como única fuente de valores y verificación en integración continua; §6.8, §27.3</td></tr>
+      <tr><td>RG-5</td><td>Regresión de accesibilidad al añadir funcionalidad</td><td>Alta</td><td>Alto</td><td>Pruebas automatizadas de accesibilidad por componente y por ruta; §26.5</td></tr>
+      <tr><td>RG-6</td><td>Compromiso de una dependencia del ecosistema de paquetes</td><td>Media</td><td>Crítico</td><td>Instalación desde fichero de bloqueo, revisión de scripts de ciclo de vida y verificación de procedencia; §23.2</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.5</b> — Registro de riesgos de diseño con la sección que especifica su mitigación.</caption>
+  </table>
+
+  <h2 id="s1-9">1.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-GEN-01.</b> La interfaz DEBE usar exclusivamente el vocabulario de la tabla 1.1; ningún texto visible introducirá sinónimos no registrados.</li>
+    <li><b>RQ-GEN-02.</b> Toda operación de escritura competitiva DEBE validarse en servidor conforme a la matriz de la tabla 1.3, con independencia de lo que la interfaz muestre o esconda.</li>
+    <li><b>RQ-GEN-03.</b> El diseño DEBE partir del ancho de 360&nbsp;px y añadir capacidades al crecer el espacio, nunca al revés.</li>
+    <li><b>RQ-GEN-04.</b> Cada escenario de la tabla 1.4 DEBE tener al menos una prueba automatizada o un procedimiento manual documentado que lo verifique.</li>
+    <li><b>RQ-GEN-05.</b> Las decisiones que se aparten de este documento DEBEN registrarse como decisión de arquitectura en el apéndice H, con alternativas consideradas y consecuencias.</li>
+  </ul>
+</section>
+
+<section class="capitulo" id="cap2">
+  <h1 id="h1-2"><span class="cnum">Capítulo 2</span><span class="ctit">Marco normativo y de referencia</span></h1>
+
+  <p class="entradilla">Diseñar «según buenas prácticas» no significa nada si no se nombra la fuente,
+  su versión y su carácter —obligatorio, recomendado u orientativo—. Este capítulo enumera el corpus
+  normativo que gobierna el producto, distingue lo exigible de lo aconsejable, fija la versión
+  concreta que aplica y asigna a cada norma un método de verificación. El resto del documento se
+  limita a aplicar lo aquí declarado.</p>
+
+  <h2 id="s2-1">2.1 Tipología de las fuentes</h2>
+  <p>No todas las referencias tienen la misma fuerza. Este documento distingue cuatro categorías,
+  que determinan qué ocurre cuando una recomendación se incumple:</p>
+  <dl>
+    <dt>Normativa legal o contractual</dt>
+    <dd>Obligatoria por ley aplicable o por contrato. Su incumplimiento es un defecto bloqueante y
+    puede acarrear consecuencias jurídicas. Ejemplo: los requisitos de accesibilidad exigibles a
+    servicios digitales en el ámbito europeo.</dd>
+    <dt>Estándar técnico de organismo reconocido</dt>
+    <dd>Especificaciones del W3C, ISO, IETF o ETSI. No siempre son obligatorias por sí mismas, pero
+    la legislación suele remitirse a ellas y la industria las trata como mínimo profesional.</dd>
+    <dt>Guía de plataforma o de proyecto de referencia</dt>
+    <dd>Documentación oficial de fabricantes de sistemas operativos, navegadores o bibliotecas, y
+    guías de organizaciones de referencia en seguridad. Tienen autoridad práctica alta.</dd>
+    <dt>Evidencia empírica</dt>
+    <dd>Investigación publicada y estudios de campo sobre percepción, legibilidad, comportamiento y
+    rendimiento. Informan decisiones donde no hay norma, y se citan con su limitación.</dd>
+  </dl>
+
+  <h2 id="s2-2">2.2 Usabilidad y diseño centrado en las personas</h2>
+  <table id="t2-1">
+    <thead><tr><th style="width:22%">Referencia</th><th style="width:45%">Contenido aplicable</th><th style="width:33%">Uso en este documento</th></tr></thead>
+    <tbody>
+      <tr><td><b>ISO 9241-210</b><br><small>Diseño centrado en las personas para sistemas interactivos</small></td><td>Define las actividades del proceso: comprender el contexto de uso, especificar requisitos, producir soluciones y evaluar frente a requisitos, con iteración obligatoria y participación de usuarios reales.</td><td>Estructura del proceso de diseño del capítulo 3 y de los ciclos de validación de §3.7.</td></tr>
+      <tr><td><b>ISO 9241-11</b><br><small>Usabilidad: definiciones y conceptos</small></td><td>Usabilidad como eficacia, eficiencia y satisfacción en un contexto de uso específico; obliga a declarar usuarios, objetivos y entorno.</td><td>Caracterización del contexto de uso (§1.4) y métricas de usabilidad (§3.8).</td></tr>
+      <tr><td><b>ISO 9241-110</b><br><small>Principios de diálogo</small></td><td>Siete principios: adecuación a la tarea, autodescripción, conformidad con las expectativas, aprendibilidad, controlabilidad, robustez frente a errores y adaptabilidad.</td><td>Base de los principios del capítulo 4 y criterio de arbitraje en revisiones de diseño.</td></tr>
+      <tr><td><b>ISO 9241-112</b><br><small>Presentación de la información</small></td><td>Principios de detectabilidad, discriminabilidad, concisión, consistencia y legibilidad de la información presentada.</td><td>Reglas de densidad, agrupación y jerarquía visual (§8, §10).</td></tr>
+      <tr><td><b>ISO 9241-125 / -143</b></td><td>Presentación visual de información y diálogos de formulario.</td><td>Especificación de formularios y validación (§13.3).</td></tr>
+      <tr><td><b>ISO/IEC 25010</b><br><small>Modelo de calidad del producto</small></td><td>Características de calidad: adecuación funcional, eficiencia, compatibilidad, usabilidad, fiabilidad, seguridad, mantenibilidad y portabilidad.</td><td>Escenarios de calidad medibles (tabla 1.4) y criterios de aceptación.</td></tr>
+      <tr><td><b>EN 17161</b><br><small>Diseño para todos</small></td><td>Enfoque de accesibilidad mediante diseño universal aplicado a productos, bienes y servicios.</td><td>Justificación del tratamiento de la accesibilidad como requisito de producto y no como adaptación (§18.1).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 2.1</b> — Normas de usabilidad y proceso aplicables, y la sección de este documento que las operacionaliza.</caption>
+  </table>
+
+  <h2 id="s2-3">2.3 Accesibilidad</h2>
+  <p>El núcleo normativo de accesibilidad es WCAG 2.2, publicada como recomendación del W3C el 5 de
+  octubre de 2023 y revisada posteriormente sin cambios de requisitos. Añade nueve criterios de
+  conformidad sobre WCAG 2.1 y retira el criterio 4.1.1 «Procesamiento», cuya verificación quedó
+  obsoleta con los analizadores sintácticos modernos. La tabla 2.2 enumera esos nueve criterios
+  porque, al ser los más recientes, son también los que con mayor frecuencia se incumplen en
+  productos construidos sobre patrones heredados.</p>
+
+  <table id="t2-2">
+    <thead><tr><th style="width:9%">Criterio</th><th style="width:28%">Denominación</th><th style="width:8%">Nivel</th><th style="width:55%">Exigencia esencial y dónde impacta en este producto</th></tr></thead>
+    <tbody>
+      <tr><td>2.4.11</td><td>Foco no oscurecido (mínimo)</td><td>AA</td><td>El elemento con foco no puede quedar completamente tapado por contenido superpuesto. Afecta a barras fijas, hojas inferiores y banners (§10.4, §18.6).</td></tr>
+      <tr><td>2.4.12</td><td>Foco no oscurecido (mejorado)</td><td>AAA</td><td>Ninguna parte del elemento con foco queda tapada. Se adopta como objetivo de calidad, no como requisito.</td></tr>
+      <tr><td>2.4.13</td><td>Apariencia del foco</td><td>AAA</td><td>Indicador de foco con área y contraste mínimos. Se adopta como requisito interno por su impacto real (§6.5).</td></tr>
+      <tr><td>2.5.7</td><td>Movimientos de arrastre</td><td>AA</td><td>Toda acción que requiera arrastre debe tener alternativa con un solo puntero. Afecta al reordenamiento de participantes y al cuadro eliminatorio (§13.7).</td></tr>
+      <tr><td>2.5.8</td><td>Tamaño del objetivo (mínimo)</td><td>AA</td><td>Objetivos de al menos 24 × 24&nbsp;px CSS, salvo excepciones tasadas. Este documento eleva el mínimo a 44 × 44&nbsp;px por el contexto de uso (§8.6).</td></tr>
+      <tr><td>3.2.6</td><td>Ayuda consistente</td><td>A</td><td>Los mecanismos de ayuda aparecen en el mismo orden relativo en todas las páginas. Afecta a la ubicación del acceso a soporte (§9.5).</td></tr>
+      <tr><td>3.3.7</td><td>Entrada redundante</td><td>A</td><td>No se puede exigir reintroducir información ya aportada en el mismo proceso. Afecta al alta de torneo en varios pasos (§13.4).</td></tr>
+      <tr><td>3.3.8</td><td>Autenticación accesible (mínimo)</td><td>AA</td><td>No exigir pruebas cognitivas (recordar, transcribir, resolver acertijos) sin alternativa. Justifica la autenticación federada y el pegado de credenciales (§22.3).</td></tr>
+      <tr><td>3.3.9</td><td>Autenticación accesible (mejorado)</td><td>AAA</td><td>Elimina también el reconocimiento de objetos. Se cumple de facto con el mecanismo elegido.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 2.2</b> — Los nueve criterios de conformidad incorporados en WCAG 2.2 y su traducción a decisiones concretas de este producto.</caption>
+  </table>
+
+  <h3 id="s2-3-1">2.3.1 Marco legal y estado de WCAG 3.0</h3>
+  <p>En el ámbito europeo, la norma armonizada de referencia es EN 301 549, cuya versión V4.1.1
+  —adoptada en agosto de 2026— alinea sus requisitos web con WCAG 2.2 niveles A y AA, sustituyendo
+  la referencia previa a WCAG 2.1. La Directiva de accesibilidad web obliga desde hace años al
+  sector público, y el Acta Europea de Accesibilidad extendió obligaciones a determinados servicios
+  privados a partir del 28 de junio de 2025. Aunque este producto sea de ámbito recreativo y privado,
+  el documento adopta el mismo listón: la conformidad AA es el requisito interno, no una
+  aspiración.</p>
+  <div class="nota">
+    <span class="et">Sobre WCAG 3.0</span>
+    <p>WCAG 3.0 continúa en estado de borrador de trabajo, con recomendación final no esperada antes
+    del final de la década, y su modelo de contraste visual permanece sin decidir: el algoritmo APCA
+    es una línea de trabajo exploratoria, no normativa. En consecuencia, <b>todas</b> las decisiones
+    de contraste de este documento se verifican con la relación de contraste de WCAG 2.x, y APCA se
+    utiliza únicamente como señal complementaria de diseño cuando dos opciones empatan en el criterio
+    normativo (§5.8).</p>
+  </div>
+
+  <h3 id="s2-3-2">2.3.2 Especificaciones técnicas de accesibilidad</h3>
+  <ul>
+    <li><b>WAI-ARIA 1.2</b> — Define roles, estados y propiedades. Regla rectora: no usar ARIA cuando
+    exista un elemento nativo con la semántica necesaria; ARIA mal aplicado es peor que ausente.</li>
+    <li><b>ARIA Authoring Practices Guide (APG)</b> — Patrones de teclado y semántica para diálogos,
+    pestañas, menús, tablas de datos y combos. Es la fuente de los contratos de interacción del
+    apéndice E.</li>
+    <li><b>Accessible Name and Description Computation</b> — Algoritmo de cálculo del nombre
+    accesible. Determina por qué el orden de precedencia entre <code>aria-labelledby</code>,
+    <code>aria-label</code> y contenido es relevante (§18.4).</li>
+    <li><b>HTML Living Standard</b> — Semántica nativa, requisitos de etiquetado de controles y
+    criterios de contenido alternativo.</li>
+  </ul>
+
+  <h2 id="s2-4">2.4 Seguridad</h2>
+  <p>El marco de seguridad aplicable combina una lista de riesgos priorizada, un catálogo de
+  requisitos verificables y las especificaciones de los mecanismos del navegador.</p>
+  <table id="t2-3">
+    <thead><tr><th style="width:24%">Referencia</th><th style="width:40%">Contenido</th><th style="width:36%">Aplicación en el producto</th></tr></thead>
+    <tbody>
+      <tr><td><b>OWASP Top 10:2025</b></td><td>Diez categorías de riesgo ordenadas por prevalencia e impacto, publicadas en noviembre de 2025. Incorpora dos categorías nuevas: fallos en la cadena de suministro de software y gestión inadecuada de condiciones excepcionales.</td><td>Estructura del modelo de amenazas (§20.4) y lista de verificación del apéndice C.</td></tr>
+      <tr><td><b>OWASP ASVS 5.0</b></td><td>Estándar de verificación con unos 350 requisitos organizados en 17 capítulos, con identificadores versionados para trazabilidad.</td><td>Nivel 2 como objetivo de verificación para los controles aplicables a una aplicación sin servidor propio (§20.6).</td></tr>
+      <tr><td><b>RFC 9700 (BCP 240)</b></td><td>Mejores prácticas actuales de seguridad de OAuth 2.0: PKCE obligatorio, defensa frente a confusión de servidores de autorización, prohibición de flujos implícitos.</td><td>Diseño del flujo de identidad y custodia de credenciales (§22.2).</td></tr>
+      <tr><td><b>CSP Nivel 3</b></td><td>Política de seguridad de contenido con <i>nonce</i>, <code>strict-dynamic</code> y restricción de destinos.</td><td>Política de despliegue y mitigación de ejecución de scripts inyectados (§21.3).</td></tr>
+      <tr><td><b>Trusted Types</b></td><td>Prevención de puntos de inyección en el DOM mediante políticas de creación de valores peligrosos.</td><td>Control de <code>innerHTML</code> y bibliotecas de terceros (§21.4).</td></tr>
+      <tr><td><b>Fetch Metadata y CORS</b></td><td>Cabeceras de contexto de petición y política de origen cruzado.</td><td>Validación de origen en funciones gestionadas y aislamiento del documento (§21.6).</td></tr>
+      <tr><td><b>SLSA y procedencia de paquetes</b></td><td>Marco de integridad de la cadena de construcción y atestación de procedencia.</td><td>Política de dependencias e instalación reproducible (§23.2).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 2.3</b> — Marco de seguridad aplicable. Los identificadores ASVS se citan siempre con su versión para evitar ambigüedad entre ediciones.</caption>
+  </table>
+
+  <h2 id="s2-5">2.5 Rendimiento</h2>
+  <p>El marco de rendimiento es el conjunto de métricas Core Web Vitals, con umbrales evaluados en el
+  percentil 75 de las visitas reales. Un sitio se considera «bueno» en una métrica cuando al menos el
+  75&nbsp;% de las visitas alcanza el umbral correspondiente.</p>
+  <table id="t2-4">
+    <thead><tr><th style="width:26%">Métrica</th><th style="width:16%">Bueno</th><th style="width:20%">Deficiente</th><th style="width:38%">Qué mide realmente</th></tr></thead>
+    <tbody>
+      <tr><td><b>LCP</b> — Mayor despliegue de contenido</td><td>≤ 2,5&nbsp;s</td><td>&gt; 4,0&nbsp;s</td><td>Velocidad de carga percibida: cuándo aparece el elemento de contenido principal.</td></tr>
+      <tr><td><b>INP</b> — Interacción hasta el siguiente pintado</td><td>≤ 200&nbsp;ms</td><td>&gt; 500&nbsp;ms</td><td>Capacidad de respuesta a lo largo de toda la sesión, no sólo en la primera interacción.</td></tr>
+      <tr><td><b>CLS</b> — Desplazamiento acumulado de diseño</td><td>≤ 0,1</td><td>&gt; 0,25</td><td>Estabilidad visual: cuánto se mueve el contenido sin que la persona lo provoque.</td></tr>
+      <tr><td><b>TTFB</b> — Tiempo hasta el primer byte</td><td>≤ 0,8&nbsp;s</td><td>&gt; 1,8&nbsp;s</td><td>Diagnóstico de la fase de red y servidor que antecede a LCP.</td></tr>
+      <tr><td><b>FCP</b> — Primer despliegue de contenido</td><td>≤ 1,8&nbsp;s</td><td>&gt; 3,0&nbsp;s</td><td>Cuándo deja de verse una pantalla en blanco.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 2.4</b> — Métricas de rendimiento y umbrales de referencia. INP sustituyó a FID como métrica de capacidad de respuesta en marzo de 2024.</caption>
+  </table>
+  <p>Complementariamente, la puntuación sintética de la herramienta de auditoría más extendida pondera
+  tiempo total de bloqueo (30&nbsp;%), LCP (25&nbsp;%), CLS (25&nbsp;%), primer despliegue (10&nbsp;%)
+  e índice de velocidad (10&nbsp;%). Este documento la usa como señal de laboratorio y
+  <b>no</b> como objetivo: los objetivos se fijan sobre datos de campo (§25.2).</p>
+
+  <h2 id="s2-6">2.6 Plataforma web y sistema de diseño</h2>
+  <ul>
+    <li><b>HTML Living Standard</b> y <b>DOM Standard</b> — semántica, formularios y eventos.</li>
+    <li><b>CSS Color Module Level 4</b> — espacios de color modernos (<code>oklch()</code>,
+    <code>lab()</code>), gama extendida y función <code>color-mix()</code>. Fundamento del sistema de
+    color del capítulo 6.</li>
+    <li><b>CSS Cascade Layers, Container Queries, <code>:has()</code>, Subgrid</b> — mecanismos de
+    composición empleados en la retícula y en los componentes adaptativos (§8.3, §10.6).</li>
+    <li><b>Design Tokens Format Module</b>, versión estable 2025.10 — formato de intercambio de
+    tokens entre herramientas de diseño y código. Es el formato canónico del apéndice A.</li>
+    <li><b>Guías de plataforma</b> — las guías de interfaz de los principales sistemas operativos y
+    el sistema de diseño de referencia para Android aportan convenciones de disposición adaptativa,
+    entre ellas la formulación canónica de la disposición lista&ndash;detalle que el capítulo 11
+    adapta a la web.</li>
+  </ul>
+
+  <h2 id="s2-7">2.7 Jerarquía de resolución de conflictos</h2>
+  <p>Cuando dos fuentes se contradicen —y ocurre—, se resuelve en este orden:</p>
+  <ol>
+    <li>Obligación legal aplicable.</li>
+    <li>Criterio de conformidad WCAG 2.2 de nivel A o AA.</li>
+    <li>Requisito de seguridad clasificado como crítico o alto en el modelo de amenazas.</li>
+    <li>Estándar técnico del W3C o de la IETF.</li>
+    <li>Guía oficial de plataforma.</li>
+    <li>Evidencia empírica publicada.</li>
+    <li>Convención interna del sistema de diseño.</li>
+  </ol>
+  <p>Un ejemplo real de este arbitraje: la guía de una plataforma móvil recomienda ocultar
+  completamente la barra de navegación al desplazarse para maximizar el contenido; el criterio 2.4.11
+  exige que el elemento con foco no quede oculto tras contenido superpuesto. Prevalece el criterio
+  WCAG: la barra se oculta, pero reaparece íntegra cuando el foco entra en ella por teclado
+  (§10.4).</p>
+
+  <h2 id="s2-8">2.8 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-NOR-01.</b> El producto DEBE cumplir WCAG 2.2 nivel A y AA en su totalidad; cualquier excepción se documenta con justificación técnica y plan de corrección fechado.</li>
+    <li><b>RQ-NOR-02.</b> Las verificaciones de contraste DEBEN realizarse con el algoritmo de relación de contraste de WCAG 2.x mientras WCAG 3.0 no alcance estado de recomendación.</li>
+    <li><b>RQ-NOR-03.</b> Los controles de seguridad DEBEN trazarse a requisitos ASVS 5.0 citados con versión completa, y cubrir las diez categorías del OWASP Top 10:2025 en el modelo de amenazas.</li>
+    <li><b>RQ-NOR-04.</b> Los objetivos de rendimiento DEBEN fijarse sobre datos de campo en percentil 75, no sobre puntuaciones sintéticas de laboratorio.</li>
+    <li><b>RQ-NOR-05.</b> Los tokens de diseño DEBEN serializarse en el formato estable del módulo de tokens de diseño para permitir intercambio entre herramienta y código.</li>
+  </ul>
+</section>
+
+<section class="capitulo" id="cap3">
+  <h1 id="h1-3"><span class="cnum">Capítulo 3</span><span class="ctit">Proceso de diseño centrado en las personas</span></h1>
+
+  <p class="entradilla">El diseño descrito en este documento no es el resultado de una preferencia,
+  sino de un proceso repetible. Este capítulo describe ese proceso conforme a ISO 9241-210: cómo se
+  investiga el contexto, cómo se representa a quienes usan el producto, cómo se formulan los
+  recorridos críticos, cómo se evalúan las soluciones con personas reales y qué métricas deciden si
+  una iteración ha mejorado o empeorado la experiencia.</p>
+
+  <h2 id="s3-1">3.1 Modelo de proceso</h2>
+  <p>ISO 9241-210 establece cuatro actividades encadenadas e iterativas, y exige que la iteración no
+  sea opcional: un diseño se considera terminado cuando satisface los requisitos verificados con
+  usuarios, no cuando se agota el calendario. Las actividades se instancian así en este producto:</p>
+
+  <figure id="f3-1">
+    <svg viewBox="0 0 700 220" width="100%" height="210" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="fa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#0B6E4F"/></marker></defs>
+      <g font-family="DejaVu Sans" font-size="10" text-anchor="middle">
+        <circle cx="350" cy="110" r="96" fill="none" stroke="#C9D1D6" stroke-width="1" stroke-dasharray="4 4"/>
+        <rect x="258" y="6" width="184" height="42" rx="5" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="350" y="24" font-weight="bold" fill="#074733">1 · Comprender el contexto</text>
+        <text x="350" y="39" font-size="8.5" fill="#3C464D">entrevistas · analítica · inventario</text>
+
+        <rect x="468" y="88" width="184" height="42" rx="5" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="560" y="106" font-weight="bold" fill="#1B4E8C">2 · Especificar requisitos</text>
+        <text x="560" y="121" font-size="8.5" fill="#3C464D">escenarios · criterios medibles</text>
+
+        <rect x="258" y="170" width="184" height="42" rx="5" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="350" y="188" font-weight="bold" fill="#074733">3 · Producir soluciones</text>
+        <text x="350" y="203" font-size="8.5" fill="#3C464D">bocetos · prototipo · implementación</text>
+
+        <rect x="48" y="88" width="184" height="42" rx="5" fill="#FBF2E2" stroke="#8A5300"/>
+        <text x="140" y="106" font-weight="bold" fill="#8A5300">4 · Evaluar frente a requisitos</text>
+        <text x="140" y="121" font-size="8.5" fill="#3C464D">prueba moderada · auditoría · campo</text>
+
+        <path d="M 452 40 A 96 96 0 0 1 520 84" fill="none" stroke="#0B6E4F" stroke-width="1.4" marker-end="url(#fa)"/>
+        <path d="M 520 136 A 96 96 0 0 1 452 178" fill="none" stroke="#0B6E4F" stroke-width="1.4" marker-end="url(#fa)"/>
+        <path d="M 248 178 A 96 96 0 0 1 180 136" fill="none" stroke="#0B6E4F" stroke-width="1.4" marker-end="url(#fa)"/>
+        <path d="M 180 84 A 96 96 0 0 1 248 42" fill="none" stroke="#0B6E4F" stroke-width="1.4" marker-end="url(#fa)"/>
+        <text x="350" y="104" font-size="9" fill="#6B7780">iteración obligatoria</text>
+        <text x="350" y="118" font-size="8" fill="#6B7780">hasta satisfacer los criterios</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 3.1</b> — Ciclo de diseño centrado en las personas conforme a ISO 9241-210. La evaluación no cierra el ciclo: lo realimenta.</figcaption>
+  </figure>
+
+  <h2 id="s3-2">3.2 Investigación: métodos y alcance</h2>
+  <p>La investigación es proporcionada al riesgo de equivocarse. Para un producto de este tamaño, un
+  programa ligero y continuo supera a un estudio extenso y único. El programa consta de cinco
+  instrumentos:</p>
+  <table id="t3-1">
+    <thead><tr><th style="width:22%">Instrumento</th><th style="width:16%">Frecuencia</th><th style="width:30%">Pregunta que responde</th><th style="width:32%">Limitación conocida</th></tr></thead>
+    <tbody>
+      <tr><td>Entrevista semiestructurada (6–8 personas)</td><td>Al inicio y ante cambio mayor</td><td>Qué hace realmente el grupo antes y después de cada partida; dónde está la fricción.</td><td>Sesgo de deseabilidad; las personas describen procesos idealizados.</td></tr>
+      <tr><td>Observación contextual de una jornada real</td><td>Dos veces al año</td><td>Cómo se registra un resultado en el momento, con el teléfono en la mano.</td><td>Efecto de observación; muestra pequeña.</td></tr>
+      <tr><td>Analítica de producto anonimizada</td><td>Continua</td><td>Qué rutas se usan, dónde se abandona, con qué frecuencia y en qué dispositivo.</td><td>Explica el qué, nunca el porqué.</td></tr>
+      <tr><td>Prueba de usabilidad moderada (5–8 personas)</td><td>Cada incremento relevante</td><td>Si una tarea concreta se completa sin ayuda y a qué coste.</td><td>No mide adopción a largo plazo ni aprendizaje acumulado.</td></tr>
+      <tr><td>Encuesta breve en producto</td><td>Trimestral</td><td>Percepción de facilidad y satisfacción; evolución frente al trimestre anterior.</td><td>Autoselección de quien responde.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 3.1</b> — Programa de investigación. Cada instrumento se declara con su limitación para evitar conclusiones que la muestra no sostiene.</caption>
+  </table>
+  <div class="nota">
+    <span class="et">Sobre el tamaño de muestra</span>
+    <p>La regla difundida de que «cinco personas bastan» procede de modelos de detección de problemas
+    con probabilidad de descubrimiento alta y homogénea. No se aplica cuando existen perfiles con
+    tareas distintas: aquí hay al menos dos (participante y organización), de modo que la prueba se
+    ejecuta con cinco personas <i>por perfil</i>. Para medir —no descubrir— se requieren muestras
+    mucho mayores; por eso las métricas cuantitativas de §3.8 proceden de analítica y de encuesta, no
+    de las sesiones moderadas.</p>
+  </div>
+
+  <h2 id="s3-3">3.3 Arquetipos de usuario</h2>
+  <p>Los arquetipos no son retratos narrativos: son conjuntos de necesidades, capacidades y
+  restricciones que permiten decidir. Se definen tres, más un conjunto de requisitos de capacidad que
+  atraviesa a todos ellos.</p>
+  <table id="t3-2">
+    <thead><tr><th style="width:18%">Arquetipo</th><th style="width:28%">Objetivo principal</th><th style="width:27%">Contexto y restricciones</th><th style="width:27%">Implicación de diseño dominante</th></tr></thead>
+    <tbody>
+      <tr><td><b>A1 · Quien organiza</b></td><td>Montar el torneo rápido, mantenerlo vivo y resolver incidencias sin perder credibilidad ante el grupo.</td><td>Carga operativa alta y concentrada; a menudo configura desde portátil y gestiona desde teléfono.</td><td>Flujos de configuración con valores por defecto sensatos y edición reversible; operaciones masivas; registro de auditoría visible.</td></tr>
+      <tr><td><b>A2 · Quien participa</b></td><td>Saber cuándo juega, contra quién y cómo va la clasificación; registrar su resultado.</td><td>Sesiones de menos de un minuto, en movilidad, con atención dividida.</td><td>Ruta de entrada directa al estado actual; densidad informativa alta pero jerarquizada; cero pasos innecesarios.</td></tr>
+      <tr><td><b>A3 · Quien observa</b></td><td>Seguir el torneo y el histórico sin participar: antiguos participantes, acompañantes.</td><td>Acceso esporádico, frecuentemente desde un enlace compartido.</td><td>Vistas de sólo lectura compartibles por URL estable y comprensibles sin contexto previo (§9.6).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 3.2</b> — Arquetipos de usuario y su implicación dominante de diseño.</caption>
+  </table>
+  <p>A estos arquetipos se superpone un <b>perfil de capacidad</b> que no es opcional: cualquiera de
+  los tres puede usar lector de pantalla, navegar exclusivamente por teclado, tener baja visión,
+  presentar deficiencia de visión del color, usar magnificación al 200&nbsp;% o interactuar con
+  temblor que reduzca la precisión del puntero. El capítulo 18 convierte ese perfil en requisitos
+  concretos; aquí basta con registrar que no se trata de un cuarto arquetipo minoritario, sino de una
+  dimensión transversal a los tres.</p>
+
+  <h2 id="s3-4">3.4 Trabajos por realizar y escenarios</h2>
+  <p>Cada recorrido crítico se formula como una declaración de trabajo por realizar —qué intenta
+  lograr la persona y en qué circunstancia— porque esa formulación resiste mejor los cambios de
+  interfaz que una lista de funcionalidades.</p>
+  <ol>
+    <li><b>JTR-1.</b> «Cuando el grupo acuerda jugar un torneo, quiero crearlo y repartir equipos sin
+    discusión, para empezar a jugar en menos de cinco minutos.»</li>
+    <li><b>JTR-2.</b> «Cuando termina una partida, quiero registrar el marcador en segundos, para que
+    la clasificación esté al día antes de la siguiente.»</li>
+    <li><b>JTR-3.</b> «Cuando llego tarde a la reunión, quiero saber de un vistazo qué se ha jugado y
+    cómo voy, para incorporarme sin preguntar.»</li>
+    <li><b>JTR-4.</b> «Cuando el torneo acaba, quiero que quede constancia de quién ganó, para poder
+    recordarlo —y recordárselo— meses después.»</li>
+    <li><b>JTR-5.</b> «Cuando alguien impugna un resultado, quiero ver quién lo introdujo y cuándo,
+    para resolverlo sin conflicto.»</li>
+  </ol>
+
+  <h2 id="s3-5">3.5 Mapa de recorrido y puntos de dolor</h2>
+  <table id="t3-3">
+    <thead><tr><th style="width:16%">Fase</th><th style="width:26%">Acción de la persona</th><th style="width:30%">Punto de dolor observado</th><th style="width:28%">Respuesta de diseño</th></tr></thead>
+    <tbody>
+      <tr><td>Descubrimiento</td><td>Recibe un enlace por mensajería y lo abre.</td><td>Aterriza en una pantalla de sesión sin contexto de a qué ha sido invitada.</td><td>La ruta de invitación muestra nombre del torneo y de quien organiza antes de pedir identificación (§9.4).</td></tr>
+      <tr><td>Incorporación</td><td>Inicia sesión y se inscribe.</td><td>Duda sobre si ha quedado inscrita; no hay confirmación persistente.</td><td>Confirmación con estado persistente en la vista de torneo y notificación efímera accesible (§13.8).</td></tr>
+      <tr><td>Preparación</td><td>Recibe o elige equipo.</td><td>El sorteo aleatorio se percibe como manipulable.</td><td>Sorteo con semilla registrada y resultado verificable; animación como refuerzo, nunca como fuente de verdad (§13.9).</td></tr>
+      <tr><td>Competición</td><td>Consulta el calendario, juega, registra.</td><td>Encontrar el propio partido en una lista larga exige desplazamiento y lectura.</td><td>Vista centrada en «mi próximo partido» y filtro persistente por participante (§11.6).</td></tr>
+      <tr><td>Resolución</td><td>Consulta la clasificación.</td><td>Los criterios de desempate no son evidentes y generan discusión.</td><td>Clasificación con explicación del desempate accesible en la propia fila (§13.6).</td></tr>
+      <tr><td>Memoria</td><td>Vuelve meses después.</td><td>El histórico es difícil de alcanzar y no cuenta una historia.</td><td>Palmarés como superficie de primer nivel con narrativa por persona (§9.3).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 3.3</b> — Mapa de recorrido con los puntos de dolor detectados en investigación y la respuesta de diseño especificada.</caption>
+  </table>
+
+  <h2 id="s3-6">3.6 Prototipado y fidelidad</h2>
+  <p>La fidelidad del prototipo se elige por la pregunta que debe responder, no por la fase del
+  proyecto. Boceto en papel o esquema de baja fidelidad para decidir estructura y prioridad; prototipo
+  interactivo de media fidelidad para validar flujo y nomenclatura; implementación real en rama
+  separada cuando la pregunta implica rendimiento, accesibilidad con tecnología de asistencia o
+  comportamiento con datos reales —tres cosas que ningún prototipo de herramienta de diseño
+  reproduce con fidelidad suficiente—. Esta última regla es la que justifica que el sistema de
+  componentes (§12) se construya como código verificable desde el principio.</p>
+
+  <h2 id="s3-7">3.7 Protocolo de evaluación</h2>
+  <p>Cada incremento relevante se evalúa con tres instrumentos complementarios:</p>
+  <dl>
+    <dt>Evaluación heurística</dt>
+    <dd>Dos personas evaluadoras recorren la interfaz contra las diez heurísticas de usabilidad
+    (§4.2) y los principios de diálogo de ISO 9241-110. Produce una lista de problemas con severidad
+    de 0 a 4. Es barata y detecta mucho, pero no sustituye a la observación: tiende a sobredetectar
+    problemas de consistencia e infradetectar problemas de comprensión del dominio.</dd>
+    <dt>Prueba de usabilidad moderada</dt>
+    <dd>Cinco personas por arquetipo ejecutan tareas reales con pensamiento en voz alta. Se mide
+    éxito, tiempo, número de errores y una pregunta de facilidad posterior a cada tarea. Se graba
+    únicamente la pantalla y la voz, con consentimiento informado y retención limitada (§3.9).</dd>
+    <dt>Auditoría de accesibilidad</dt>
+    <dd>Recorrido completo por teclado, verificación con al menos dos combinaciones de lector de
+    pantalla y navegador, inspección del árbol de accesibilidad y comprobación automatizada. El
+    procedimiento detallado está en §19.2.</dd>
+  </dl>
+  <div class="aviso">
+    <span class="et">Umbral de bloqueo</span>
+    <p>Un problema de severidad 4 (impide completar una tarea crítica) o cualquier incumplimiento de
+    nivel A o AA detectado en la auditoría <b>bloquea</b> la publicación del incremento. Los de
+    severidad 3 se corrigen antes del siguiente incremento. Esta regla es la que da fuerza real al
+    proceso: sin umbral de bloqueo, la evaluación es decorativa.</p>
+  </div>
+
+  <h2 id="s3-8">3.8 Métricas de experiencia</h2>
+  <table id="t3-4">
+    <thead><tr><th style="width:22%">Métrica</th><th style="width:26%">Definición operativa</th><th style="width:18%">Objetivo</th><th style="width:34%">Fuente y cadencia</th></tr></thead>
+    <tbody>
+      <tr><td>Tasa de éxito de tarea</td><td>Porcentaje de intentos que terminan en el estado objetivo sin ayuda.</td><td>≥ 90&nbsp;% en JTR-2 y JTR-3</td><td>Prueba moderada, por incremento.</td></tr>
+      <tr><td>Tiempo hasta primer valor</td><td>Segundos desde la apertura del enlace hasta ver el estado del torneo.</td><td>≤ 8&nbsp;s en red móvil de referencia</td><td>Analítica de campo, continua.</td></tr>
+      <tr><td>Esfuerzo percibido</td><td>Pregunta de ítem único tras la tarea, escala de 1 a 7.</td><td>Media ≥ 6</td><td>Prueba moderada y encuesta.</td></tr>
+      <tr><td>Satisfacción general</td><td>Cuestionario breve estandarizado de usabilidad percibida.</td><td>≥ 80 sobre 100</td><td>Encuesta trimestral.</td></tr>
+      <tr><td>Abandono en incorporación</td><td>Sesiones que abren la invitación y no completan la inscripción.</td><td>≤ 15&nbsp;%</td><td>Analítica de campo, continua.</td></tr>
+      <tr><td>Incidencias de accesibilidad</td><td>Número de incumplimientos A/AA abiertos.</td><td>0</td><td>Auditoría por incremento y automatización continua.</td></tr>
+      <tr><td>Reincidencia de soporte</td><td>Preguntas repetidas del grupo sobre el mismo punto de la interfaz.</td><td>Tendencia decreciente</td><td>Registro cualitativo mensual.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 3.4</b> — Cuadro de métricas de experiencia. Ninguna métrica se interpreta aislada: el aumento de velocidad con caída de éxito es una regresión, no una mejora.</caption>
+  </table>
+
+  <h2 id="s3-9">3.9 Ética, consentimiento y datos de investigación</h2>
+  <p>Toda sesión de investigación requiere consentimiento informado explícito, revocable y previo a
+  la grabación. Se graba la pantalla y la voz, nunca la imagen del rostro salvo petición expresa de
+  utilidad justificada. Los materiales se seudonimizan antes del análisis, se conservan un máximo de
+  doce meses y se almacenan cifrados con acceso restringido al equipo de producto. En los informes no
+  se citan datos que permitan reidentificar a una persona dentro de un grupo pequeño —precaución
+  especialmente relevante aquí, donde los grupos son reducidos y sus integrantes se conocen—.
+  Ninguna prueba se realiza con cuentas o datos de terceros sin su consentimiento, y la analítica de
+  producto se limita a eventos agregados sin perfilado individual (§23.5).</p>
+
+  <h2 id="s3-10">3.10 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-PRO-01.</b> Todo incremento que modifique un recorrido crítico DEBE evaluarse con al menos cinco personas por arquetipo afectado antes de su publicación.</li>
+    <li><b>RQ-PRO-02.</b> Los problemas de severidad 4 y los incumplimientos WCAG de nivel A o AA DEBEN bloquear la publicación.</li>
+    <li><b>RQ-PRO-03.</b> Cada decisión de diseño relevante DEBE poder trazarse a un trabajo por realizar, un punto de dolor documentado o un requisito normativo.</li>
+    <li><b>RQ-PRO-04.</b> La investigación con personas DEBE contar con consentimiento informado, seudonimización y retención máxima de doce meses.</li>
+    <li><b>RQ-PRO-05.</b> Las métricas de experiencia DEBEN revisarse conjuntamente; ninguna optimización puede justificarse con una métrica aislada.</li>
+  </ul>
+</section>
+
+<section class="capitulo" id="cap4">
+  <h1 id="h1-4"><span class="cnum">Capítulo 4</span><span class="ctit">Principios de diseño y leyes de la interacción</span></h1>
+
+  <p class="entradilla">Entre la norma y el píxel hay un espacio enorme que ninguna especificación
+  puede cubrir caso por caso. Lo cubren los principios: reglas de decisión que permiten resolver
+  situaciones no previstas sin consultar a nadie. Este capítulo fija los principios del producto, los
+  contrasta con las heurísticas de usabilidad consolidadas, formula las regularidades empíricas de la
+  interacción que tienen consecuencia métrica y explica cómo se aplican a las pantallas concretas de
+  FIFA Friends.</p>
+
+  <h2 id="s4-1">4.1 Principios del producto</h2>
+  <p>Seis principios, ordenados por prioridad. El orden importa: cuando dos chocan, gana el de número
+  menor.</p>
+  <dl>
+    <dt>P1 · El estado actual, primero</dt>
+    <dd>Cada pantalla responde antes que nada a «¿qué pasa ahora y qué me toca?». El contenido que
+    responde a esa pregunta ocupa la posición superior y la mayor jerarquía visual; la configuración,
+    el histórico y la administración son secundarios aunque sean funcionalmente más ricos.</dd>
+    <dt>P2 · Una verdad, muchas vistas</dt>
+    <dd>La clasificación, el calendario y el cuadro son proyecciones de los mismos partidos. Nunca se
+    permite que dos superficies muestren cifras contradictorias: si hay contradicción, es un defecto
+    de datos, no una diferencia de interpretación (§16.6).</dd>
+    <dt>P3 · Decir lo que se puede hacer y por qué no</dt>
+    <dd>Un control que no está disponible explica su condición en el mismo lugar donde se intenta
+    usar. Esconder controles sin explicación produce la sensación de interfaz rota; mostrarlos
+    deshabilitados sin explicación, la de interfaz arbitraria.</dd>
+    <dt>P4 · Reversibilidad antes que confirmación</dt>
+    <dd>Siempre que sea técnicamente posible, se prefiere ejecutar la acción y ofrecer deshacer, en
+    lugar de interrumpir con un diálogo de confirmación. La confirmación se reserva para acciones
+    destructivas, irreversibles o con efecto sobre terceros (§13.10).</dd>
+    <dt>P5 · Densidad con jerarquía</dt>
+    <dd>Este producto trata con tablas, no con tarjetas decorativas. Se acepta densidad informativa
+    alta siempre que exista jerarquía tipográfica y de color suficiente para que la lectura por
+    barrido funcione; se rechaza el minimalismo que obliga a navegar para obtener un dato que cabía
+    en pantalla.</dd>
+    <dt>P6 · Nada depende de una sola señal</dt>
+    <dd>Ningún estado se comunica sólo por color, sólo por posición, sólo por animación o sólo por
+    sonido. Toda señal relevante tiene al menos dos codificaciones concurrentes (§5.9, §18.5).</dd>
+  </dl>
+
+  <h2 id="s4-2">4.2 Heurísticas de usabilidad aplicadas</h2>
+  <p>Las diez heurísticas de usabilidad de Nielsen siguen siendo el instrumento de inspección más
+  rentable que existe. Su valor no está en enunciarlas, sino en declarar qué significa cada una
+  <i>en este producto</i> y cómo se comprueba.</p>
+  <table id="t4-1">
+    <thead><tr><th style="width:24%">Heurística</th><th style="width:40%">Aplicación concreta</th><th style="width:36%">Comprobación</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Visibilidad del estado del sistema</td><td>Estado del torneo visible en todas sus vistas; indicadores de carga, de guardado y de sincronización diferenciados entre sí.</td><td>Toda operación &gt; 400&nbsp;ms muestra retroalimentación; toda escritura confirma o informa de fallo.</td></tr>
+      <tr><td>2 · Correspondencia con el mundo real</td><td>Vocabulario de la tabla 1.1: «jornada», «cuadro», «palmarés», no «registro», «entidad» o «documento».</td><td>Ningún texto de interfaz contiene términos técnicos del modelo de datos.</td></tr>
+      <tr><td>3 · Control y libertad</td><td>Deshacer en registro de resultados; salida clara de todo diálogo; navegación hacia atrás que respeta la selección previa.</td><td>El botón atrás del navegador nunca pierde contexto en maestro&ndash;detalle (§11.7).</td></tr>
+      <tr><td>4 · Consistencia y estándares</td><td>Un único componente por intención; posición invariable de las acciones primarias; convenciones de plataforma respetadas.</td><td>Inventario sin duplicados funcionales; revisión de componentes nuevos contra el catálogo (§27.2).</td></tr>
+      <tr><td>5 · Prevención de errores</td><td>Marcadores con entrada numérica acotada; imposibilidad de registrar un partido inexistente; validación de formato antes del envío.</td><td>Formularios que restringen en origen en vez de rechazar al final (§13.3).</td></tr>
+      <tr><td>6 · Reconocer antes que recordar</td><td>Equipos con escudo y nombre; participantes con avatar; criterios de desempate visibles junto a la tabla.</td><td>Ninguna tarea exige recordar un dato de otra pantalla.</td></tr>
+      <tr><td>7 · Flexibilidad y eficiencia</td><td>Atajos de teclado para organización; enlaces profundos a cualquier estado; filtros persistentes.</td><td>Tareas repetitivas con camino corto documentado en §13.11.</td></tr>
+      <tr><td>8 · Estética y diseño minimalista</td><td>Cada elemento compite por atención: se elimina lo que no responde a una pregunta del usuario.</td><td>Relación señal/ruido revisada en cada pantalla (§4.6).</td></tr>
+      <tr><td>9 · Reconocer, diagnosticar y recuperarse de errores</td><td>Mensajes en lenguaje llano, con causa y acción siguiente; nunca códigos sin traducción.</td><td>Catálogo de mensajes de error revisado (§13.12).</td></tr>
+      <tr><td>10 · Ayuda y documentación</td><td>Ayuda contextual en el punto de uso; acceso al soporte en posición consistente (criterio WCAG 3.2.6).</td><td>El mecanismo de ayuda ocupa el mismo lugar relativo en todas las vistas.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 4.1</b> — Heurísticas de usabilidad, su aplicación específica en FIFA Friends y la comprobación que las hace verificables.</caption>
+  </table>
+
+  <h2 id="s4-3">4.3 Regularidades empíricas con consecuencia métrica</h2>
+  <p>Las llamadas «leyes» de la experiencia de usuario son modelos con grados de validez muy
+  distintos. Se recogen aquí sólo las que tienen consecuencia directa y comprobable sobre decisiones
+  de este documento, con su formulación y su límite.</p>
+  <table id="t4-2">
+    <thead><tr><th style="width:20%">Regularidad</th><th style="width:38%">Formulación y validez</th><th style="width:42%">Consecuencia adoptada</th></tr></thead>
+    <tbody>
+      <tr><td><b>Ley de Fitts</b></td><td>El tiempo de adquisición de un objetivo crece con el logaritmo de la distancia dividida por el tamaño: <i>MT = a + b·log₂(2D/W)</i>. Validada ampliamente en apuntado con ratón y adaptada al toque.</td><td>Objetivos táctiles ≥ 44&nbsp;px y separación ≥ 8&nbsp;px; acciones frecuentes en la zona alcanzable del pulgar; áreas de activación extendidas más allá del icono visible (§8.6).</td></tr>
+      <tr><td><b>Ley de Hick-Hyman</b></td><td>El tiempo de decisión crece con el logaritmo del número de alternativas equiprobables. Se debilita cuando las opciones están agrupadas o son familiares.</td><td>Menús de un nivel con ≤ 7 destinos; formatos de torneo presentados como 4 opciones con descripción, no como lista extensa de parámetros (§13.2).</td></tr>
+      <tr><td><b>Límites de la memoria de trabajo</b></td><td>La capacidad es limitada y depende del agrupamiento; la cifra «7±2» se cita con frecuencia fuera de su contexto original y no es un límite de diseño de menús.</td><td>No se usa como regla numérica. Se aplica su consecuencia sólida: agrupar información relacionada y evitar que una tarea exija retener datos entre pantallas (§13.4).</td></tr>
+      <tr><td><b>Umbrales de respuesta</b></td><td>0,1&nbsp;s se percibe como instantáneo; 1&nbsp;s mantiene el flujo de pensamiento; 10&nbsp;s es el límite de atención. El umbral de Doherty sitúa en ~400&nbsp;ms el punto donde la interacción deja de frenar al usuario.</td><td>Retroalimentación inmediata &lt; 100&nbsp;ms; indicador de progreso a partir de 400&nbsp;ms; operaciones &gt; 1&nbsp;s con estado explícito y posibilidad de continuar (§24.2).</td></tr>
+      <tr><td><b>Ley de Jakob</b></td><td>Las personas pasan la mayor parte del tiempo en otros productos, de modo que esperan que el tuyo funcione igual que los demás.</td><td>Convenciones no negociables: logotipo que lleva al inicio, navegación inferior en móvil, formulario con acción primaria a la derecha o en bloque final.</td></tr>
+      <tr><td><b>Efecto de posición serial</b></td><td>Se recuerda mejor el primer y el último elemento de una serie.</td><td>El dato decisivo de cada fila se sitúa al principio o al final, nunca en el centro visual (§13.6).</td></tr>
+      <tr><td><b>Efecto de aislamiento</b></td><td>Un elemento visualmente distinto en un conjunto homogéneo capta la atención.</td><td>Un único énfasis cromático por vista; si todo destaca, nada destaca (§6.4).</td></tr>
+      <tr><td><b>Ley de Tesler</b></td><td>Todo sistema tiene una complejidad irreducible: la cuestión es quién la asume.</td><td>La complejidad del formato competitivo la asume el sistema (generación automática de calendario), no la persona que organiza (§16.3).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 4.2</b> — Regularidades empíricas, su validez declarada y la consecuencia de diseño adoptada en este documento.</caption>
+  </table>
+
+  <h2 id="s4-4">4.4 Principios de agrupación perceptiva</h2>
+  <p>La organización visual precede a la lectura: antes de leer, el sistema visual agrupa. Los
+  principios de agrupación de la psicología de la forma describen esa operación y permiten sustituir
+  líneas y cajas por relaciones espaciales, reduciendo el ruido sin perder estructura.</p>
+
+  <figure id="f4-1">
+    <svg viewBox="0 0 700 150" width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="8.5" fill="#3C464D">
+        <text x="8" y="12" font-weight="bold" fill="#15191C">Proximidad</text>
+        <rect x="8" y="20" width="22" height="22" rx="3" fill="#0B6E4F"/><rect x="34" y="20" width="22" height="22" rx="3" fill="#0B6E4F"/>
+        <rect x="86" y="20" width="22" height="22" rx="3" fill="#0B6E4F"/><rect x="112" y="20" width="22" height="22" rx="3" fill="#0B6E4F"/>
+        <text x="8" y="60" font-size="7.5">dos grupos sin dibujar un solo borde</text>
+
+        <text x="188" y="12" font-weight="bold" fill="#15191C">Similitud</text>
+        <circle cx="198" cy="31" r="10" fill="#0B6E4F"/><circle cx="224" cy="31" r="10" fill="#C9D1D6"/><circle cx="250" cy="31" r="10" fill="#0B6E4F"/><circle cx="276" cy="31" r="10" fill="#C9D1D6"/>
+        <text x="188" y="60" font-size="7.5">la forma y el color crean categorías</text>
+
+        <text x="358" y="12" font-weight="bold" fill="#15191C">Región común</text>
+        <rect x="358" y="18" width="110" height="28" rx="4" fill="#E8F3EE" stroke="#0B6E4F" stroke-width=".8"/>
+        <circle cx="378" cy="32" r="7" fill="#0B6E4F"/><circle cx="400" cy="32" r="7" fill="#0B6E4F"/><circle cx="446" cy="32" r="7" fill="#6B7780"/>
+        <text x="358" y="60" font-size="7.5">la tarjeta domina sobre la proximidad</text>
+
+        <text x="520" y="12" font-weight="bold" fill="#15191C">Continuidad</text>
+        <path d="M 524 38 C 554 18, 584 48, 614 28 S 664 18, 684 34" fill="none" stroke="#1B4E8C" stroke-width="1.6"/>
+        <text x="520" y="60" font-size="7.5">la alineación guía la lectura</text>
+
+        <rect x="8" y="78" width="330" height="62" rx="4" fill="#F4F7F8" stroke="#E4E9EC"/>
+        <text x="18" y="94" font-size="8" font-weight="bold" fill="#15191C">Aplicación: fila de clasificación</text>
+        <text x="18" y="108" font-size="7.5">Posición y escudo juntos (proximidad) · puntos aislados a la derecha</text>
+        <text x="18" y="120" font-size="7.5">(aislamiento) · filas separadas por espacio, no por línea (señal/ruido) ·</text>
+        <text x="18" y="132" font-size="7.5">alineación decimal de las cifras (continuidad)</text>
+
+        <rect x="352" y="78" width="340" height="62" rx="4" fill="#F4F7F8" stroke="#E4E9EC"/>
+        <text x="362" y="94" font-size="8" font-weight="bold" fill="#15191C">Antipatrón frecuente</text>
+        <text x="362" y="108" font-size="7.5">Separar con líneas lo que ya separa el espacio, encerrar en tarjeta lo</text>
+        <text x="362" y="120" font-size="7.5">que ya agrupa la proximidad y colorear lo que ya distingue la forma:</text>
+        <text x="362" y="132" font-size="7.5">tres codificaciones redundantes elevan el ruido sin añadir información.</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 4.1</b> — Principios de agrupación perceptiva y su aplicación a la fila de clasificación, la unidad de información más repetida del producto.</figcaption>
+  </figure>
+
+  <h2 id="s4-5">4.5 Carga cognitiva</h2>
+  <p>La teoría de la carga cognitiva distingue la carga <i>intrínseca</i> —la dificultad propia de la
+  tarea—, la <i>extrínseca</i> —la que añade la presentación— y la <i>pertinente</i> —la que se
+  invierte en construir comprensión—. El diseño sólo puede actuar sobre la segunda, y ése es
+  exactamente su trabajo: comprender un cuadro de eliminatorias es intrínsecamente complejo;
+  descifrar qué columna es «GF» y cuál «GC» es carga extrínseca pura y, por tanto, un defecto.</p>
+  <p>Reglas operativas derivadas: encabezados de tabla con texto completo o con abreviatura
+  acompañada de su desarrollo accesible; unidades y signos explícitos (+3, −2); ninguna convención
+  que exija aprendizaje previo sin ofrecer su clave en pantalla; y división de tareas largas en pasos
+  con estado persistente, de modo que nada deba sostenerse en la memoria de la persona.</p>
+
+  <h2 id="s4-6">4.6 Relación señal/ruido y jerarquía visual</h2>
+  <p>Cada vista se somete a tres preguntas en revisión de diseño: ¿qué pregunta responde?; ¿qué
+  elemento la responde?; ¿qué elementos compiten con ese? Lo que no responde a la pregunta principal
+  o no habilita la acción siguiente se degrada en jerarquía o se elimina. La jerarquía se construye
+  con cuatro recursos, en este orden de preferencia: <b>posición</b> (lo primero en el flujo de
+  lectura), <b>tamaño</b> (escala tipográfica), <b>peso</b> y, sólo al final, <b>color</b>. El color
+  es el recurso más limitado porque es el único que deja de funcionar para una parte de la población
+  (§5.9) y el que antes se satura: una interfaz con cinco acentos no tiene ninguno.</p>
+
+  <h2 id="s4-7">4.7 Significantes, restricciones y retroalimentación</h2>
+  <p>Un control debe <i>parecer</i> lo que es. En interfaces planas, el significante no puede ser el
+  relieve: se construye con forma, contraste, posición y etiqueta. Este documento adopta tres reglas
+  derivadas:</p>
+  <ul>
+    <li>Todo elemento interactivo tiene al menos dos significantes: forma reconocible (botón,
+    enlace subrayado, campo con borde) y respuesta al puntero y al foco.</li>
+    <li>Las restricciones se expresan en el control, no en el mensaje de error: si el marcador admite
+    de 0 a 99, el campo no acepta otra cosa.</li>
+    <li>Toda acción produce retroalimentación perceptible en menos de 100&nbsp;ms, aunque el
+    resultado tarde más; el cambio de estado visual precede a la confirmación del servidor
+    (§15.5).</li>
+  </ul>
+
+  <h2 id="s4-8">4.8 Cuándo romper la convención</h2>
+  <p>La convención se rompe sólo cuando se cumplen tres condiciones simultáneas: existe evidencia de
+  que la convención perjudica a esta tarea concreta; la alternativa se ha validado con personas
+  reales; y la ruptura es sistemática —se aplica en todo el producto, no en una pantalla—. Un caso
+  real en este producto: la convención sitúa la acción destructiva a la derecha junto a la primaria;
+  aquí se separa físicamente y se desplaza al final del panel de detalle, porque la observación
+  mostró pulsaciones accidentales en uso con una mano. La ruptura se documenta como decisión de
+  arquitectura (ADR-07, apéndice H).</p>
+
+  <h2 id="s4-9">4.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-PRI-01.</b> Toda vista DEBE declarar, en su ficha de diseño, la pregunta que responde y el elemento que la responde.</li>
+    <li><b>RQ-PRI-02.</b> Ningún estado DEBE comunicarse mediante una única codificación sensorial.</li>
+    <li><b>RQ-PRI-03.</b> Los objetivos interactivos DEBEN cumplir el tamaño y separación mínimos del §8.6 con independencia de su importancia aparente.</li>
+    <li><b>RQ-PRI-04.</b> Las acciones reversibles NO DEBERÍAN exigir confirmación; las irreversibles DEBEN exigirla con descripción explícita de la consecuencia.</li>
+    <li><b>RQ-PRI-05.</b> Toda ruptura de convención DEBE registrarse como decisión de arquitectura con la evidencia que la sostiene.</li>
+  </ul>
+</section>
+
+<section class="parte" id="parte2">
+  <p class="et">Parte II</p>
+  <h1>Sistema visual: color, tipografía y composición</h1>
+  <p class="res">De la física de la percepción a la tabla de tokens: cómo se construye un lenguaje
+  visual medible, legible, consistente en modo claro y oscuro, y robusto ante deficiencias de visión
+  del color.</p>
+  <ol>
+    <li>Teoría del color aplicada a interfaces</li>
+    <li>Sistema de color del producto</li>
+    <li>Tipografía y legibilidad</li>
+    <li>Retícula, espaciado, iconografía y movimiento</li>
+  </ol>
+</section>
+
+<section class="capitulo" id="cap5">
+  <h1 id="h1-5"><span class="cnum">Capítulo 5</span><span class="ctit">Teoría del color aplicada a interfaces</span></h1>
+
+  <p class="entradilla">El color es la variable de diseño con mayor capacidad de comunicar y con
+  mayor probabilidad de fallar: depende de la pantalla, de la luz ambiente, de la fisiología de quien
+  mira y del significado que su cultura le atribuye. Este capítulo establece los fundamentos físicos
+  y perceptivos necesarios para tomar decisiones cromáticas que sean reproducibles y verificables, y
+  explica por qué este documento construye su paleta en un espacio perceptualmente uniforme y la
+  valida con la relación de contraste normativa.</p>
+
+  <h2 id="s5-1">5.1 Luz, superficie y síntesis aditiva</h2>
+  <p>En una pantalla el color se produce por síntesis aditiva: tres emisores —rojo, verde y azul—
+  suman radiancia hasta componer un estímulo. Es una diferencia sustantiva respecto al color
+  impreso, sustractivo, y explica por qué la intuición cromática heredada de la pintura conduce a
+  errores: en pantalla, la suma de todos los primarios es blanco, no negro, y la «mezcla» de
+  complementarios produce gris claro, no barro. La rueda de color de pigmentos (rojo-amarillo-azul)
+  que todavía se enseña en diseño gráfico no describe el comportamiento de un panel emisor; las
+  armonías que de ella se derivan deben reinterpretarse en un espacio adecuado al medio (§5.5).</p>
+  <p>Dos consecuencias prácticas. Primera: dos colores con la misma especificación numérica se
+  perciben distintos en paneles distintos, por diferencias de gama, de calibración y de función de
+  transferencia; el diseño debe ser robusto a esa variación, lo que desaconseja basar significados en
+  matices próximos. Segunda: el brillo percibido no es proporcional al valor numérico del canal, por
+  la codificación no lineal de sRGB; un gris «del 50&nbsp;%» en notación hexadecimal no es la mitad de
+  luminoso que el blanco. Esta no linealidad es la raíz de la mayoría de los errores de contraste que
+  se cometen al elegir colores «a ojo».</p>
+
+  <h2 id="s5-2">5.2 El observador: cómo vemos el color</h2>
+  <p>La retina humana contiene tres tipos de conos con sensibilidades espectrales solapadas —de onda
+  larga, media y corta— y bastones responsables de la visión en penumbra. De esta arquitectura se
+  derivan hechos con consecuencias directas de diseño:</p>
+  <ul>
+    <li><b>La sensibilidad no es uniforme.</b> El ojo es mucho más sensible a la luz en la región
+    verde del espectro que en la azul. Por eso la luminancia relativa pondera los canales de forma
+    muy desigual (0,2126·R + 0,7152·G + 0,0722·B tras linealización), y por eso un azul saturado
+    sobre negro es casi ilegible mientras un verde del mismo «brillo nominal» resulta cómodo.</li>
+    <li><b>Hay muchos menos conos de onda corta.</b> La agudeza para el detalle fino en azul es
+    pobre: el texto fino en azul puro sobre fondo oscuro produce fatiga y aberración cromática
+    perceptible. No se usa azul saturado para tipografía pequeña.</li>
+    <li><b>La adaptación cromática es constante.</b> El sistema visual normaliza la iluminación; un
+    blanco frío parece neutro tras unos segundos. De ahí que el modo oscuro no deba ser una inversión
+    literal: la percepción del contraste cambia con el nivel de adaptación (§6.6).</li>
+    <li><b>El brillo percibido crece con la saturación</b> (efecto Helmholtz&ndash;Kohlrausch) y el
+    tono percibido se desplaza con la intensidad (efecto Bezold&ndash;Brücke). Dos colores con
+    idéntica luminancia medida pueden no parecer igual de luminosos. Es la razón de que las escalas
+    construidas en HSL no resulten perceptualmente regulares.</li>
+    <li><b>El contraste simultáneo</b> altera la apariencia según el entorno: un mismo gris parece más
+    claro sobre fondo oscuro. Por eso los tokens se definen por pareja fondo/primer plano y nunca
+    de forma aislada (§6.3).</li>
+  </ul>
+
+  <h2 id="s5-3">5.3 Espacios de color y su idoneidad</h2>
+  <table id="t5-1">
+    <thead><tr><th style="width:17%">Espacio</th><th style="width:40%">Qué modela</th><th style="width:43%">Idoneidad para un sistema de diseño</th></tr></thead>
+    <tbody>
+      <tr><td><b>sRGB</b> (hexadecimal)</td><td>Valores de emisión de los tres primarios con codificación no lineal, referidos a una gama estándar.</td><td>Formato de salida y de intercambio. Inadecuado para <i>razonar</i>: distancias numéricas iguales no equivalen a diferencias perceptivas iguales.</td></tr>
+      <tr><td><b>HSL / HSV</b></td><td>Reparametrización geométrica de RGB en tono, saturación y claridad nominal.</td><td>Intuitivo pero engañoso: a igual «claridad», un amarillo y un azul difieren enormemente en luminancia. Produce escalas visualmente irregulares. No se usa en este sistema.</td></tr>
+      <tr><td><b>CIE XYZ</b></td><td>Espacio de referencia derivado de la colorimetría del observador estándar.</td><td>Base de conversión; no es un espacio de trabajo cómodo para diseño.</td></tr>
+      <tr><td><b>CIELAB / LCh</b></td><td>Espacio de oposición de colores con intención de uniformidad perceptual; L* aproxima la claridad percibida.</td><td>Muy superior a HSL. Presenta no uniformidades conocidas en azules intensos (desplazamiento de tono al variar el croma).</td></tr>
+      <tr><td><b>OKLab / OKLCh</b></td><td>Reformulación moderna con mejor uniformidad, especialmente en azules y en degradados.</td><td><b>Espacio de trabajo de este sistema.</b> Permite construir escalas donde un paso de claridad equivale a un paso perceptivo similar en todas las familias cromáticas.</td></tr>
+      <tr><td><b>Display P3 / Rec. 2020</b></td><td>Gamas extendidas disponibles en pantallas modernas.</td><td>Uso opcional para acentos no portadores de información, siempre con alternativa en gama estándar mediante consulta de características del dispositivo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 5.1</b> — Espacios de color y su idoneidad. La elección de OKLCh como espacio de trabajo es la decisión cromática más consecuente del sistema: hace predecible la construcción de escalas.</caption>
+  </table>
+
+  <h3 id="s5-3-1">5.3.1 Por qué importa la uniformidad perceptual</h3>
+  <p>Una escala de color de un sistema de diseño debe cumplir una promesa muy simple: que el paso
+  «600» de cualquier familia tenga aproximadamente la misma presencia visual que el «600» de otra.
+  Sólo así es posible sustituir un color de acento por otro sin rehacer todas las verificaciones de
+  contraste. En HSL esa promesa es imposible: fijando <i>L</i>=50&nbsp;% se obtienen un amarillo
+  deslumbrante y un azul casi negro. En OKLCh, fijando la claridad y el croma, las familias conservan
+  una presencia comparable y las verificaciones se trasladan entre ellas con mínimas correcciones.</p>
+
+  <figure id="f5-1">
+    <svg viewBox="0 0 700 170" width="100%" height="168" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="7.5" fill="#3C464D">
+        <text x="4" y="10" font-size="8.5" font-weight="bold" fill="#15191C">Escala construida en OKLCh: la claridad desciende de forma regular</text>
+        <rect x="4" y="16" width="62" height="28" fill="#E0FFE7"/><rect x="66" y="16" width="62" height="28" fill="#ADEBBD"/><rect x="128" y="16" width="62" height="28" fill="#68BE81"/><rect x="190" y="16" width="62" height="28" fill="#3FA663"/><rect x="252" y="16" width="62" height="28" fill="#188D4A"/><rect x="314" y="16" width="62" height="28" fill="#087139"/><rect x="376" y="16" width="62" height="28" fill="#005628"/><rect x="438" y="16" width="62" height="28" fill="#003A19"/><rect x="500" y="16" width="62" height="28" fill="#00250D"/>
+        <text x="4" y="54">50</text><text x="66" y="54">200</text><text x="128" y="54">400</text><text x="190" y="54">500</text><text x="252" y="54">600</text><text x="314" y="54">700</text><text x="376" y="54">800</text><text x="438" y="54">900</text><text x="500" y="54">950</text>
+        <text x="572" y="34" font-size="8">L: 0,97 → 0,23</text>
+
+        <text x="4" y="76" font-size="8.5" font-weight="bold" fill="#15191C">La misma claridad en cuatro familias: presencia visual comparable</text>
+        <rect x="4" y="82" width="110" height="26" fill="#087139"/><text x="59" y="99" fill="#FFFFFF" text-anchor="middle" font-size="8">verde 700</text>
+        <rect x="118" y="82" width="110" height="26" fill="#315D9F"/><text x="173" y="99" fill="#FFFFFF" text-anchor="middle" font-size="8">índigo 700</text>
+        <rect x="232" y="82" width="110" height="26" fill="#7F5500"/><text x="287" y="99" fill="#FFFFFF" text-anchor="middle" font-size="8">ámbar 700</text>
+        <rect x="346" y="82" width="110" height="26" fill="#9E3531"/><text x="401" y="99" fill="#FFFFFF" text-anchor="middle" font-size="8">granate 700</text>
+        <text x="466" y="99" font-size="8">contraste sobre blanco: 6,1 · 6,6 · 6,6 · 7,0</text>
+
+        <text x="4" y="126" font-size="8.5" font-weight="bold" fill="#15191C">Misma «claridad» en HSL (L = 50 %): presencia visual dispar</text>
+        <rect x="4" y="132" width="110" height="26" fill="#19E686"/><text x="59" y="149" fill="#15191C" text-anchor="middle" font-size="8">verde</text>
+        <rect x="118" y="132" width="110" height="26" fill="#5719E6"/><text x="173" y="149" fill="#FFFFFF" text-anchor="middle" font-size="8">índigo</text>
+        <rect x="232" y="132" width="110" height="26" fill="#E6C419"/><text x="287" y="149" fill="#15191C" text-anchor="middle" font-size="8">amarillo</text>
+        <rect x="346" y="132" width="110" height="26" fill="#E67219"/><text x="401" y="149" fill="#15191C" text-anchor="middle" font-size="8">naranja</text>
+        <text x="466" y="149" font-size="8">contraste sobre blanco: 1,65 · 7,82 · 1,71 · 3,09</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 5.1</b> — Comparación entre una escala construida en OKLCh y colores de idéntica claridad nominal en HSL. La dispersión de contraste de la fila inferior es la razón por la que este sistema no utiliza HSL para generar escalas.</figcaption>
+  </figure>
+
+  <h2 id="s5-4">5.4 Luminancia relativa y relación de contraste</h2>
+  <p>El criterio normativo de contraste de WCAG 2.x se calcula sobre la luminancia relativa de los
+  dos colores comparados. El procedimiento es: tomar cada canal en el intervalo [0,1], linealizarlo
+  —dividir por 12,92 si es menor o igual a 0,04045, y en caso contrario aplicar
+  ((c+0,055)/1,055)<sup>2,4</sup>—, ponderar los canales linealizados por 0,2126, 0,7152 y 0,0722, y
+  componer la relación:</p>
+  <pre>relación = (L_claro + 0,05) / (L_oscuro + 0,05)</pre>
+  <p>El sumando 0,05 modela la reflexión ambiental de la pantalla; por eso la relación máxima
+  alcanzable entre negro y blanco es 21:1 y no infinito. Los umbrales exigidos son:</p>
+  <table class="compacta" id="t5-2">
+    <thead><tr><th style="width:36%">Elemento</th><th style="width:16%">Nivel AA</th><th style="width:16%">Nivel AAA</th><th style="width:32%">Criterio</th></tr></thead>
+    <tbody>
+      <tr><td>Texto normal (&lt; 24&nbsp;px, o &lt; 19&nbsp;px en negrita)</td><td>4,5:1</td><td>7:1</td><td>1.4.3 / 1.4.6</td></tr>
+      <tr><td>Texto grande (≥ 24&nbsp;px, o ≥ 19&nbsp;px en negrita)</td><td>3:1</td><td>4,5:1</td><td>1.4.3 / 1.4.6</td></tr>
+      <tr><td>Componentes de interfaz y gráficos informativos</td><td>3:1</td><td>—</td><td>1.4.11</td></tr>
+      <tr><td>Indicador de foco (área mínima y cambio de contraste)</td><td>3:1</td><td>—</td><td>1.4.11 / 2.4.13</td></tr>
+      <tr><td>Texto decorativo, logotipos, texto inactivo</td><td>exento</td><td>exento</td><td>1.4.3, excepciones</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 5.2</b> — Umbrales de contraste exigibles. Este documento añade un margen de seguridad: los valores objetivo del sistema superan el umbral en al menos 0,3 puntos para absorber variaciones de representación.</caption>
+  </table>
+
+  <h3 id="s5-4-1">5.4.1 Límites conocidos del criterio y el papel de APCA</h3>
+  <p>La relación de contraste de WCAG 2.x tiene limitaciones documentadas: no modela el tamaño ni el
+  grosor del trazo tipográfico más allá de un umbral binario, trata de forma simétrica texto claro
+  sobre fondo oscuro y texto oscuro sobre fondo claro —cuando la percepción no es simétrica— y es
+  excesivamente permisiva con ciertos pares de alta saturación. El algoritmo de contraste perceptual
+  avanzado (APCA) aborda esos problemas, pero permanece como línea de investigación dentro del
+  trabajo de WCAG 3.0 y no es normativo. La política de este documento es inequívoca: <b>la
+  conformidad se verifica con WCAG 2.x</b>; APCA se usa sólo como criterio de desempate entre dos
+  opciones que ya cumplen, típicamente para elegir el tono del texto secundario en modo oscuro.</p>
+
+  <h2 id="s5-5">5.5 Armonías cromáticas</h2>
+  <p>Las armonías —complementaria, análoga, triádica, dividida— son heurísticas de partida, no reglas.
+  En interfaz tienen un uso muy acotado porque la paleta no se elige por belleza abstracta sino por
+  capacidad de codificar estados. El sistema adopta una estructura deliberadamente austera:</p>
+  <ul>
+    <li><b>Un tono dominante</b> (verde, por el campo de juego y por su asociación con validez) que
+    identifica el producto y marca las acciones primarias.</li>
+    <li><b>Un tono de acento análogo-distante</b> (índigo) para información, enlaces y selección, lo
+    bastante separado en tono para ser inconfundible sin competir con el dominante.</li>
+    <li><b>Dos tonos semánticos</b> (ámbar y granate) reservados a atención y error, nunca
+    decorativos.</li>
+    <li><b>Una familia neutra ligeramente teñida</b> hacia el tono dominante, que cohesiona la
+    interfaz sin introducir un quinto color.</li>
+  </ul>
+  <p>La proporción de uso sigue una regla práctica de reparto aproximado 60/30/10: superficie neutra
+  dominante, contenido y estructura en neutros medios, y una fracción pequeña reservada al color
+  portador de significado. La regla no es normativa, pero su violación —interfaces donde el color de
+  marca cubre grandes superficies— destruye la capacidad de destacar lo importante.</p>
+
+  <h2 id="s5-6">5.6 Semántica y convención</h2>
+  <p>El significado del color es convencional y depende del dominio. En este producto conviven dos
+  convenciones que podrían chocar: la del software (verde = correcto, rojo = error) y la del deporte
+  (verde = victoria, rojo = derrota o tarjeta). Coinciden lo suficiente para ser compatibles, pero
+  obligan a una decisión explícita: el verde de «victoria» en una tabla de resultados <b>no</b> es el
+  mismo token que el verde de «acción primaria», aunque pertenezcan a la misma familia. Confundirlos
+  produce tablas donde el usuario cree que una fila es pulsable. La separación entre tokens de marca
+  y tokens semánticos (§6.2) existe exactamente para evitar esa ambigüedad.</p>
+  <table class="compacta" id="t5-3">
+    <thead><tr><th style="width:20%">Estado del dominio</th><th style="width:22%">Codificación cromática</th><th style="width:28%">Codificación redundante obligatoria</th><th style="width:30%">Nota</th></tr></thead>
+    <tbody>
+      <tr><td>Victoria</td><td>Verde 700 sobre verde 50</td><td>Letra «V» y posición de columna</td><td>Nunca sólo el relleno de celda.</td></tr>
+      <tr><td>Empate</td><td>Neutro 600 sobre neutro 100</td><td>Letra «E»</td><td>El neutro evita que el empate parezca un estado de error.</td></tr>
+      <tr><td>Derrota</td><td>Granate 700 sobre granate 50</td><td>Letra «D»</td><td>Se evita el rojo puro saturado por fatiga visual en listas largas.</td></tr>
+      <tr><td>Pendiente</td><td>Neutro 500, sin relleno</td><td>Guion largo y texto «por jugar»</td><td>La ausencia de color comunica ausencia de resultado.</td></tr>
+      <tr><td>En disputa</td><td>Ámbar 700 sobre ámbar 50</td><td>Icono de aviso y texto</td><td>Reservado a resultados impugnados (§13.12).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 5.3</b> — Codificación de estados del dominio. Cada estado tiene, como mínimo, color y una segunda codificación textual o posicional.</caption>
+  </table>
+
+  <h2 id="s5-7">5.7 Color, superficie y profundidad</h2>
+  <p>En interfaces planas la profundidad se construye con claridad de superficie, no con sombras
+  pronunciadas. El sistema define una jerarquía de superficies —fondo de aplicación, superficie de
+  contenido, superficie elevada, superficie flotante— donde cada nivel se separa del anterior por un
+  salto de claridad suficiente para ser perceptible sin bordes. En modo claro la elevación aclara; en
+  modo oscuro, también: oscurecer para elevar produce el efecto contrario al esperado porque la luz
+  en el entorno simulado proviene de arriba. Las sombras acompañan, pero nunca son la única señal:
+  en modo de contraste forzado desaparecen, y por eso cada superficie elevada declara además un borde
+  de contraste mínimo 3:1 frente a su fondo inmediato (§6.7).</p>
+
+  <h2 id="s5-8">5.8 Contraste en situaciones difíciles</h2>
+  <ul>
+    <li><b>Texto sobre imagen.</b> Nunca se confía en la imagen: se aplica una capa de velado con
+    opacidad calculada para garantizar el contraste en el peor píxel, o se reserva una banda sólida.
+    En este producto afecta a las cabeceras de torneo con imagen de fondo.</li>
+    <li><b>Texto sobre degradado.</b> Se verifica el contraste en ambos extremos del degradado, no en
+    el punto medio.</li>
+    <li><b>Estados deshabilitados.</b> Están exentos del criterio, pero la exención no es una licencia:
+    un control deshabilitado ilegible impide entender por qué no se puede actuar. Se fija un mínimo
+    interno de 3:1 y se acompaña siempre de explicación textual (principio P3).</li>
+    <li><b>Marcas de datos en gráficos.</b> Las series se distinguen por color <i>y</i> por forma de
+    marcador o patrón de trazo, con contraste mínimo 3:1 frente al fondo del gráfico.</li>
+  </ul>
+
+  <h2 id="s5-9">5.9 Deficiencias de visión del color</h2>
+  <p>Las deficiencias congénitas de visión del color rojo-verde afectan aproximadamente al 8&nbsp;% de
+  los hombres y a menos del 1&nbsp;% de las mujeres de ascendencia europea, con variación entre
+  poblaciones. En un grupo de doce participantes, la probabilidad de que al menos una persona tenga
+  alguna deficiencia es considerable. Puesto que el producto codifica resultados con verde y rojo
+  —precisamente el eje más afectado—, la redundancia no es una recomendación: es una condición de
+  funcionamiento.</p>
+  <table class="compacta" id="t5-4">
+    <thead><tr><th style="width:20%">Tipo</th><th style="width:30%">Alteración</th><th style="width:50%">Consecuencia en este producto</th></tr></thead>
+    <tbody>
+      <tr><td>Protanopia / protanomalía</td><td>Ausencia o alteración del cono de onda larga; los rojos se oscurecen.</td><td>El granate de «derrota» puede confundirse con neutro oscuro: se exige la letra identificativa.</td></tr>
+      <tr><td>Deuteranopia / deuteranomalía</td><td>Ausencia o alteración del cono de onda media; es la más frecuente.</td><td>Verde y rojo se aproximan: victoria y derrota serían indistinguibles sólo por color.</td></tr>
+      <tr><td>Tritanopia</td><td>Alteración del cono de onda corta; afecta al eje azul-amarillo. Poco frecuente.</td><td>El ámbar de «en disputa» puede acercarse a neutro: se exige icono.</td></tr>
+      <tr><td>Acromatopsia</td><td>Visión sin discriminación cromática.</td><td>Exige que toda la información sea recuperable sólo con diferencias de luminancia.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 5.4</b> — Tipos de deficiencia de visión del color y su efecto sobre la codificación cromática del producto.</caption>
+  </table>
+  <div class="clave">
+    <span class="et">Prueba de escala de grises</span>
+    <p>Toda pantalla DEBE superar la prueba de conversión a escala de grises: si al eliminar el color
+    se pierde información —qué fila ganó, qué campo tiene error, qué elemento está seleccionado—, el
+    diseño incumple el criterio 1.4.1 y debe corregirse antes de la revisión de código. Esta prueba se
+    automatiza en la verificación visual de regresión (§26.6).</p>
+  </div>
+
+  <h2 id="s5-10">5.10 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-COL-01.</b> Las escalas de color DEBEN generarse en OKLCh y publicarse también en sRGB para compatibilidad.</li>
+    <li><b>RQ-COL-02.</b> Todo par texto/fondo DEBE verificarse con la relación de contraste de WCAG 2.x y superar el umbral aplicable con margen ≥ 0,3.</li>
+    <li><b>RQ-COL-03.</b> Ninguna información DEBE transmitirse únicamente mediante color; la prueba de escala de grises es obligatoria.</li>
+    <li><b>RQ-COL-04.</b> Los tokens de marca y los tokens semánticos NO DEBEN compartir identificador aunque compartan valor.</li>
+    <li><b>RQ-COL-05.</b> Los colores de gama extendida PUEDEN usarse sólo como realce no informativo y con alternativa en gama estándar.</li>
+  </ul>
+</section>
+
+<section class="capitulo" id="cap6">
+  <h1 id="h1-6"><span class="cnum">Capítulo 6</span><span class="ctit">Sistema de color del producto</span></h1>
+
+  <p class="entradilla">Este capítulo convierte la teoría del capítulo anterior en valores concretos:
+  una arquitectura de tokens en tres niveles, cinco familias cromáticas generadas en OKLCh con su
+  contraste verificado, un mapa semántico para modo claro y modo oscuro, reglas de superficie y
+  elevación, y el mecanismo de implementación y verificación automática que impide la deriva.</p>
+
+  <h2 id="s6-1">6.1 Arquitectura de tokens</h2>
+  <p>Un sistema de color sostenible no expone colores: expone <i>intenciones</i>. Se definen tres
+  niveles, y sólo el intermedio puede usarse al construir pantallas.</p>
+  <table id="t6-1">
+    <thead><tr><th style="width:20%">Nivel</th><th style="width:26%">Ejemplo</th><th style="width:30%">Quién lo consume</th><th style="width:24%">Regla</th></tr></thead>
+    <tbody>
+      <tr><td><b>1 · Primitivo</b></td><td><code>cesped-700 = #087139</code></td><td>Sólo el nivel 2. Nunca una pantalla ni un componente.</td><td>Describe un color, no un significado. Cambiarlo altera todo el sistema.</td></tr>
+      <tr><td><b>2 · Semántico</b></td><td><code>color-accion-primaria = cesped-700</code></td><td>Componentes y pantallas.</td><td>Describe una intención. Es el único nivel que se escribe en el código de interfaz.</td></tr>
+      <tr><td><b>3 · De componente</b></td><td><code>boton-primario-fondo-hover</code></td><td>Un único componente.</td><td>Se crea sólo cuando un componente necesita una excepción justificada.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 6.1</b> — Niveles de token. La regla de oro: ningún archivo de componente contiene un literal hexadecimal ni un token primitivo.</caption>
+  </table>
+
+  <h2 id="s6-2">6.2 Nomenclatura</h2>
+  <p>El nombre de un token semántico se compone como
+  <code>color-&lt;rol&gt;-&lt;elemento&gt;[-&lt;estado&gt;]</code>, donde el rol es la función
+  (acción primaria, superficie, texto, borde, estado), el elemento indica qué parte se colorea
+  (fondo, texto, borde, icono) y el estado es opcional (reposo implícito, <i>hover</i>, activo,
+  foco, deshabilitado, seleccionado). Ejemplos válidos:
+  <code>color-superficie-elevada</code>, <code>color-texto-secundario</code>,
+  <code>color-estado-error-borde</code>, <code>color-accion-primaria-fondo-hover</code>. Los nombres
+  nunca contienen el color («verde», «rojo») ni valores («claro-2»): un token llamado
+  <code>color-verde-boton</code> impide cambiar la marca sin renombrar todo el sistema.</p>
+
+  <h2 id="s6-3">6.3 Paleta primitiva</h2>
+  <p>Las cinco familias se generan algorítmicamente en OKLCh con once pasos de claridad decreciente y
+  croma atenuado en los extremos para evitar que los tonos claros parezcan lavados y los oscuros,
+  embarrados. Todos los valores están dentro de la gama sRGB; cuando el croma nominal excedía la
+  gama, se redujo hasta el máximo representable conservando claridad y tono, de modo que la
+  regularidad perceptual de la escala se mantiene. Las dos últimas columnas documentan el contraste
+  verificado numéricamente y son la razón por la que cada paso tiene el uso asignado que tiene.</p>
+<h4>cesped — Primario · identidad, acción principal, estado de victoria</h4>
+<table class="compacta" id="t6-cesped">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>cesped-50</code></td><td><code>oklch(0.971 0.0460 152)</code></td><td><code>#E0FFE7</code></td><td>1,07:1</td><td>17,5:1</td><td>fondo sutil</td></tr>
+<tr><td><code>cesped-100</code></td><td><code>oklch(0.939 0.0783 152)</code></td><td><code>#C4FBD1</code></td><td>1,16:1</td><td>16,1:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>cesped-200</code></td><td><code>oklch(0.886 0.0892 152)</code></td><td><code>#ADEBBD</code></td><td>1,36:1</td><td>13,72:1</td><td>borde suave</td></tr>
+<tr><td><code>cesped-300</code></td><td><code>oklch(0.816 0.1036 152)</code></td><td><code>#8FD6A2</code></td><td>1,71:1</td><td>10,97:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>cesped-400</code></td><td><code>oklch(0.730 0.1213 152)</code></td><td><code>#68BE81</code></td><td>2,27:1</td><td>8,26:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>cesped-500</code></td><td><code>oklch(0.648 0.1381 152)</code></td><td><code>#3FA663</code></td><td>3,07:1</td><td>6,1:1</td><td>icono no textual</td></tr>
+<tr><td><code>cesped-600</code></td><td><code>oklch(0.566 0.1410 152)</code></td><td><code>#188D4A</code></td><td>4,24:1</td><td>4,41:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>cesped-700</code></td><td><code>oklch(0.482 0.1237 152)</code></td><td><code>#087139</code></td><td>6,12:1</td><td>3,06:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>cesped-800</code></td><td><code>oklch(0.396 0.1051 152)</code></td><td><code>#005628</code></td><td>8,89:1</td><td>2,11:1</td><td>texto enfático</td></tr>
+<tr><td><code>cesped-900</code></td><td><code>oklch(0.306 0.0820 152)</code></td><td><code>#003A19</code></td><td>12,97:1</td><td>1,44:1</td><td>superficie oscura</td></tr>
+<tr><td><code>cesped-950</code></td><td><code>oklch(0.232 0.0636 152)</code></td><td><code>#00250D</code></td><td>16,53:1</td><td>1,13:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.2</b> — Familia <i>cesped</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+<h4>indigo — Acento · información, selección, enlaces</h4>
+<table class="compacta" id="t6-indigo">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>indigo-50</code></td><td><code>oklch(0.971 0.0138 258)</code></td><td><code>#F0F6FF</code></td><td>1,09:1</td><td>17,23:1</td><td>fondo sutil</td></tr>
+<tr><td><code>indigo-100</code></td><td><code>oklch(0.939 0.0294 258)</code></td><td><code>#DFECFF</code></td><td>1,19:1</td><td>15,67:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>indigo-200</code></td><td><code>oklch(0.886 0.0560 258)</code></td><td><code>#C3DBFF</code></td><td>1,41:1</td><td>13,28:1</td><td>borde suave</td></tr>
+<tr><td><code>indigo-300</code></td><td><code>oklch(0.816 0.0928 258)</code></td><td><code>#9EC5FF</code></td><td>1,77:1</td><td>10,59:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>indigo-400</code></td><td><code>oklch(0.730 0.1147 258)</code></td><td><code>#7AA9EF</code></td><td>2,4:1</td><td>7,8:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>indigo-500</code></td><td><code>oklch(0.648 0.1307 258)</code></td><td><code>#5A8FDD</code></td><td>3,28:1</td><td>5,71:1</td><td>icono no textual</td></tr>
+<tr><td><code>indigo-600</code></td><td><code>oklch(0.566 0.1334 258)</code></td><td><code>#4176C3</code></td><td>4,56:1</td><td>4,1:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>indigo-700</code></td><td><code>oklch(0.482 0.1171 258)</code></td><td><code>#315D9F</code></td><td>6,57:1</td><td>2,85:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>indigo-800</code></td><td><code>oklch(0.396 0.1003 258)</code></td><td><code>#21467B</code></td><td>9,43:1</td><td>1,98:1</td><td>texto enfático</td></tr>
+<tr><td><code>indigo-900</code></td><td><code>oklch(0.306 0.0828 258)</code></td><td><code>#122E58</code></td><td>13,48:1</td><td>1,39:1</td><td>superficie oscura</td></tr>
+<tr><td><code>indigo-950</code></td><td><code>oklch(0.232 0.0684 258)</code></td><td><code>#061C3D</code></td><td>16,92:1</td><td>1,11:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.3</b> — Familia <i>indigo</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+<h4>ambar — Atención · avisos y estados en disputa</h4>
+<table class="compacta" id="t6-ambar">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>ambar-50</code></td><td><code>oklch(0.971 0.0239 76)</code></td><td><code>#FFF4E4</code></td><td>1,09:1</td><td>17,21:1</td><td>fondo sutil</td></tr>
+<tr><td><code>ambar-100</code></td><td><code>oklch(0.939 0.0510 76)</code></td><td><code>#FFE7C6</code></td><td>1,2:1</td><td>15,6:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>ambar-200</code></td><td><code>oklch(0.886 0.0904 76)</code></td><td><code>#FCD295</code></td><td>1,42:1</td><td>13,19:1</td><td>borde suave</td></tr>
+<tr><td><code>ambar-300</code></td><td><code>oklch(0.816 0.1050 76)</code></td><td><code>#EABA73</code></td><td>1,78:1</td><td>10,49:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>ambar-400</code></td><td><code>oklch(0.730 0.1229 76)</code></td><td><code>#D49C44</code></td><td>2,43:1</td><td>7,7:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>ambar-500</code></td><td><code>oklch(0.648 0.1365 76)</code></td><td><code>#BD8100</code></td><td>3,33:1</td><td>5,62:1</td><td>icono no textual</td></tr>
+<tr><td><code>ambar-600</code></td><td><code>oklch(0.566 0.1194 76)</code></td><td><code>#9E6B00</code></td><td>4,61:1</td><td>4,06:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>ambar-700</code></td><td><code>oklch(0.482 0.1019 76)</code></td><td><code>#7F5500</code></td><td>6,56:1</td><td>2,85:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>ambar-800</code></td><td><code>oklch(0.396 0.0841 76)</code></td><td><code>#603F00</code></td><td>9,51:1</td><td>1,97:1</td><td>texto enfático</td></tr>
+<tr><td><code>ambar-900</code></td><td><code>oklch(0.306 0.0659 76)</code></td><td><code>#422A00</code></td><td>13,44:1</td><td>1,39:1</td><td>superficie oscura</td></tr>
+<tr><td><code>ambar-950</code></td><td><code>oklch(0.232 0.0516 76)</code></td><td><code>#2B1900</code></td><td>16,91:1</td><td>1,11:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.4</b> — Familia <i>ambar</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+<h4>granate — Peligro · errores, destrucción, derrota</h4>
+<table class="compacta" id="t6-granate">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>granate-50</code></td><td><code>oklch(0.971 0.0143 26)</code></td><td><code>#FFF2F0</code></td><td>1,09:1</td><td>17,12:1</td><td>fondo sutil</td></tr>
+<tr><td><code>granate-100</code></td><td><code>oklch(0.939 0.0307 26)</code></td><td><code>#FFE4E0</code></td><td>1,21:1</td><td>15,53:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>granate-200</code></td><td><code>oklch(0.886 0.0601 26)</code></td><td><code>#FFCBC5</code></td><td>1,44:1</td><td>13,01:1</td><td>borde suave</td></tr>
+<tr><td><code>granate-300</code></td><td><code>oklch(0.816 0.1037 26)</code></td><td><code>#FFA9A0</code></td><td>1,84:1</td><td>10,19:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>granate-400</code></td><td><code>oklch(0.730 0.1377 26)</code></td><td><code>#F28379</code></td><td>2,53:1</td><td>7,4:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>granate-500</code></td><td><code>oklch(0.648 0.1568 26)</code></td><td><code>#DE625A</code></td><td>3,5:1</td><td>5,35:1</td><td>icono no textual</td></tr>
+<tr><td><code>granate-600</code></td><td><code>oklch(0.566 0.1601 26)</code></td><td><code>#C34741</code></td><td>4,89:1</td><td>3,83:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>granate-700</code></td><td><code>oklch(0.482 0.1405 26)</code></td><td><code>#9E3531</code></td><td>6,98:1</td><td>2,68:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>granate-800</code></td><td><code>oklch(0.396 0.1204 26)</code></td><td><code>#7B2422</code></td><td>9,92:1</td><td>1,89:1</td><td>texto enfático</td></tr>
+<tr><td><code>granate-900</code></td><td><code>oklch(0.306 0.0994 26)</code></td><td><code>#571312</code></td><td>13,93:1</td><td>1,34:1</td><td>superficie oscura</td></tr>
+<tr><td><code>granate-950</code></td><td><code>oklch(0.232 0.0821 26)</code></td><td><code>#3C0607</code></td><td>17,2:1</td><td>1,09:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.5</b> — Familia <i>granate</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+<h4>neutro — Neutro · texto, superficies, bordes</h4>
+<table class="compacta" id="t6-neutro">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>neutro-50</code></td><td><code>oklch(0.971 0.0058 170)</code></td><td><code>#F2F7F5</code></td><td>1,08:1</td><td>17,29:1</td><td>fondo sutil</td></tr>
+<tr><td><code>neutro-100</code></td><td><code>oklch(0.939 0.0064 170)</code></td><td><code>#E7ECEA</code></td><td>1,19:1</td><td>15,67:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>neutro-200</code></td><td><code>oklch(0.886 0.0072 170)</code></td><td><code>#D5DBD9</code></td><td>1,4:1</td><td>13,34:1</td><td>borde suave</td></tr>
+<tr><td><code>neutro-300</code></td><td><code>oklch(0.816 0.0084 170)</code></td><td><code>#BEC5C2</code></td><td>1,76:1</td><td>10,66:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>neutro-400</code></td><td><code>oklch(0.730 0.0098 170)</code></td><td><code>#A2AAA7</code></td><td>2,37:1</td><td>7,88:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>neutro-500</code></td><td><code>oklch(0.648 0.0112 170)</code></td><td><code>#88918D</code></td><td>3,24:1</td><td>5,78:1</td><td>icono no textual</td></tr>
+<tr><td><code>neutro-600</code></td><td><code>oklch(0.566 0.0114 170)</code></td><td><code>#707875</code></td><td>4,53:1</td><td>4,13:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>neutro-700</code></td><td><code>oklch(0.482 0.0100 170)</code></td><td><code>#59605D</code></td><td>6,45:1</td><td>2,9:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>neutro-800</code></td><td><code>oklch(0.396 0.0086 170)</code></td><td><code>#424846</code></td><td>9,35:1</td><td>2,0:1</td><td>texto enfático</td></tr>
+<tr><td><code>neutro-900</code></td><td><code>oklch(0.306 0.0071 170)</code></td><td><code>#2C302F</code></td><td>13,37:1</td><td>1,4:1</td><td>superficie oscura</td></tr>
+<tr><td><code>neutro-950</code></td><td><code>oklch(0.232 0.0059 170)</code></td><td><code>#1B1E1D</code></td><td>16,8:1</td><td>1,11:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.6</b> — Familia <i>neutro</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+  <div class="nota">
+    <span class="et">Lectura de las tablas</span>
+    <p>El paso <b>600</b> es el primero que alcanza 3:1 sobre blanco y por tanto el mínimo admisible
+    para bordes de control, iconos informativos y gráficos. El paso <b>700</b> es el primero que
+    supera 4,5:1 y por tanto el mínimo para texto normal sobre fondo claro. En modo oscuro la
+    relación se invierte: los pasos <b>300</b> y <b>400</b> son los que ofrecen contraste suficiente
+    sobre la tinta de fondo. Esta correspondencia —600 para componentes, 700 para texto, 300/400 en
+    oscuro— es la regla mnemotécnica que el equipo debe memorizar.</p>
+  </div>
+
+  <h2 id="s6-4">6.4 Tokens semánticos: modo claro</h2>
+  <table id="t6-7">
+    <thead><tr><th style="width:30%">Token semántico</th><th style="width:20%">Valor</th><th style="width:16%">Contraste</th><th style="width:34%">Uso y restricción</th></tr></thead>
+    <tbody>
+      <tr><td><code>color-fondo-aplicacion</code></td><td><code>neutro-50</code></td><td>—</td><td>Lienzo de la ventana. Nunca contiene texto directamente.</td></tr>
+      <tr><td><code>color-superficie</code></td><td><code>#FFFFFF</code></td><td>base</td><td>Tarjetas, tablas, paneles.</td></tr>
+      <tr><td><code>color-superficie-elevada</code></td><td><code>#FFFFFF</code> + sombra 1</td><td>base</td><td>Menús, diálogos, hojas. Borde <code>neutro-200</code> obligatorio.</td></tr>
+      <tr><td><code>color-superficie-sutil</code></td><td><code>neutro-100</code></td><td>—</td><td>Filas alternas, cabeceras de tabla, zonas inactivas.</td></tr>
+      <tr><td><code>color-texto-principal</code></td><td><code>neutro-900</code></td><td>13,4:1</td><td>Texto de lectura y cifras.</td></tr>
+      <tr><td><code>color-texto-secundario</code></td><td><code>neutro-700</code></td><td>6,5:1</td><td>Metadatos, descripciones. Nunca para datos críticos.</td></tr>
+      <tr><td><code>color-texto-terciario</code></td><td><code>neutro-600</code></td><td>4,5:1</td><td>Marcas de tiempo, ayudas. Límite inferior admisible.</td></tr>
+      <tr><td><code>color-texto-inverso</code></td><td><code>#FFFFFF</code></td><td>≥ 6,1:1</td><td>Sobre fondos de acción primaria (<code>cesped-700</code> o más oscuro).</td></tr>
+      <tr><td><code>color-borde</code></td><td><code>neutro-300</code></td><td>1,8:1</td><td>Separadores no informativos. No sirve como único indicador de control.</td></tr>
+      <tr><td><code>color-borde-fuerte</code></td><td><code>neutro-600</code></td><td>4,5:1</td><td>Bordes de campos de formulario y de controles (cumple 1.4.11).</td></tr>
+      <tr><td><code>color-accion-primaria-fondo</code></td><td><code>cesped-700</code></td><td>6,1:1</td><td>Botón primario; texto en blanco.</td></tr>
+      <tr><td><code>color-accion-primaria-fondo-hover</code></td><td><code>cesped-800</code></td><td>8,9:1</td><td>Oscurece al apuntar; nunca aclara.</td></tr>
+      <tr><td><code>color-accion-secundaria-texto</code></td><td><code>cesped-800</code></td><td>8,9:1</td><td>Botón de contorno sobre superficie blanca.</td></tr>
+      <tr><td><code>color-enlace</code></td><td><code>indigo-700</code></td><td>6,6:1</td><td>Subrayado obligatorio en texto corrido (1.4.1).</td></tr>
+      <tr><td><code>color-seleccion-fondo</code></td><td><code>indigo-50</code></td><td>—</td><td>Fila o elemento seleccionado en maestro&ndash;detalle; acompañado de barra indicadora.</td></tr>
+      <tr><td><code>color-estado-exito-texto</code></td><td><code>cesped-800</code></td><td>8,9:1</td><td>Victoria y confirmaciones.</td></tr>
+      <tr><td><code>color-estado-aviso-texto</code></td><td><code>ambar-800</code></td><td>9,5:1</td><td>Resultados en disputa y advertencias.</td></tr>
+      <tr><td><code>color-estado-error-texto</code></td><td><code>granate-700</code></td><td>7,0:1</td><td>Errores de validación y derrota.</td></tr>
+      <tr><td><code>color-foco</code></td><td><code>indigo-600</code></td><td>4,6:1</td><td>Anillo de foco; véase §6.5.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 6.7</b> — Tokens semánticos del modo claro con el contraste verificado frente a su fondo de uso previsto.</caption>
+  </table>
+
+  <h2 id="s6-5">6.5 Indicador de foco</h2>
+  <p>El foco de teclado es el único mecanismo de orientación de quien no usa puntero, y es el
+  elemento que más a menudo se destruye por motivos estéticos. La especificación es estricta:</p>
+  <ul>
+    <li>Anillo de <b>2&nbsp;px</b> sólido en <code>color-foco</code>, con desplazamiento exterior de
+    <b>2&nbsp;px</b> respecto al control, de modo que no reduzca el área táctil ni se confunda con el
+    borde del propio control.</li>
+    <li>Contorno adicional de 1&nbsp;px en <code>color-superficie</code> entre control y anillo: así
+    el indicador sigue siendo visible tanto sobre fondos claros como oscuros, sin necesidad de dos
+    tokens distintos.</li>
+    <li>Implementación con <code>:focus-visible</code>, nunca con <code>:focus</code> a secas, para no
+    mostrar el anillo tras una pulsación con puntero.</li>
+    <li><code>outline: none</code> sin sustituto equivalente está <b>prohibido</b>; la regla se
+    verifica mediante análisis estático en integración continua (§26.4).</li>
+    <li>El anillo debe permanecer visible: ningún elemento fijo puede taparlo (criterio 2.4.11), lo
+    que obliga a reservar espacio de desplazamiento adicional bajo las barras fijas (§10.4).</li>
+  </ul>
+  <pre>:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
+  border-radius: var(--radio-sm);
+}
+<span class="c">/* En modo de contraste forzado el sistema sustituye los colores:
+   se usa la palabra clave del sistema para no perder el indicador. */</span>
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid Highlight;
+  }
+}</pre>
+
+  <h2 id="s6-6">6.6 Modo oscuro</h2>
+  <p>El modo oscuro no es una inversión: es un segundo mapa semántico sobre la misma paleta
+  primitiva. Las reglas que lo gobiernan derivan de la fisiología descrita en §5.2:</p>
+  <ol>
+    <li><b>Nunca negro puro.</b> El fondo es <code>#0D1316</code> (una tinta derivada de
+    <code>neutro-950</code> con ligera componente del tono de marca). El negro absoluto sobre panel
+    emisor maximiza el deslumbramiento del texto blanco y agrava el efecto de halo.</li>
+    <li><b>Nunca blanco puro para texto largo.</b> Se usa <code>neutro-100</code>, que reduce el
+    deslumbramiento sin perder contraste (15,7:1 sobre la tinta).</li>
+    <li><b>Reducir el croma de los acentos.</b> Los colores saturados sobre fondo oscuro producen
+    aberración cromática percibida; se usan los pasos 300 y 400, no 600 y 700.</li>
+    <li><b>Elevar aclarando.</b> Cada nivel de superficie aumenta la claridad entre 0,02 y 0,04 en
+    OKLCh respecto al anterior.</li>
+    <li><b>Respetar la preferencia del sistema y permitir anularla.</b> Se implementa con
+    <code>prefers-color-scheme</code> más un conmutador explícito de tres estados —claro, oscuro,
+    automático— persistido por dispositivo.</li>
+  </ol>
+  <table class="compacta" id="t6-8">
+    <thead><tr><th style="width:30%">Token semántico</th><th style="width:20%">Modo claro</th><th style="width:20%">Modo oscuro</th><th style="width:30%">Contraste en oscuro</th></tr></thead>
+    <tbody>
+      <tr><td><code>color-fondo-aplicacion</code></td><td><code>neutro-50</code></td><td><code>#0D1316</code></td><td>—</td></tr>
+      <tr><td><code>color-superficie</code></td><td><code>#FFFFFF</code></td><td><code>neutro-950</code></td><td>—</td></tr>
+      <tr><td><code>color-superficie-elevada</code></td><td><code>#FFFFFF</code></td><td><code>neutro-900</code></td><td>—</td></tr>
+      <tr><td><code>color-texto-principal</code></td><td><code>neutro-900</code></td><td><code>neutro-100</code></td><td>15,7:1</td></tr>
+      <tr><td><code>color-texto-secundario</code></td><td><code>neutro-700</code></td><td><code>neutro-300</code></td><td>10,7:1</td></tr>
+      <tr><td><code>color-texto-terciario</code></td><td><code>neutro-600</code></td><td><code>neutro-400</code></td><td>7,9:1</td></tr>
+      <tr><td><code>color-accion-primaria-fondo</code></td><td><code>cesped-700</code></td><td><code>cesped-400</code></td><td>8,3:1 con texto <code>#0D1316</code></td></tr>
+      <tr><td><code>color-enlace</code></td><td><code>indigo-700</code></td><td><code>indigo-300</code></td><td>10,6:1</td></tr>
+      <tr><td><code>color-estado-error-texto</code></td><td><code>granate-700</code></td><td><code>granate-300</code></td><td>10,2:1</td></tr>
+      <tr><td><code>color-estado-aviso-texto</code></td><td><code>ambar-800</code></td><td><code>ambar-300</code></td><td>10,5:1</td></tr>
+      <tr><td><code>color-borde-fuerte</code></td><td><code>neutro-600</code></td><td><code>neutro-500</code></td><td>5,8:1</td></tr>
+      <tr><td><code>color-foco</code></td><td><code>indigo-600</code></td><td><code>indigo-300</code></td><td>10,6:1</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 6.8</b> — Mapa semántico dual. Obsérvese la inversión sistemática de pasos: 700→300/400. El texto sobre acción primaria en modo oscuro es tinta, no blanco.</caption>
+  </table>
+
+  <h2 id="s6-7">6.7 Superficies, elevación y sombra</h2>
+  <table class="compacta" id="t6-9">
+    <thead><tr><th style="width:16%">Nivel</th><th style="width:26%">Uso</th><th style="width:30%">Sombra (modo claro)</th><th style="width:28%">Señal alternativa obligatoria</th></tr></thead>
+    <tbody>
+      <tr><td>0 · Base</td><td>Fondo de aplicación</td><td>ninguna</td><td>—</td></tr>
+      <tr><td>1 · Contenido</td><td>Tarjetas, tablas</td><td><code>0 1px 2px rgb(0 0 0 / .06)</code></td><td>Borde <code>neutro-200</code></td></tr>
+      <tr><td>2 · Elevada</td><td>Menús, desplegables</td><td><code>0 4px 12px rgb(0 0 0 / .10)</code></td><td>Borde <code>neutro-300</code></td></tr>
+      <tr><td>3 · Flotante</td><td>Diálogos modales, hojas</td><td><code>0 12px 32px rgb(0 0 0 / .16)</code></td><td>Borde + velo de fondo al 50&nbsp;%</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 6.9</b> — Escala de elevación. En modo oscuro las sombras se sustituyen por incrementos de claridad de superficie; en modo de contraste forzado, por bordes.</caption>
+  </table>
+
+  <h2 id="s6-8">6.8 Implementación</h2>
+  <p>Los tokens se publican en el formato estable del módulo de tokens de diseño, y de ahí se generan
+  las propiedades personalizadas de CSS y la configuración del motor de utilidades. El origen es
+  único: ninguna herramienta define colores por su cuenta.</p>
+  <pre>// tokens/color.json — formato DTCG (extracto)
+{
+  "color": {
+    "cesped": {
+      "700": { "$type": "color", "$value": "#087139",
+               "$extensions": { "oklch": "oklch(0.482 0.1237 152)" } }
+    },
+    "accion": {
+      "primaria": {
+        "fondo":  { "$type": "color", "$value": "{color.cesped.700}" },
+        "texto":  { "$type": "color", "$value": "#FFFFFF" }
+      }
+    }
+  }
+}</pre>
+  <pre>/* styles/tokens.css — generado, no editar a mano */
+@theme {
+  --color-cesped-700: oklch(0.482 0.1237 152);
+  --color-neutro-900: oklch(0.306 0.0071 170);
+  --color-accion-primaria-fondo: var(--color-cesped-700);
+  --color-texto-principal: var(--color-neutro-900);
+}
+:root[data-tema="oscuro"], :root:not([data-tema="claro"]) {
+  @media (prefers-color-scheme: dark) {
+    --color-accion-primaria-fondo: var(--color-cesped-400);
+    --color-texto-principal: var(--color-neutro-100);
+  }
+}</pre>
+  <div class="aviso">
+    <span class="et">Transición entre temas</span>
+    <p>El cambio de tema NO DEBE animarse con transiciones de color sobre toda la página: produce un
+    repintado costoso y resulta desagradable. Se aplica de forma instantánea, y se respeta
+    <code>prefers-reduced-motion</code> en cualquier caso (§8.8).</p>
+  </div>
+
+  <h2 id="s6-9">6.9 Verificación automática</h2>
+  <p>La deriva cromática se previene con una comprobación que se ejecuta en cada integración y falla
+  la construcción si un par declarado incumple su umbral. La prueba recorre el mapa semántico, no las
+  pantallas, lo que la hace barata y exhaustiva.</p>
+  <pre>// scripts/verificar-contraste.ts (extracto)
+const PARES: Array&lt;[string, string, number]&gt; = [
+  ['color-texto-principal',   'color-superficie',            4.5],
+  ['color-texto-secundario',  'color-superficie',            4.5],
+  ['color-texto-terciario',   'color-superficie',            4.5],
+  ['color-texto-inverso',     'color-accion-primaria-fondo', 4.5],
+  ['color-borde-fuerte',      'color-superficie',            3.0],
+  ['color-foco',              'color-superficie',            3.0],
+  ['color-estado-error-texto','color-superficie',            4.5],
+];
+for (const modo of ['claro', 'oscuro'] as const) {
+  for (const [frente, fondo, minimo] of PARES) {
+    const r = contraste(resolver(frente, modo), resolver(fondo, modo));
+    if (r &lt; minimo) fallar(`${frente}/${fondo} en ${modo}: ${r.toFixed(2)} &lt; ${minimo}`);
+  }
+}</pre>
+
+  <h2 id="s6-10">6.10 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-COL-06.</b> Ningún componente DEBE contener literales de color ni referencias a tokens primitivos.</li>
+    <li><b>RQ-COL-07.</b> El modo oscuro DEBE implementarse como mapa semántico independiente, no como inversión ni como filtro.</li>
+    <li><b>RQ-COL-08.</b> El indicador de foco DEBE cumplir la especificación de §6.5 en todos los controles, incluidos los personalizados.</li>
+    <li><b>RQ-COL-09.</b> La verificación de contraste DEBE ejecutarse en integración continua y bloquear la construcción ante incumplimiento.</li>
+    <li><b>RQ-COL-10.</b> El producto DEBE respetar <code>prefers-color-scheme</code> y ofrecer conmutador explícito de tres estados persistido.</li>
+  </ul>
+</section>
+
+<section class="capitulo" id="cap7">
+  <h1 id="h1-7"><span class="cnum">Capítulo 7</span><span class="ctit">Tipografía y legibilidad</span></h1>
+
+  <p class="entradilla">La tipografía es el componente que más superficie ocupa y el que más
+  directamente determina si una interfaz se puede usar. Este capítulo especifica la selección de
+  familias, la escala modular, las métricas de composición, el tratamiento de las cifras —crítico en
+  un producto de marcadores y clasificaciones—, la estrategia de carga y los requisitos de
+  accesibilidad tipográfica.</p>
+
+  <h2 id="s7-1">7.1 Qué debe resolver la tipografía aquí</h2>
+  <p>Tres problemas, por orden de importancia: <b>jerarquizar</b> —que el ojo distinga en un barrido
+  qué es nombre de equipo, qué es marcador y qué es metadato—; <b>alinear cifras</b> —que una columna
+  de puntos se lea verticalmente sin esfuerzo—; y <b>resistir el contenido real</b> —nombres de
+  participantes de longitud imprevisible, apodos con emoji, equipos con nombres de treinta
+  caracteres—. Una tipografía que falle en el tercer punto produce interfaces que sólo funcionan con
+  datos de ejemplo.</p>
+
+  <h2 id="s7-2">7.2 Criterios de selección de familia</h2>
+  <table id="t7-1">
+    <thead><tr><th style="width:26%">Criterio</th><th style="width:40%">Por qué importa</th><th style="width:34%">Exigencia del sistema</th></tr></thead>
+    <tbody>
+      <tr><td>Altura de x elevada</td><td>Determina el tamaño percibido y la legibilidad a tamaños pequeños más que el cuerpo nominal.</td><td>Relación altura de x / altura de mayúscula ≥ 0,70 en la familia de texto.</td></tr>
+      <tr><td>Aperturas amplias</td><td>Letras como <i>c</i>, <i>e</i>, <i>s</i> con aberturas cerradas se confunden a tamaño pequeño o con baja agudeza.</td><td>Formas abiertas; se descartan familias condensadas para texto corrido.</td></tr>
+      <tr><td>Desambiguación de caracteres</td><td>1/l/I y 0/O aparecen en marcadores, códigos de invitación y tiempos.</td><td>Formas distinguibles obligatorias; el código de invitación usa además un alfabeto reducido (§13.5).</td></tr>
+      <tr><td>Cifras tabulares</td><td>Sin ellas, las columnas numéricas «bailan» y la comparación vertical falla.</td><td>Soporte de <code>tnum</code> obligatorio en la familia de texto.</td></tr>
+      <tr><td>Cobertura de caracteres</td><td>Castellano con acentos, diéresis, eñe, comillas latinas y signos de apertura.</td><td>Cobertura latina extendida completa.</td></tr>
+      <tr><td>Variabilidad</td><td>Una fuente variable sustituye a cinco ficheros estáticos y permite ajustes finos de grosor.</td><td>Preferencia por fuente variable con eje de grosor.</td></tr>
+      <tr><td>Licencia y autoalojamiento</td><td>Depender de un tercero en la ruta crítica añade latencia, riesgo de disponibilidad y fuga de metadatos de navegación.</td><td>Licencia que permita autoalojamiento; carga desde el propio dominio.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 7.1</b> — Criterios de selección de familia tipográfica y exigencia concreta del sistema.</caption>
+  </table>
+
+  <h3 id="s7-2-1">7.2.1 Decisión</h3>
+  <p>El sistema define tres roles tipográficos:</p>
+  <dl>
+    <dt>Familia de texto (<code>--fuente-texto</code>)</dt>
+    <dd>Fuente variable de palo seco humanista con altura de x elevada y cifras tabulares,
+    autoalojada y subconjuntada a latino extendido. Cubre interfaz, contenido y datos. Es la única
+    familia obligatoria para que el producto funcione.</dd>
+    <dt>Familia de titulares (<code>--fuente-display</code>)</dt>
+    <dd>Familia condensada de carácter deportivo, reservada a titulares de torneo, marcadores grandes
+    y el nombre del producto. Se carga de forma diferida y <b>no bloquea</b> el renderizado: si no
+    llega, la familia de texto la sustituye sin alterar la maquetación, gracias al ajuste de métricas
+    de §7.7.</dd>
+    <dt>Familia monoespaciada (<code>--fuente-mono</code>)</dt>
+    <dd>Sólo para códigos de invitación e identificadores técnicos. Se resuelve con la pila del
+    sistema; no se descarga ningún fichero.</dd>
+  </dl>
+  <div class="riesgo">
+    <span class="et">Hallazgo H5</span>
+    <p>La implementación actual carga una familia de titulares desde un servicio de terceros mediante
+    una hoja de estilo enlazada en el documento, lo que introduce dos viajes de red adicionales en la
+    ruta crítica, expone la navegación de las personas usuarias a un tercero y hace depender el
+    primer pintado de un dominio ajeno. Debe sustituirse por autoalojamiento con subconjunto y
+    <code>font-display: swap</code>, y la familia debe dejar de ser necesaria para el primer
+    pintado.</p>
+  </div>
+
+  <h2 id="s7-3">7.3 Escala modular</h2>
+  <p>La escala parte de un cuerpo base de 16&nbsp;px —el valor por defecto de los navegadores, que
+  nunca debe reducirse globalmente— y aplica una razón de tercera menor (1,2) redondeada a valores
+  enteros cómodos. Los tamaños se expresan en <code>rem</code> para que respeten la preferencia de
+  tamaño de letra del sistema operativo; los titulares usan interpolación fluida acotada para
+  adaptarse al ancho sin saltos.</p>
+  <table id="t7-2">
+    <thead><tr><th style="width:17%">Token</th><th style="width:15%">Tamaño</th><th style="width:13%">Interlineado</th><th style="width:13%">Grosor</th><th style="width:42%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>texto-display</code></td><td>clamp 32–48&nbsp;px</td><td>1,1</td><td>700</td><td>Marcador grande en detalle de partido; nombre de torneo en cabecera.</td></tr>
+      <tr><td><code>texto-titulo-1</code></td><td>28&nbsp;px (1,75rem)</td><td>1,2</td><td>700</td><td>Título de página. Uno solo por vista.</td></tr>
+      <tr><td><code>texto-titulo-2</code></td><td>23&nbsp;px (1,4375rem)</td><td>1,25</td><td>700</td><td>Título de sección.</td></tr>
+      <tr><td><code>texto-titulo-3</code></td><td>19&nbsp;px (1,1875rem)</td><td>1,3</td><td>600</td><td>Título de tarjeta o de bloque.</td></tr>
+      <tr><td><code>texto-cuerpo-g</code></td><td>18&nbsp;px (1,125rem)</td><td>1,55</td><td>400</td><td>Texto introductorio y estados vacíos.</td></tr>
+      <tr><td><code>texto-cuerpo</code></td><td>16&nbsp;px (1rem)</td><td>1,55</td><td>400</td><td>Texto por defecto. Mínimo para lectura continua.</td></tr>
+      <tr><td><code>texto-dato</code></td><td>16&nbsp;px</td><td>1,2</td><td>600</td><td>Cifras en tablas, con <code>font-variant-numeric: tabular-nums</code>.</td></tr>
+      <tr><td><code>texto-etiqueta</code></td><td>14&nbsp;px (0,875rem)</td><td>1,4</td><td>600</td><td>Etiquetas de formulario, encabezados de tabla, botones.</td></tr>
+      <tr><td><code>texto-auxiliar</code></td><td>14&nbsp;px</td><td>1,45</td><td>400</td><td>Metadatos, ayudas y marcas de tiempo.</td></tr>
+      <tr><td><code>texto-micro</code></td><td>12,8&nbsp;px (0,8rem)</td><td>1,4</td><td>600</td><td>Insignias y contadores. <b>Nunca</b> texto en prosa ni dato crítico.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 7.2</b> — Escala tipográfica. El peldaño <code>texto-micro</code> es el único por debajo de 14&nbsp;px y su uso está restringido por norma interna.</caption>
+  </table>
+  <pre>:root {
+  --texto-cuerpo: 1rem;
+  --texto-display: clamp(2rem, 1.2rem + 3.2vw, 3rem);
+  --interlineado-lectura: 1.55;
+}
+.tabla-clasificacion td.num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1;
+  text-align: right;         <span class="c">/* alineación por la derecha para comparar magnitudes */</span>
+  font-variant-ligatures: none;
+}</pre>
+
+  <h2 id="s7-4">7.4 Composición: medida, interlineado y alineación</h2>
+  <ul>
+    <li><b>Medida de línea.</b> Entre 45 y 75 caracteres para texto continuo; el óptimo clásico se
+    sitúa alrededor de 66. Se implementa con <code>max-inline-size: 68ch</code> en los bloques de
+    prosa. Las tablas quedan excluidas de esta restricción.</li>
+    <li><b>Interlineado.</b> 1,5 en texto continuo (coincide con el mínimo exigido por el criterio
+    1.4.12 cuando el usuario modifica el espaciado), 1,2–1,3 en titulares, donde un interlineado
+    amplio rompe la unidad visual del bloque.</li>
+    <li><b>Alineación.</b> Alineación a la izquierda, sin justificar. El texto justificado sin
+    partición de palabras de calidad produce ríos y espaciado irregular, penaliza a lectores con
+    dislexia y está desaconsejado por el criterio 1.4.8.</li>
+    <li><b>Espaciado de letras.</b> Neutro en texto; ligeramente negativo (−0,01em) sólo en titulares
+    grandes; positivo (+0,04em) en versalitas y etiquetas en mayúsculas, que de otro modo se
+    apelmazan.</li>
+    <li><b>Mayúsculas.</b> No se usan bloques de texto en mayúsculas: reducen la velocidad de lectura
+    al eliminar la silueta de palabra. Se admiten en etiquetas de una o dos palabras.</li>
+    <li><b>Truncamiento.</b> Nunca se trunca un dato identificativo sin que su valor completo sea
+    recuperable (atributo <code>title</code> no basta: debe existir en el nombre accesible o
+    desplegarse al enfocar).</li>
+  </ul>
+
+  <h2 id="s7-5">7.5 Tratamiento de cifras</h2>
+  <p>Este producto es, en buena medida, una interfaz de cifras. Las reglas son explícitas:</p>
+  <table class="compacta" id="t7-3">
+    <thead><tr><th style="width:24%">Elemento</th><th style="width:30%">Formato</th><th style="width:46%">Regla</th></tr></thead>
+    <tbody>
+      <tr><td>Marcador de partido</td><td><code>3 – 1</code></td><td>Cifras tabulares, separador con espacios finos, nunca guion corto pegado. En detalle, cuerpo <code>texto-display</code>.</td></tr>
+      <tr><td>Puntos y diferencia</td><td><code>+7</code>, <code>−3</code></td><td>Signo explícito en la diferencia; menos tipográfico (U+2212), no guion.</td></tr>
+      <tr><td>Columnas numéricas</td><td>alineadas a la derecha</td><td>Cifras tabulares obligatorias; encabezado con abreviatura y desarrollo accesible.</td></tr>
+      <tr><td>Porcentajes</td><td><code>62 %</code></td><td>Espacio fino antes del símbolo, conforme a la norma ortográfica castellana.</td></tr>
+      <tr><td>Fechas</td><td><code>12 oct 2026</code></td><td>Formato local, mes abreviado sin punto; fecha completa en el nombre accesible.</td></tr>
+      <tr><td>Horas</td><td><code>21:30</code></td><td>Formato de 24 horas; se evita la ambigüedad del formato de 12 horas.</td></tr>
+      <tr><td>Tiempo relativo</td><td><code>hace 2 h</code></td><td>Siempre acompañado de la marca absoluta en el elemento <code>&lt;time&gt;</code>.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 7.3</b> — Reglas de composición numérica. La coherencia de estas reglas es lo que hace que una tabla de clasificación se lea de un vistazo.</caption>
+  </table>
+
+  <h2 id="s7-6">7.6 Carga y rendimiento tipográfico</h2>
+  <p>Las fuentes web son uno de los principales causantes de desplazamiento de diseño y de retraso en
+  el mayor despliegue de contenido. La estrategia es:</p>
+  <ol>
+    <li><b>Autoalojamiento</b> en el mismo origen, servido con caché inmutable de un año y nombre con
+    huella de contenido.</li>
+    <li><b>Subconjunto</b> a los caracteres realmente usados (latino básico y extendido, signos y
+    cifras), con formato comprimido moderno. Reduce típicamente el peso entre un 60 y un 80&nbsp;%.</li>
+    <li><b>Precarga</b> exclusivamente del fichero de la familia de texto en el grosor usado por
+    encima del pliegue. Precargar más de un fichero compite con el recurso que determina el mayor
+    despliegue de contenido.</li>
+    <li><b><code>font-display: swap</code></b> con fuente alternativa del sistema ajustada mediante
+    <code>size-adjust</code>, <code>ascent-override</code> y <code>descent-override</code>, de modo
+    que el intercambio no mueva el texto: así el desplazamiento acumulado atribuible a la tipografía
+    tiende a cero.</li>
+    <li><b>Fuente variable</b> con un único fichero para todos los grosores empleados.</li>
+  </ol>
+  <pre>@font-face {
+  font-family: "Texto";
+  src: url("/fuentes/texto-var.woff2") format("woff2-variations");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2018-201E, U+2212;
+}
+<span class="c">/* Alternativa del sistema con métricas ajustadas: evita el salto al intercambiar */</span>
+@font-face {
+  font-family: "Texto alterna";
+  src: local("Arial");
+  size-adjust: 103.5%;
+  ascent-override: 92%;
+  descent-override: 24%;
+}
+:root { --fuente-texto: "Texto", "Texto alterna", system-ui, sans-serif; }</pre>
+
+  <h2 id="s7-7">7.7 Accesibilidad tipográfica</h2>
+  <ul>
+    <li><b>Unidades relativas.</b> Todo tamaño de texto en <code>rem</code>; ningún
+    <code>px</code> absoluto en tipografía. Reducir el tamaño base del documento para «que quepa
+    más» anula la preferencia de la persona y es una violación práctica del criterio 1.4.4.</li>
+    <li><b>Ampliación al 200&nbsp;%.</b> Todo el contenido y toda la funcionalidad deben permanecer
+    disponibles; se verifica en las tres rutas críticas (§19.3).</li>
+    <li><b>Reflujo.</b> A 320&nbsp;px de ancho equivalente no debe aparecer desplazamiento horizontal
+    (criterio 1.4.10). Las tablas anchas se tratan con el patrón de §13.6, no con zoom reducido.</li>
+    <li><b>Espaciado de texto.</b> El diseño debe tolerar interlineado 1,5, espaciado entre párrafos
+    2em, entre letras 0,12em y entre palabras 0,16em sin pérdida de contenido (criterio 1.4.12). Esto
+    obliga a contenedores que crezcan con el contenido, nunca de altura fija.</li>
+    <li><b>Dislexia.</b> La evidencia disponible no respalda que las tipografías comercializadas como
+    «para dislexia» mejoren de forma consistente la velocidad de lectura; sí hay respaldo para el
+    aumento de espaciado entre caracteres y líneas y para la alineación a la izquierda. El sistema
+    aplica lo segundo y no impone lo primero.</li>
+    <li><b>Mayúsculas y abreviaturas.</b> Las abreviaturas de columna («PJ», «GF», «GC», «DG») se
+    acompañan de su desarrollo mediante <code>&lt;abbr&gt;</code> y de un encabezado accesible
+    completo, porque los lectores de pantalla las deletrean de forma impredecible.</li>
+  </ul>
+
+  <h2 id="s7-8">7.8 Contenido real y casos límite</h2>
+  <p>El diseño tipográfico se valida contra un conjunto fijo de cadenas hostiles, que forma parte de
+  los datos de prueba: nombre de participante de 1 carácter; de 40 caracteres sin espacios; con
+  emoji; con diacríticos apilados; equipo con nombre largo y paréntesis; marcador de dos dígitos por
+  lado; y cadena en un alfabeto no latino. Toda vista debe soportar esas siete cadenas sin
+  desbordamiento, sin truncamiento de datos críticos y sin romper la alineación de columnas.</p>
+
+  <h2 id="s7-9">7.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-TIP-01.</b> El tamaño base DEBE ser de 16&nbsp;px y todos los tamaños de texto se expresarán en unidades relativas.</li>
+    <li><b>RQ-TIP-02.</b> Las fuentes DEBEN autoalojarse, subconjuntarse y declararse con alternativa de métricas ajustadas.</li>
+    <li><b>RQ-TIP-03.</b> Toda cifra comparable DEBE componerse con cifras tabulares y alinearse a la derecha.</li>
+    <li><b>RQ-TIP-04.</b> El diseño DEBE superar la prueba de espaciado de texto del criterio 1.4.12 y el reflujo a 320&nbsp;px.</li>
+    <li><b>RQ-TIP-05.</b> Ningún dato identificativo DEBE truncarse sin vía accesible de recuperación del valor completo.</li>
+    <li><b>RQ-TIP-06.</b> La familia de titulares NO DEBE formar parte de la ruta crítica de renderizado.</li>
+  </ul>
+</section>
+
+<section class="capitulo" id="cap8">
+  <h1 id="h1-8"><span class="cnum">Capítulo 8</span><span class="ctit">Retícula, espaciado, iconografía y movimiento</span></h1>
+
+  <p class="entradilla">El espacio es el material con el que se construye la jerarquía cuando el
+  color está reservado al significado. Este capítulo fija la escala de espaciado, la retícula y los
+  puntos de ruptura, los radios y las sombras, el tamaño mínimo y la separación de los objetivos
+  interactivos, el sistema iconográfico y la gramática del movimiento.</p>
+
+  <h2 id="s8-1">8.1 Escala de espaciado</h2>
+  <p>Toda distancia del producto procede de una escala geométrica de base 4&nbsp;px. Una escala
+  cerrada evita el fenómeno más común de deriva visual: los márgenes de 13, 15 y 17 píxeles que
+  aparecen cuando cada persona ajusta a ojo. Los nombres son numéricos y no describen uso, para que
+  puedan reutilizarse en cualquier contexto.</p>
+  <table class="compacta" id="t8-1">
+    <thead><tr><th style="width:14%">Token</th><th style="width:12%">Valor</th><th style="width:36%">Uso característico</th><th style="width:14%">Token</th><th style="width:12%">Valor</th><th style="width:12%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>esp-0</code></td><td>0</td><td>Anulación explícita de espacio heredado</td><td><code>esp-6</code></td><td>24&nbsp;px</td><td>Separación entre bloques</td></tr>
+      <tr><td><code>esp-1</code></td><td>4&nbsp;px</td><td>Separación icono-texto</td><td><code>esp-8</code></td><td>32&nbsp;px</td><td>Secciones de página</td></tr>
+      <tr><td><code>esp-2</code></td><td>8&nbsp;px</td><td>Interior de insignias, separación de controles contiguos</td><td><code>esp-10</code></td><td>40&nbsp;px</td><td>Cabecera de vista</td></tr>
+      <tr><td><code>esp-3</code></td><td>12&nbsp;px</td><td>Interior vertical de campos y filas</td><td><code>esp-12</code></td><td>48&nbsp;px</td><td>Separación de regiones</td></tr>
+      <tr><td><code>esp-4</code></td><td>16&nbsp;px</td><td>Margen lateral en móvil; interior de tarjeta</td><td><code>esp-16</code></td><td>64&nbsp;px</td><td>Espacio de respiro en escritorio</td></tr>
+      <tr><td><code>esp-5</code></td><td>20&nbsp;px</td><td>Interior de tarjeta ampliada</td><td><code>esp-24</code></td><td>96&nbsp;px</td><td>Estados vacíos centrados</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.1</b> — Escala de espaciado. Cualquier distancia que no pertenezca a esta escala es un defecto, verificable mediante análisis estático de las utilidades empleadas.</caption>
+  </table>
+  <p>El <b>ritmo vertical</b> se construye por agrupación, no por regla de rejilla: dentro de un
+  bloque, los elementos se separan con <code>esp-2</code> o <code>esp-3</code>; entre bloques, con
+  <code>esp-6</code>; entre secciones, con <code>esp-8</code> o <code>esp-12</code>. La relación
+  interior/exterior siempre es asimétrica —lo que está junto pertenece junto— y es la aplicación
+  directa del principio de proximidad (§4.4).</p>
+
+  <h2 id="s8-2">8.2 Retícula y contenedores</h2>
+  <p>La retícula no se define por número de columnas sino por <b>comportamiento del contenido</b>.
+  Se emplean tres mecanismos, por orden de preferencia:</p>
+  <ol>
+    <li><b>Flujo intrínseco.</b> La mayoría de las vistas son una columna de bloques apilados cuyo
+    ancho lo limita el contenedor. No necesitan retícula.</li>
+    <li><b>Retícula automática.</b> Las colecciones homogéneas —cuadrícula de equipos, tarjetas de
+    torneo— usan <code>grid-template-columns: repeat(auto-fill, minmax(…))</code>, que se adapta sin
+    puntos de ruptura.</li>
+    <li><b>Retícula explícita de 12 columnas.</b> Reservada a las plantillas de dos y tres paneles
+    (§10.5), donde la proporción entre regiones sí debe fijarse.</li>
+  </ol>
+  <table class="compacta" id="t8-2">
+    <thead><tr><th style="width:16%">Contenedor</th><th style="width:20%">Ancho</th><th style="width:20%">Margen lateral</th><th style="width:44%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>cont-estrecho</code></td><td>≤ 42rem (672&nbsp;px)</td><td><code>esp-4</code> / <code>esp-6</code></td><td>Formularios, textos largos, autenticación.</td></tr>
+      <tr><td><code>cont-estandar</code></td><td>≤ 64rem (1024&nbsp;px)</td><td><code>esp-4</code> / <code>esp-8</code></td><td>Vistas de una columna: listado de torneos, palmarés.</td></tr>
+      <tr><td><code>cont-ancho</code></td><td>≤ 90rem (1440&nbsp;px)</td><td><code>esp-4</code> / <code>esp-8</code></td><td>Maestro&ndash;detalle de dos paneles, cuadro eliminatorio.</td></tr>
+      <tr><td><code>cont-pleno</code></td><td>100&nbsp;%</td><td>0</td><td>Barras fijas y fondos; nunca contiene texto sin contenedor interior.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.2</b> — Contenedores del sistema. El límite superior existe porque una línea de texto de 1600&nbsp;px es ilegible por exceso de medida (§7.4).</caption>
+  </table>
+
+  <h2 id="s8-3">8.3 Puntos de ruptura</h2>
+  <p>Los puntos de ruptura se eligen por el contenido, no por dispositivos concretos. Se definen
+  cuatro, y la regla es que un componente use <b>consultas de contenedor</b> siempre que su
+  adaptación dependa del espacio disponible y no del tamaño de la ventana: una tarjeta de partido
+  debe reorganizarse igual si está en un panel estrecho dentro de una pantalla ancha.</p>
+
+  <figure id="f8-1">
+    <svg viewBox="0 0 700 180" width="100%" height="180" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="8">
+        <text x="4" y="12" font-size="9" font-weight="bold" fill="#15191C">Comportamiento de la plantilla maestro–detalle según el ancho disponible</text>
+
+        <rect x="4" y="24" width="96" height="140" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="12" y="46" width="80" height="108" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="52" y="38" text-anchor="middle" fill="#15191C" font-weight="bold">&lt; 640</text>
+        <text x="52" y="100" text-anchor="middle" fill="#074733">maestro</text>
+        <text x="52" y="112" text-anchor="middle" fill="#3C464D" font-size="7">(detalle = ruta propia)</text>
+
+        <rect x="120" y="24" width="150" height="140" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="128" y="46" width="134" height="108" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="195" y="38" text-anchor="middle" fill="#15191C" font-weight="bold">640 – 1023</text>
+        <text x="195" y="100" text-anchor="middle" fill="#074733">maestro, densidad media</text>
+
+        <rect x="290" y="24" width="190" height="140" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="298" y="46" width="66" height="108" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <rect x="370" y="46" width="102" height="108" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="385" y="38" text-anchor="middle" fill="#15191C" font-weight="bold">1024 – 1439</text>
+        <text x="331" y="100" text-anchor="middle" fill="#074733" font-size="7.5">maestro</text>
+        <text x="421" y="100" text-anchor="middle" fill="#1B4E8C" font-size="7.5">detalle</text>
+
+        <rect x="500" y="24" width="196" height="140" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="508" y="46" width="58" height="108" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <rect x="572" y="46" width="76" height="108" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <rect x="654" y="46" width="34" height="108" rx="3" fill="#FBF2E2" stroke="#8A5300"/>
+        <text x="598" y="38" text-anchor="middle" fill="#15191C" font-weight="bold">≥ 1440</text>
+        <text x="537" y="100" text-anchor="middle" fill="#074733" font-size="7.5">maestro</text>
+        <text x="610" y="100" text-anchor="middle" fill="#1B4E8C" font-size="7.5">detalle</text>
+        <text x="671" y="94" text-anchor="middle" fill="#8A5300" font-size="7">panel</text>
+        <text x="671" y="104" text-anchor="middle" fill="#8A5300" font-size="7">auxiliar</text>
+        <text x="4" y="176" fill="#6B7780" font-size="7.5">Anchos en píxeles CSS. El panel auxiliar es opcional y nunca contiene información que no esté accesible de otro modo.</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 8.1</b> — Progresión de la plantilla principal. La transición de uno a dos paneles ocurre a 1024&nbsp;px porque por debajo de ese ancho ninguno de los dos paneles alcanza una medida de línea aceptable.</figcaption>
+  </figure>
+
+  <h2 id="s8-4">8.4 Densidad</h2>
+  <p>El producto ofrece dos densidades: <b>cómoda</b> (por defecto, obligatoria en pantallas táctiles)
+  y <b>compacta</b> (opcional, disponible a partir de 1024&nbsp;px y con puntero fino detectado
+  mediante <code>pointer: fine</code>). La densidad compacta reduce el espaciado vertical interno un
+  escalón, nunca el tamaño del texto ni el área táctil mínima. La preferencia se persiste por
+  dispositivo y se expone en ajustes, no en una barra de herramientas flotante.</p>
+
+  <h2 id="s8-5">8.5 Radios, bordes y sombras</h2>
+  <table class="compacta" id="t8-3">
+    <thead><tr><th style="width:18%">Token</th><th style="width:14%">Valor</th><th style="width:68%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>radio-sm</code></td><td>4&nbsp;px</td><td>Insignias, campos de entrada, celdas con relleno.</td></tr>
+      <tr><td><code>radio-md</code></td><td>8&nbsp;px</td><td>Botones, tarjetas, menús.</td></tr>
+      <tr><td><code>radio-lg</code></td><td>16&nbsp;px</td><td>Diálogos y hojas inferiores.</td></tr>
+      <tr><td><code>radio-pleno</code></td><td>9999&nbsp;px</td><td>Avatares, conmutadores, contadores circulares.</td></tr>
+      <tr><td><code>borde-fino</code></td><td>1&nbsp;px</td><td>Separadores y contornos por defecto.</td></tr>
+      <tr><td><code>borde-grueso</code></td><td>2&nbsp;px</td><td>Selección, foco y estado de error.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.3</b> — Radios y grosores. Los radios anidados mantienen la regla <i>radio interior = radio exterior − espaciado</i> para que las esquinas resulten concéntricas.</caption>
+  </table>
+
+  <h2 id="s8-6">8.6 Objetivos interactivos</h2>
+  <p>El criterio 2.5.8 exige objetivos de al menos 24 × 24&nbsp;px CSS, con excepciones tasadas. Dado
+  el contexto de uso —teléfono, una mano, a menudo de pie y con prisa— este documento fija un listón
+  superior:</p>
+  <table class="compacta" id="t8-4">
+    <thead><tr><th style="width:26%">Situación</th><th style="width:20%">Mínimo del sistema</th><th style="width:54%">Observación</th></tr></thead>
+    <tbody>
+      <tr><td>Control táctil primario</td><td>44 × 44&nbsp;px</td><td>Área de activación, no tamaño visual: el icono puede medir 20&nbsp;px con relleno hasta 44.</td></tr>
+      <tr><td>Control táctil secundario</td><td>40 × 40&nbsp;px</td><td>Sólo si está separado ≥ 8&nbsp;px de cualquier otro objetivo.</td></tr>
+      <tr><td>Control con puntero fino</td><td>32 × 32&nbsp;px</td><td>Admisible en densidad compacta y sólo con <code>pointer: fine</code>.</td></tr>
+      <tr><td>Enlace en línea de texto</td><td>exento</td><td>Excepción prevista por el criterio; se compensa con espaciado de línea 1,55.</td></tr>
+      <tr><td>Separación entre objetivos</td><td>≥ 8&nbsp;px</td><td>Reduce activaciones accidentales; crítico en filas de acciones de partido.</td></tr>
+      <tr><td>Acción destructiva</td><td>44 × 44&nbsp;px y aislada</td><td>Separación ≥ 16&nbsp;px de cualquier acción frecuente (§4.8).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.4</b> — Tamaños y separaciones mínimas de objetivos interactivos.</caption>
+  </table>
+  <p>Las acciones más frecuentes se sitúan en la mitad inferior de la pantalla en móvil, donde el
+  pulgar alcanza sin recolocar el dispositivo. La navegación principal se ancla abajo en móvil y
+  arriba en escritorio; ambas posiciones son convencionales en sus respectivos contextos (ley de
+  Jakob, §4.3).</p>
+
+  <h2 id="s8-7">8.7 Iconografía</h2>
+  <ul>
+    <li><b>Formato.</b> Conjunto SVG único referenciado por símbolo, con trazo de 1,5&nbsp;px sobre
+    lienzo de 24&nbsp;px y alineación a la rejilla de píxel. Un solo fichero cacheable frente a
+    docenas de peticiones.</li>
+    <li><b>Tamaños.</b> 16, 20 y 24&nbsp;px. Por debajo de 16 los iconos de trazo pierden
+    legibilidad.</li>
+    <li><b>Color.</b> Heredado del texto mediante <code>fill="currentColor"</code>; nunca se codifican
+    colores dentro del símbolo.</li>
+    <li><b>Semántica.</b> Un icono decorativo lleva <code>aria-hidden="true"</code> y <code>focusable="false"</code>.
+    Un icono que porta información tiene texto accesible equivalente. Un botón sólo con icono
+    <b>debe</b> tener nombre accesible y, salvo que la convención sea universal (cerrar, buscar),
+    etiqueta visible.</li>
+    <li><b>Significado estable.</b> Un icono tiene un único significado en todo el producto. El
+    icono de trofeo no puede significar «torneo» en una vista y «premio» en otra.</li>
+    <li><b>Contraste.</b> Los iconos informativos cumplen 3:1 frente a su fondo (criterio 1.4.11).</li>
+  </ul>
+
+  <h2 id="s8-8">8.8 Movimiento</h2>
+  <p>El movimiento tiene tres funciones legítimas: <b>orientar</b> (de dónde viene y a dónde va un
+  elemento), <b>informar</b> (algo está ocurriendo) y <b>confirmar</b> (la acción surtió efecto).
+  Cualquier animación que no cumpla una de las tres se elimina.</p>
+  <table class="compacta" id="t8-5">
+    <thead><tr><th style="width:22%">Token</th><th style="width:14%">Duración</th><th style="width:30%">Curva</th><th style="width:34%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>mov-instantaneo</code></td><td>80&nbsp;ms</td><td><code>linear</code></td><td>Cambio de estado de color en controles.</td></tr>
+      <tr><td><code>mov-rapido</code></td><td>140&nbsp;ms</td><td><code>cubic-bezier(.2,0,.2,1)</code></td><td>Aparición de menús e información emergente.</td></tr>
+      <tr><td><code>mov-estandar</code></td><td>220&nbsp;ms</td><td><code>cubic-bezier(.2,0,0,1)</code></td><td>Transición de panel, hojas, diálogos.</td></tr>
+      <tr><td><code>mov-enfatico</code></td><td>320&nbsp;ms</td><td><code>cubic-bezier(.3,0,0,1)</code></td><td>Entrada de elementos grandes; sorteo de equipos.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.5</b> — Tokens de movimiento. Ninguna transición de interfaz supera 320&nbsp;ms: por encima, el movimiento deja de orientar y empieza a estorbar.</caption>
+  </table>
+  <p>Reglas adicionales, todas verificables:</p>
+  <ul>
+    <li>Sólo se animan <code>transform</code> y <code>opacity</code>; animar propiedades que
+    provocan recálculo de diseño es un defecto de rendimiento (§25.4).</li>
+    <li>Se respeta <code>prefers-reduced-motion</code>: las transiciones de posición se sustituyen
+    por fundidos de 80&nbsp;ms, y las animaciones autónomas —como la ruleta del sorteo— se reducen a
+    un cambio de estado con anuncio textual del resultado.</li>
+    <li>Nada parpadea más de tres veces por segundo (criterio 2.3.1).</li>
+    <li>Ninguna animación bloquea la interacción: la interfaz acepta entrada durante la
+    transición.</li>
+    <li>Las transiciones de vista se implementan con la interfaz de transiciones del navegador cuando
+    está disponible, con degradación silenciosa cuando no lo está (§14.8).</li>
+  </ul>
+  <pre>@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}</pre>
+
+  <h2 id="s8-9">8.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-ESP-01.</b> Toda distancia DEBE proceder de la escala de espaciado; no se admiten valores arbitrarios.</li>
+    <li><b>RQ-ESP-02.</b> Los componentes DEBERÍAN adaptarse mediante consultas de contenedor y no de ventana.</li>
+    <li><b>RQ-ESP-03.</b> Los objetivos táctiles DEBEN medir al menos 44 × 44&nbsp;px con separación mínima de 8&nbsp;px.</li>
+    <li><b>RQ-ESP-04.</b> Los iconos decorativos DEBEN ocultarse a la capa de accesibilidad; los informativos DEBEN tener equivalente textual.</li>
+    <li><b>RQ-ESP-05.</b> El movimiento DEBE limitarse a <code>transform</code> y <code>opacity</code> y respetar la preferencia de movimiento reducido.</li>
+  </ul>
+</section>
+
+<section class="parte" id="parte3">
+  <p class="et">Parte III</p>
+  <h1>Arquitectura de la interfaz</h1>
+  <p class="res">Cómo se organiza la información, cómo se distribuyen los componentes en la pantalla,
+  cómo se especifica el patrón maestro&ndash;detalle que gobierna las tres superficies principales y
+  qué contiene el catálogo de componentes.</p>
+  <ol>
+    <li>Arquitectura de información y navegación</li>
+    <li>Distribución de componentes en la interfaz</li>
+    <li>El patrón maestro&ndash;detalle</li>
+    <li>Catálogo de componentes del sistema de diseño</li>
+    <li>Patrones de interacción, formularios y estados</li>
+  </ol>
+</section>
+
+
+
+
+
+
+<section class="parte" id="parte4">
+  <p class="et">Parte IV</p>
+  <h1>Arquitectura de aplicación de página única</h1>
+  <p class="res">Modelo de ejecución, enrutamiento, división de código, separación entre estado de
+  servidor y estado de cliente, contratos de datos del dominio competitivo y accesibilidad específica
+  de la navegación sin recarga.</p>
+  <ol>
+    <li>Arquitectura SPA: modelo de ejecución y enrutamiento</li>
+    <li>Gestión de estado y de datos</li>
+    <li>Modelo de dominio y contratos de datos</li>
+    <li>Accesibilidad específica de la SPA</li>
+  </ol>
+</section>
+
+
+
+
+
+<section class="parte" id="parte5">
+  <p class="et">Parte V</p>
+  <h1>Accesibilidad</h1>
+  <p class="res">Conformidad WCAG 2.2 nivel AA criterio por criterio, semántica y ARIA, teclado,
+  tecnologías de asistencia, y el procedimiento operativo de auditoría, remediación y declaración
+  de accesibilidad.</p>
+  <ol>
+    <li>Accesibilidad: principios y conformidad WCAG 2.2 AA</li>
+    <li>Accesibilidad operativa: auditoría, pruebas y declaración</li>
+  </ol>
+</section>
+
+
+
+<section class="parte" id="parte6">
+  <p class="et">Parte VI</p>
+  <h1>Seguridad</h1>
+  <p class="res">Modelo de amenazas del producto, controles del cliente web, identidad y
+  autorización verificada en servidor, y protección de la cadena de suministro, los secretos y
+  los datos personales.</p>
+  <ol>
+    <li>Modelo de amenazas y arquitectura de seguridad</li>
+    <li>Seguridad del cliente web</li>
+    <li>Identidad, sesión y autorización</li>
+    <li>Cadena de suministro, secretos, privacidad y respuesta</li>
+  </ol>
+</section>
+
+
+
+
+
+<section class="parte" id="parte7">
+  <p class="et">Parte VII</p>
+  <h1>Rendimiento, calidad y gobernanza</h1>
+  <p class="res">Presupuestos y técnicas de rendimiento, observabilidad del usuario real, estrategia
+  de pruebas, integración continua y gobierno del sistema de diseño a lo largo del tiempo.</p>
+  <ol>
+    <li>Rendimiento: métricas, presupuestos y carga</li>
+    <li>Rendimiento en ejecución y observabilidad</li>
+    <li>Calidad, pruebas y entrega continua</li>
+    <li>Gobernanza, evolución y hoja de ruta</li>
+  </ol>
+</section>
+
+
+
+
+
+<section class="parte" id="parte8">
+  <p class="et">Parte VIII</p>
+  <h1>Apéndices normativos</h1>
+  <p class="res">La parte operativa del documento: tablas completas de tokens, listas de verificación
+  ejecutables, mapas de patrones, trazabilidad de requisitos, decisiones de arquitectura, glosario y
+  fuentes.</p>
+  <ol>
+    <li>Apéndice A — Especificación de tokens de diseño</li>
+    <li>Apéndice B — Lista de verificación WCAG 2.2 A/AA</li>
+    <li>Apéndice C — Lista de verificación de seguridad</li>
+    <li>Apéndice D — Presupuestos y verificación de rendimiento</li>
+    <li>Apéndice E — Patrones ARIA por componente</li>
+    <li>Apéndice F — Matriz de trazabilidad de requisitos</li>
+    <li>Apéndice G — Plantillas de trabajo</li>
+    <li>Apéndice H — Decisiones de arquitectura</li>
+    <li>Apéndice I — Glosario</li>
+    <li>Apéndice J — Bibliografía y fuentes consultadas</li>
+  </ol>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

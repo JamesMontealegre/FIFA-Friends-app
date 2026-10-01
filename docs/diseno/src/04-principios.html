@@ -1,0 +1,174 @@
+<section class="capitulo" id="cap4">
+  <h1 id="h1-4"><span class="cnum">Capítulo 4</span>Principios de diseño y leyes de la interacción</h1>
+
+  <p class="entradilla">Entre la norma y el píxel hay un espacio enorme que ninguna especificación
+  puede cubrir caso por caso. Lo cubren los principios: reglas de decisión que permiten resolver
+  situaciones no previstas sin consultar a nadie. Este capítulo fija los principios del producto, los
+  contrasta con las heurísticas de usabilidad consolidadas, formula las regularidades empíricas de la
+  interacción que tienen consecuencia métrica y explica cómo se aplican a las pantallas concretas de
+  FIFA Friends.</p>
+
+  <h2 id="s4-1">4.1 Principios del producto</h2>
+  <p>Seis principios, ordenados por prioridad. El orden importa: cuando dos chocan, gana el de número
+  menor.</p>
+  <dl>
+    <dt>P1 · El estado actual, primero</dt>
+    <dd>Cada pantalla responde antes que nada a «¿qué pasa ahora y qué me toca?». El contenido que
+    responde a esa pregunta ocupa la posición superior y la mayor jerarquía visual; la configuración,
+    el histórico y la administración son secundarios aunque sean funcionalmente más ricos.</dd>
+    <dt>P2 · Una verdad, muchas vistas</dt>
+    <dd>La clasificación, el calendario y el cuadro son proyecciones de los mismos partidos. Nunca se
+    permite que dos superficies muestren cifras contradictorias: si hay contradicción, es un defecto
+    de datos, no una diferencia de interpretación (§16.6).</dd>
+    <dt>P3 · Decir lo que se puede hacer y por qué no</dt>
+    <dd>Un control que no está disponible explica su condición en el mismo lugar donde se intenta
+    usar. Esconder controles sin explicación produce la sensación de interfaz rota; mostrarlos
+    deshabilitados sin explicación, la de interfaz arbitraria.</dd>
+    <dt>P4 · Reversibilidad antes que confirmación</dt>
+    <dd>Siempre que sea técnicamente posible, se prefiere ejecutar la acción y ofrecer deshacer, en
+    lugar de interrumpir con un diálogo de confirmación. La confirmación se reserva para acciones
+    destructivas, irreversibles o con efecto sobre terceros (§13.10).</dd>
+    <dt>P5 · Densidad con jerarquía</dt>
+    <dd>Este producto trata con tablas, no con tarjetas decorativas. Se acepta densidad informativa
+    alta siempre que exista jerarquía tipográfica y de color suficiente para que la lectura por
+    barrido funcione; se rechaza el minimalismo que obliga a navegar para obtener un dato que cabía
+    en pantalla.</dd>
+    <dt>P6 · Nada depende de una sola señal</dt>
+    <dd>Ningún estado se comunica sólo por color, sólo por posición, sólo por animación o sólo por
+    sonido. Toda señal relevante tiene al menos dos codificaciones concurrentes (§5.9, §18.5).</dd>
+  </dl>
+
+  <h2 id="s4-2">4.2 Heurísticas de usabilidad aplicadas</h2>
+  <p>Las diez heurísticas de usabilidad de Nielsen siguen siendo el instrumento de inspección más
+  rentable que existe. Su valor no está en enunciarlas, sino en declarar qué significa cada una
+  <i>en este producto</i> y cómo se comprueba.</p>
+  <table id="t4-1">
+    <thead><tr><th style="width:24%">Heurística</th><th style="width:40%">Aplicación concreta</th><th style="width:36%">Comprobación</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Visibilidad del estado del sistema</td><td>Estado del torneo visible en todas sus vistas; indicadores de carga, de guardado y de sincronización diferenciados entre sí.</td><td>Toda operación &gt; 400&nbsp;ms muestra retroalimentación; toda escritura confirma o informa de fallo.</td></tr>
+      <tr><td>2 · Correspondencia con el mundo real</td><td>Vocabulario de la tabla 1.1: «jornada», «cuadro», «palmarés», no «registro», «entidad» o «documento».</td><td>Ningún texto de interfaz contiene términos técnicos del modelo de datos.</td></tr>
+      <tr><td>3 · Control y libertad</td><td>Deshacer en registro de resultados; salida clara de todo diálogo; navegación hacia atrás que respeta la selección previa.</td><td>El botón atrás del navegador nunca pierde contexto en maestro&ndash;detalle (§11.7).</td></tr>
+      <tr><td>4 · Consistencia y estándares</td><td>Un único componente por intención; posición invariable de las acciones primarias; convenciones de plataforma respetadas.</td><td>Inventario sin duplicados funcionales; revisión de componentes nuevos contra el catálogo (§27.2).</td></tr>
+      <tr><td>5 · Prevención de errores</td><td>Marcadores con entrada numérica acotada; imposibilidad de registrar un partido inexistente; validación de formato antes del envío.</td><td>Formularios que restringen en origen en vez de rechazar al final (§13.3).</td></tr>
+      <tr><td>6 · Reconocer antes que recordar</td><td>Equipos con escudo y nombre; participantes con avatar; criterios de desempate visibles junto a la tabla.</td><td>Ninguna tarea exige recordar un dato de otra pantalla.</td></tr>
+      <tr><td>7 · Flexibilidad y eficiencia</td><td>Atajos de teclado para organización; enlaces profundos a cualquier estado; filtros persistentes.</td><td>Tareas repetitivas con camino corto documentado en §13.11.</td></tr>
+      <tr><td>8 · Estética y diseño minimalista</td><td>Cada elemento compite por atención: se elimina lo que no responde a una pregunta del usuario.</td><td>Relación señal/ruido revisada en cada pantalla (§4.6).</td></tr>
+      <tr><td>9 · Reconocer, diagnosticar y recuperarse de errores</td><td>Mensajes en lenguaje llano, con causa y acción siguiente; nunca códigos sin traducción.</td><td>Catálogo de mensajes de error revisado (§13.12).</td></tr>
+      <tr><td>10 · Ayuda y documentación</td><td>Ayuda contextual en el punto de uso; acceso al soporte en posición consistente (criterio WCAG 3.2.6).</td><td>El mecanismo de ayuda ocupa el mismo lugar relativo en todas las vistas.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 4.1</b> — Heurísticas de usabilidad, su aplicación específica en FIFA Friends y la comprobación que las hace verificables.</caption>
+  </table>
+
+  <h2 id="s4-3">4.3 Regularidades empíricas con consecuencia métrica</h2>
+  <p>Las llamadas «leyes» de la experiencia de usuario son modelos con grados de validez muy
+  distintos. Se recogen aquí sólo las que tienen consecuencia directa y comprobable sobre decisiones
+  de este documento, con su formulación y su límite.</p>
+  <table id="t4-2">
+    <thead><tr><th style="width:20%">Regularidad</th><th style="width:38%">Formulación y validez</th><th style="width:42%">Consecuencia adoptada</th></tr></thead>
+    <tbody>
+      <tr><td><b>Ley de Fitts</b></td><td>El tiempo de adquisición de un objetivo crece con el logaritmo de la distancia dividida por el tamaño: <i>MT = a + b·log₂(2D/W)</i>. Validada ampliamente en apuntado con ratón y adaptada al toque.</td><td>Objetivos táctiles ≥ 44&nbsp;px y separación ≥ 8&nbsp;px; acciones frecuentes en la zona alcanzable del pulgar; áreas de activación extendidas más allá del icono visible (§8.6).</td></tr>
+      <tr><td><b>Ley de Hick-Hyman</b></td><td>El tiempo de decisión crece con el logaritmo del número de alternativas equiprobables. Se debilita cuando las opciones están agrupadas o son familiares.</td><td>Menús de un nivel con ≤ 7 destinos; formatos de torneo presentados como 4 opciones con descripción, no como lista extensa de parámetros (§13.2).</td></tr>
+      <tr><td><b>Límites de la memoria de trabajo</b></td><td>La capacidad es limitada y depende del agrupamiento; la cifra «7±2» se cita con frecuencia fuera de su contexto original y no es un límite de diseño de menús.</td><td>No se usa como regla numérica. Se aplica su consecuencia sólida: agrupar información relacionada y evitar que una tarea exija retener datos entre pantallas (§13.4).</td></tr>
+      <tr><td><b>Umbrales de respuesta</b></td><td>0,1&nbsp;s se percibe como instantáneo; 1&nbsp;s mantiene el flujo de pensamiento; 10&nbsp;s es el límite de atención. El umbral de Doherty sitúa en ~400&nbsp;ms el punto donde la interacción deja de frenar al usuario.</td><td>Retroalimentación inmediata &lt; 100&nbsp;ms; indicador de progreso a partir de 400&nbsp;ms; operaciones &gt; 1&nbsp;s con estado explícito y posibilidad de continuar (§24.2).</td></tr>
+      <tr><td><b>Ley de Jakob</b></td><td>Las personas pasan la mayor parte del tiempo en otros productos, de modo que esperan que el tuyo funcione igual que los demás.</td><td>Convenciones no negociables: logotipo que lleva al inicio, navegación inferior en móvil, formulario con acción primaria a la derecha o en bloque final.</td></tr>
+      <tr><td><b>Efecto de posición serial</b></td><td>Se recuerda mejor el primer y el último elemento de una serie.</td><td>El dato decisivo de cada fila se sitúa al principio o al final, nunca en el centro visual (§13.6).</td></tr>
+      <tr><td><b>Efecto de aislamiento</b></td><td>Un elemento visualmente distinto en un conjunto homogéneo capta la atención.</td><td>Un único énfasis cromático por vista; si todo destaca, nada destaca (§6.4).</td></tr>
+      <tr><td><b>Ley de Tesler</b></td><td>Todo sistema tiene una complejidad irreducible: la cuestión es quién la asume.</td><td>La complejidad del formato competitivo la asume el sistema (generación automática de calendario), no la persona que organiza (§16.3).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 4.2</b> — Regularidades empíricas, su validez declarada y la consecuencia de diseño adoptada en este documento.</caption>
+  </table>
+
+  <h2 id="s4-4">4.4 Principios de agrupación perceptiva</h2>
+  <p>La organización visual precede a la lectura: antes de leer, el sistema visual agrupa. Los
+  principios de agrupación de la psicología de la forma describen esa operación y permiten sustituir
+  líneas y cajas por relaciones espaciales, reduciendo el ruido sin perder estructura.</p>
+
+  <figure id="f4-1">
+    <svg viewBox="0 0 700 150" width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="8.5" fill="#3C464D">
+        <text x="8" y="12" font-weight="bold" fill="#15191C">Proximidad</text>
+        <rect x="8" y="20" width="22" height="22" rx="3" fill="#0B6E4F"/><rect x="34" y="20" width="22" height="22" rx="3" fill="#0B6E4F"/>
+        <rect x="86" y="20" width="22" height="22" rx="3" fill="#0B6E4F"/><rect x="112" y="20" width="22" height="22" rx="3" fill="#0B6E4F"/>
+        <text x="8" y="60" font-size="7.5">dos grupos sin dibujar un solo borde</text>
+
+        <text x="188" y="12" font-weight="bold" fill="#15191C">Similitud</text>
+        <circle cx="198" cy="31" r="10" fill="#0B6E4F"/><circle cx="224" cy="31" r="10" fill="#C9D1D6"/><circle cx="250" cy="31" r="10" fill="#0B6E4F"/><circle cx="276" cy="31" r="10" fill="#C9D1D6"/>
+        <text x="188" y="60" font-size="7.5">la forma y el color crean categorías</text>
+
+        <text x="358" y="12" font-weight="bold" fill="#15191C">Región común</text>
+        <rect x="358" y="18" width="110" height="28" rx="4" fill="#E8F3EE" stroke="#0B6E4F" stroke-width=".8"/>
+        <circle cx="378" cy="32" r="7" fill="#0B6E4F"/><circle cx="400" cy="32" r="7" fill="#0B6E4F"/><circle cx="446" cy="32" r="7" fill="#6B7780"/>
+        <text x="358" y="60" font-size="7.5">la tarjeta domina sobre la proximidad</text>
+
+        <text x="520" y="12" font-weight="bold" fill="#15191C">Continuidad</text>
+        <path d="M 524 38 C 554 18, 584 48, 614 28 S 664 18, 684 34" fill="none" stroke="#1B4E8C" stroke-width="1.6"/>
+        <text x="520" y="60" font-size="7.5">la alineación guía la lectura</text>
+
+        <rect x="8" y="78" width="330" height="62" rx="4" fill="#F4F7F8" stroke="#E4E9EC"/>
+        <text x="18" y="94" font-size="8" font-weight="bold" fill="#15191C">Aplicación: fila de clasificación</text>
+        <text x="18" y="108" font-size="7.5">Posición y escudo juntos (proximidad) · puntos aislados a la derecha</text>
+        <text x="18" y="120" font-size="7.5">(aislamiento) · filas separadas por espacio, no por línea (señal/ruido) ·</text>
+        <text x="18" y="132" font-size="7.5">alineación decimal de las cifras (continuidad)</text>
+
+        <rect x="352" y="78" width="340" height="62" rx="4" fill="#F4F7F8" stroke="#E4E9EC"/>
+        <text x="362" y="94" font-size="8" font-weight="bold" fill="#15191C">Antipatrón frecuente</text>
+        <text x="362" y="108" font-size="7.5">Separar con líneas lo que ya separa el espacio, encerrar en tarjeta lo</text>
+        <text x="362" y="120" font-size="7.5">que ya agrupa la proximidad y colorear lo que ya distingue la forma:</text>
+        <text x="362" y="132" font-size="7.5">tres codificaciones redundantes elevan el ruido sin añadir información.</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 4.1</b> — Principios de agrupación perceptiva y su aplicación a la fila de clasificación, la unidad de información más repetida del producto.</figcaption>
+  </figure>
+
+  <h2 id="s4-5">4.5 Carga cognitiva</h2>
+  <p>La teoría de la carga cognitiva distingue la carga <i>intrínseca</i> —la dificultad propia de la
+  tarea—, la <i>extrínseca</i> —la que añade la presentación— y la <i>pertinente</i> —la que se
+  invierte en construir comprensión—. El diseño sólo puede actuar sobre la segunda, y ése es
+  exactamente su trabajo: comprender un cuadro de eliminatorias es intrínsecamente complejo;
+  descifrar qué columna es «GF» y cuál «GC» es carga extrínseca pura y, por tanto, un defecto.</p>
+  <p>Reglas operativas derivadas: encabezados de tabla con texto completo o con abreviatura
+  acompañada de su desarrollo accesible; unidades y signos explícitos (+3, −2); ninguna convención
+  que exija aprendizaje previo sin ofrecer su clave en pantalla; y división de tareas largas en pasos
+  con estado persistente, de modo que nada deba sostenerse en la memoria de la persona.</p>
+
+  <h2 id="s4-6">4.6 Relación señal/ruido y jerarquía visual</h2>
+  <p>Cada vista se somete a tres preguntas en revisión de diseño: ¿qué pregunta responde?; ¿qué
+  elemento la responde?; ¿qué elementos compiten con ese? Lo que no responde a la pregunta principal
+  o no habilita la acción siguiente se degrada en jerarquía o se elimina. La jerarquía se construye
+  con cuatro recursos, en este orden de preferencia: <b>posición</b> (lo primero en el flujo de
+  lectura), <b>tamaño</b> (escala tipográfica), <b>peso</b> y, sólo al final, <b>color</b>. El color
+  es el recurso más limitado porque es el único que deja de funcionar para una parte de la población
+  (§5.9) y el que antes se satura: una interfaz con cinco acentos no tiene ninguno.</p>
+
+  <h2 id="s4-7">4.7 Significantes, restricciones y retroalimentación</h2>
+  <p>Un control debe <i>parecer</i> lo que es. En interfaces planas, el significante no puede ser el
+  relieve: se construye con forma, contraste, posición y etiqueta. Este documento adopta tres reglas
+  derivadas:</p>
+  <ul>
+    <li>Todo elemento interactivo tiene al menos dos significantes: forma reconocible (botón,
+    enlace subrayado, campo con borde) y respuesta al puntero y al foco.</li>
+    <li>Las restricciones se expresan en el control, no en el mensaje de error: si el marcador admite
+    de 0 a 99, el campo no acepta otra cosa.</li>
+    <li>Toda acción produce retroalimentación perceptible en menos de 100&nbsp;ms, aunque el
+    resultado tarde más; el cambio de estado visual precede a la confirmación del servidor
+    (§15.5).</li>
+  </ul>
+
+  <h2 id="s4-8">4.8 Cuándo romper la convención</h2>
+  <p>La convención se rompe sólo cuando se cumplen tres condiciones simultáneas: existe evidencia de
+  que la convención perjudica a esta tarea concreta; la alternativa se ha validado con personas
+  reales; y la ruptura es sistemática —se aplica en todo el producto, no en una pantalla—. Un caso
+  real en este producto: la convención sitúa la acción destructiva a la derecha junto a la primaria;
+  aquí se separa físicamente y se desplaza al final del panel de detalle, porque la observación
+  mostró pulsaciones accidentales en uso con una mano. La ruptura se documenta como decisión de
+  arquitectura (ADR-07, apéndice H).</p>
+
+  <h2 id="s4-9">4.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-PRI-01.</b> Toda vista DEBE declarar, en su ficha de diseño, la pregunta que responde y el elemento que la responde.</li>
+    <li><b>RQ-PRI-02.</b> Ningún estado DEBE comunicarse mediante una única codificación sensorial.</li>
+    <li><b>RQ-PRI-03.</b> Los objetivos interactivos DEBEN cumplir el tamaño y separación mínimos del §8.6 con independencia de su importancia aparente.</li>
+    <li><b>RQ-PRI-04.</b> Las acciones reversibles NO DEBERÍAN exigir confirmación; las irreversibles DEBEN exigirla con descripción explícita de la consecuencia.</li>
+    <li><b>RQ-PRI-05.</b> Toda ruptura de convención DEBE registrarse como decisión de arquitectura con la evidencia que la sostiene.</li>
+  </ul>
+</section>

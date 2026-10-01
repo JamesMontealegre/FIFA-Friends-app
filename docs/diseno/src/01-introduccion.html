@@ -1,0 +1,246 @@
+<section class="capitulo" id="cap1">
+  <h1 id="h1-1"><span class="cnum">Capítulo 1</span>Introducción, alcance y contexto del producto</h1>
+
+  <p class="entradilla">Un documento de diseño sólo es útil si delimita con precisión qué decide y
+  qué deja abierto. Este capítulo fija el propósito y el alcance de la especificación, describe el
+  dominio competitivo que la aplicación modela, caracteriza el contexto de uso conforme a
+  ISO 9241-11, enumera las restricciones que acotan el espacio de soluciones y traduce los atributos
+  de calidad de ISO/IEC 25010 en escenarios medibles que el resto del documento debe satisfacer.</p>
+
+  <h2 id="s1-1">1.1 Propósito</h2>
+  <p>Este documento especifica el diseño de la interfaz de usuario y los atributos de calidad
+  transversales de FIFA Friends, una aplicación web para organizar y seguir torneos recreativos de
+  videojuego de fútbol entre grupos de personas conocidas. Persigue cuatro objetivos simultáneos:</p>
+  <ol>
+    <li><b>Prescribir.</b> Define, con nivel de detalle suficiente para implementar sin negociación
+    adicional, cómo son los componentes, cómo se comportan, cómo se combinan y qué valores
+    concretos —color, tamaño, espacio, tiempo— los parametrizan.</li>
+    <li><b>Justificar.</b> Cada prescripción se apoya en una norma, una guía oficial de plataforma o
+    un resultado de investigación citado, no en preferencia estética. Donde la evidencia es débil o
+    contradictoria, se indica explícitamente y se adopta la opción más conservadora para el usuario.</li>
+    <li><b>Verificar.</b> Toda afirmación relevante se expresa de modo que pueda comprobarse: un
+    umbral numérico, una lista de verificación, una prueba automatizada o un procedimiento de
+    auditoría manual reproducible.</li>
+    <li><b>Perdurar.</b> El documento separa lo que cambia con frecuencia (contenido, catálogo de
+    equipos, reglas de competición) de lo que debe permanecer estable (tokens, patrones, contratos),
+    de modo que la evolución del producto no obligue a reescribirlo entero.</li>
+  </ol>
+
+  <div class="clave">
+    <span class="et">Criterio rector</span>
+    <p>Ante un conflicto entre dos recomendaciones de este documento, prevalece el orden siguiente:
+    <b>(1)</b> seguridad de las personas y de sus datos; <b>(2)</b> accesibilidad; <b>(3)</b>
+    corrección funcional del dominio competitivo; <b>(4)</b> rendimiento percibido; <b>(5)</b>
+    consistencia del sistema de diseño; <b>(6)</b> preferencia estética. Este orden no es retórico:
+    se aplica literalmente en la revisión de diseño (apéndice G).</p>
+  </div>
+
+  <h2 id="s1-2">1.2 Alcance</h2>
+  <p>Queda <b>dentro</b> del alcance: el sistema visual completo (color, tipografía, retícula,
+  espaciado, iconografía, movimiento); la arquitectura de información y la navegación; la
+  distribución de componentes en pantalla y las plantillas de página; el catálogo de componentes con
+  sus estados, propiedades y comportamiento accesible; el patrón maestro&ndash;detalle y sus
+  variantes adaptativas; la arquitectura de la aplicación de página única, incluidos enrutamiento,
+  división de código, gestión de estado y sincronización con la base de datos; la accesibilidad
+  conforme a WCAG 2.2 nivel AA; la seguridad del cliente web y el modelo de autorización ejercido en
+  servidor; los presupuestos y técnicas de rendimiento; y la estrategia de pruebas y gobernanza.</p>
+  <p>Queda <b>fuera</b> del alcance: la estrategia comercial y de monetización; el diseño de
+  campañas de adquisición; la implementación concreta de los algoritmos de generación de calendario,
+  que se tratan sólo en lo que afectan a la interfaz y a los contratos de datos (§16); la
+  administración de la infraestructura de nube más allá de su configuración de seguridad y de caché;
+  y la localización a idiomas distintos del castellano, para la cual el documento se limita a fijar
+  los requisitos de internacionalización que no deben cerrarse prematuramente (§9.8).</p>
+
+  <h2 id="s1-3">1.3 El dominio: vocabulario controlado</h2>
+  <p>La primera obligación de una interfaz es hablar el idioma de quien la usa (Nielsen, heurística
+  2). Eso exige un vocabulario único y estable, compartido por interfaz, documentación, código y
+  base de datos. La tabla 1.1 fija ese vocabulario; cualquier sinónimo que aparezca en el producto
+  debe considerarse un defecto.</p>
+
+  <table id="t1-1">
+    <thead><tr><th style="width:18%">Término</th><th style="width:60%">Definición operativa</th><th style="width:22%">Identificador</th></tr></thead>
+    <tbody>
+      <tr><td><b>Torneo</b></td><td>Competición con un conjunto cerrado de participantes, un formato y un ciclo de vida propio. Unidad de agregación y de permisos.</td><td><code>tournament</code></td></tr>
+      <tr><td><b>Participante</b></td><td>Persona inscrita en un torneo concreto. Distinto de «usuario»: una cuenta puede ser participante en unos torneos y no en otros.</td><td><code>player</code></td></tr>
+      <tr><td><b>Organizador</b></td><td>Participante con permisos de administración sobre un torneo: edita el calendario, valida resultados y cierra la competición.</td><td><code>organizer</code></td></tr>
+      <tr><td><b>Equipo</b></td><td>Selección o club del videojuego asignado a un participante, con atributos de valoración y liga de procedencia.</td><td><code>team</code></td></tr>
+      <tr><td><b>Formato</b></td><td>Estructura competitiva: liga de ida, liga de ida y vuelta, grupos más eliminatoria, o eliminatoria directa.</td><td><code>format</code></td></tr>
+      <tr><td><b>Fase</b></td><td>Tramo del torneo con reglas homogéneas: fase de grupos, octavos, cuartos, semifinal, final.</td><td><code>stage</code></td></tr>
+      <tr><td><b>Jornada</b></td><td>Conjunto de partidos programados para disputarse en paralelo dentro de una fase de liga.</td><td><code>round</code></td></tr>
+      <tr><td><b>Partido</b></td><td>Enfrentamiento entre dos participantes con marcador, estado y metadatos de registro.</td><td><code>match</code></td></tr>
+      <tr><td><b>Calendario</b></td><td>Conjunto ordenado de partidos generado al iniciar el torneo a partir del formato y de los participantes.</td><td><code>fixture</code></td></tr>
+      <tr><td><b>Clasificación</b></td><td>Tabla derivada de los partidos finalizados: puntos, partidos jugados, diferencia de goles y criterios de desempate.</td><td><code>standings</code></td></tr>
+      <tr><td><b>Cuadro</b></td><td>Representación en árbol de la fase eliminatoria, con emparejamientos y progresión de ganadores.</td><td><code>bracket</code></td></tr>
+      <tr><td><b>Palmarés</b></td><td>Histórico agregado por persona a lo largo de todos los torneos: títulos, finales, goles, racha.</td><td><code>palmares</code></td></tr>
+      <tr><td><b>Código de invitación</b></td><td>Cadena corta que permite incorporarse a un torneo en estado borrador sin invitación nominal.</td><td><code>inviteCode</code></td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.1</b> — Vocabulario controlado del dominio. La columna derecha fija el identificador canónico en código y en el modelo de datos; la interfaz castellana y el código inglés mantienen una correspondencia uno a uno.</caption>
+  </table>
+
+  <h3 id="s1-3-1">1.3.1 Ciclo de vida del torneo</h3>
+  <p>El torneo es una máquina de estados explícita. Las transiciones no son reversibles salvo donde
+  se indica, y cada una habilita o inhabilita operaciones de la interfaz. Esta máquina es la fuente
+  de verdad para decidir qué controles se muestran, cuáles se deshabilitan y qué reglas de
+  autorización aplican en servidor (§22.6).</p>
+
+  <figure id="f1-1">
+    <svg viewBox="0 0 700 150" width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="fl" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#3C464D"/></marker></defs>
+      <g font-family="DejaVu Sans" font-size="11" text-anchor="middle">
+        <rect x="6" y="46" width="112" height="40" rx="5" fill="#E8F3EE" stroke="#0B6E4F" stroke-width="1.2"/>
+        <text x="62" y="64" fill="#074733" font-weight="bold">borrador</text>
+        <text x="62" y="78" fill="#3C464D" font-size="8.5">inscripción abierta</text>
+
+        <rect x="178" y="46" width="112" height="40" rx="5" fill="#E9F0F8" stroke="#1B4E8C" stroke-width="1.2"/>
+        <text x="234" y="64" fill="#1B4E8C" font-weight="bold">activo</text>
+        <text x="234" y="78" fill="#3C464D" font-size="8.5">calendario generado</text>
+
+        <rect x="350" y="46" width="112" height="40" rx="5" fill="#E9F0F8" stroke="#1B4E8C" stroke-width="1.2"/>
+        <text x="406" y="64" fill="#1B4E8C" font-weight="bold">eliminatoria</text>
+        <text x="406" y="78" fill="#3C464D" font-size="8.5">cuadro vigente</text>
+
+        <rect x="522" y="46" width="112" height="40" rx="5" fill="#F4F7F8" stroke="#6B7780" stroke-width="1.2"/>
+        <text x="578" y="64" fill="#15191C" font-weight="bold">cerrado</text>
+        <text x="578" y="78" fill="#3C464D" font-size="8.5">palmarés consolidado</text>
+
+        <line x1="120" y1="66" x2="172" y2="66" stroke="#3C464D" stroke-width="1.2" marker-end="url(#fl)"/>
+        <line x1="292" y1="66" x2="344" y2="66" stroke="#3C464D" stroke-width="1.2" marker-end="url(#fl)"/>
+        <line x1="464" y1="66" x2="516" y2="66" stroke="#3C464D" stroke-width="1.2" marker-end="url(#fl)"/>
+        <text x="146" y="40" font-size="8" fill="#3C464D">iniciar</text>
+        <text x="318" y="40" font-size="8" fill="#3C464D">clasificar</text>
+        <text x="490" y="40" font-size="8" fill="#3C464D">final</text>
+        <path d="M 234 92 C 234 128, 406 128, 406 92" fill="none" stroke="#9B1C1C" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#fl)"/>
+        <text x="320" y="140" font-size="8" fill="#9B1C1C">liga directa sin fase eliminatoria (formato «liga»)</text>
+        <text x="62" y="30" font-size="8" fill="#0B6E4F" text-anchor="middle">escritura por participantes</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 1.1</b> — Ciclo de vida del torneo. Sólo en estado <i>borrador</i> una persona no organizadora puede escribir, y únicamente para incorporarse a sí misma; a partir de <i>activo</i> toda escritura competitiva queda reservada a la organización (§22.5).</figcaption>
+  </figure>
+
+  <h2 id="s1-4">1.4 Contexto de uso</h2>
+  <p>ISO 9241-11 define la usabilidad como el grado en que un sistema puede ser usado por usuarios
+  específicos para alcanzar objetivos específicos con eficacia, eficiencia y satisfacción
+  <i>en un contexto de uso específico</i>. La última cláusula es la que con más frecuencia se omite
+  y la que más decisiones condiciona. La tabla 1.2 describe el contexto real de esta aplicación.</p>
+
+  <table id="t1-2">
+    <thead><tr><th style="width:16%">Dimensión</th><th style="width:42%">Caracterización</th><th style="width:42%">Consecuencia de diseño</th></tr></thead>
+    <tbody>
+      <tr><td><b>Usuarios</b></td><td>Grupos de 4 a 24 personas con vínculo social previo; alfabetización digital media-alta; sin formación en el producto; rotación baja.</td><td>No hay presupuesto de aprendizaje: la interfaz debe ser autoevidente en la primera sesión (§4.3). No se diseñan tutoriales obligatorios.</td></tr>
+      <tr><td><b>Tareas</b></td><td>Consultar el calendario y la clasificación; registrar un resultado; inscribirse; crear y configurar un torneo; revisar el palmarés.</td><td>Las dos primeras concentran la mayoría de las sesiones y determinan la ruta de entrada y el presupuesto de rendimiento (§24.3).</td></tr>
+      <tr><td><b>Equipamiento</b></td><td>Predominio de teléfono (pantallas de 360–430&nbsp;px CSS de ancho), uso secundario en portátil; navegadores actuales con soporte de módulos ES.</td><td>Diseño con prioridad móvil real, no adaptación posterior; dos paneles sólo a partir de 1024&nbsp;px (§11.5).</td></tr>
+      <tr><td><b>Entorno físico</b></td><td>Salón doméstico con iluminación variable, a menudo baja; pantalla a 40–60&nbsp;cm; uso con una sola mano; posible ruido y atención dividida.</td><td>Modo oscuro de primera clase (§6.6); contraste por encima del mínimo legal; objetivos táctiles amplios (§8.6); nada que dependa sólo del color.</td></tr>
+      <tr><td><b>Entorno de red</b></td><td>Wifi doméstica o red móvil; latencias de 50–300&nbsp;ms; episodios de pérdida de conectividad durante la partida.</td><td>Caché declarada con revalidación, actualización optimista y reconciliación explícita de conflictos (§15.5, §15.6).</td></tr>
+      <tr><td><b>Entorno social</b></td><td>El resultado de un partido tiene consecuencias reputacionales dentro del grupo; existe incentivo para disputar o alterar marcadores.</td><td>Trazabilidad de quién registró cada resultado y cuándo; autorización en servidor; historial de cambios (§16.5, §22.7).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.2</b> — Contexto de uso según el esquema de ISO 9241-11 y su traducción directa a decisiones de diseño verificables.</caption>
+  </table>
+
+  <h2 id="s1-5">1.5 Perfiles y matriz de permisos</h2>
+  <p>El producto reconoce cuatro perfiles. Los permisos se definen aquí en términos de producto y se
+  implementan como control de acceso basado en roles con alcance de torneo en §22.6.</p>
+
+  <table class="compacta" id="t1-3">
+    <thead><tr><th style="width:24%">Operación</th><th style="width:17%">Visitante</th><th style="width:21%">Participante</th><th style="width:20%">Organizador</th><th style="width:18%">Administración</th></tr></thead>
+    <tbody>
+      <tr><td>Ver torneo público</td><td>No</td><td>Sí</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Incorporarse con código</td><td>No (requiere sesión)</td><td>Sí, sólo a sí misma, sólo en borrador</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Crear torneo</td><td>No</td><td>Sí (pasa a organizar el suyo)</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Generar calendario</td><td>No</td><td>No</td><td>Sí, en su torneo</td><td>Sí</td></tr>
+      <tr><td>Registrar resultado</td><td>No</td><td>Propuesta sujeta a validación</td><td>Sí, en su torneo</td><td>Sí</td></tr>
+      <tr><td>Editar resultado consolidado</td><td>No</td><td>No</td><td>Sí, con registro de auditoría</td><td>Sí</td></tr>
+      <tr><td>Cerrar torneo y consolidar palmarés</td><td>No</td><td>No</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Gestionar roles de un torneo</td><td>No</td><td>No</td><td>Sí, delegar organización</td><td>Sí</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.3</b> — Matriz de permisos por perfil. La columna «Administración» corresponde a operación de plataforma y debe ser excepcional, auditada y nunca la vía ordinaria de trabajo.</caption>
+  </table>
+
+  <div class="riesgo">
+    <span class="et">Hallazgo H1 — deuda de seguridad heredada</span>
+    <p>La implementación vigente concede la totalidad de la columna «Organizador» y «Administración»
+    a una dirección de correo literal escrita en las reglas de la base de datos. Esto impide delegar,
+    rompe si la persona cambia de cuenta, no deja rastro de auditoría y convierte una identidad
+    personal en un privilegio estructural. El capítulo 22 especifica su sustitución por roles con
+    alcance de torneo verificados en servidor; es el único cambio que este documento clasifica como
+    bloqueante antes de cualquier ampliación funcional.</p>
+  </div>
+
+  <h2 id="s1-6">1.6 Restricciones</h2>
+  <dl>
+    <dt>R1 · Plataforma</dt>
+    <dd>Aplicación de página única en React 19 con TypeScript, empaquetada con Vite y desplegada
+    como contenido estático en una red de distribución perimetral con reescritura a
+    <code>index.html</code>. No existe servidor de aplicación propio; toda lógica privilegiada debe
+    residir en el motor de reglas de la base de datos o en funciones gestionadas.</dd>
+    <dt>R2 · Datos</dt>
+    <dd>Cloud Firestore como almacén documental con suscripciones en tiempo real y reglas de
+    seguridad declarativas. Las consultas no admiten uniones; la desnormalización es la norma y
+    exige una estrategia explícita de consistencia (§16.4).</dd>
+    <dt>R3 · Identidad</dt>
+    <dd>Autenticación federada mediante proveedor externo con identificador de token en el cliente.
+    No se almacenan contraseñas propias. El token se gestiona en memoria por la biblioteca cliente
+    y se renueva de forma transparente (§22.2).</dd>
+    <dt>R4 · Equipo y ritmo</dt>
+    <dd>Equipo reducido y dedicación parcial. La especificación debe ser implementable por
+    incrementos independientes y priorizar soluciones de plataforma sobre dependencias nuevas.</dd>
+    <dt>R5 · Coste</dt>
+    <dd>Operación dentro de los niveles gratuitos o de bajo coste de la plataforma: el número de
+    lecturas de documento por sesión es una restricción de diseño, no sólo de rendimiento
+    (§15.4).</dd>
+    <dt>R6 · Legal</dt>
+    <dd>Tratamiento de datos personales mínimo (nombre visible, imagen de perfil, correo de la
+    identidad federada). Aplican los principios de minimización y limitación de finalidad; la
+    interfaz debe permitir ejercer supresión y portabilidad (§23.5).</dd>
+  </dl>
+
+  <h2 id="s1-7">1.7 Atributos de calidad y escenarios medibles</h2>
+  <p>ISO/IEC 25010 describe la calidad del producto software en características y subcaracterísticas.
+  Un documento de diseño que se limite a declarar «la aplicación será usable, segura y rápida» no
+  decide nada. La tabla 1.4 convierte cada atributo priorizado en un escenario de calidad con
+  estímulo, respuesta y medida, que es lo que después se verifica en el apéndice D y en §26.</p>
+
+  <table id="t1-4">
+    <thead><tr><th style="width:18%">Atributo (25010)</th><th style="width:45%">Escenario</th><th style="width:37%">Medida de aceptación</th></tr></thead>
+    <tbody>
+      <tr><td><b>Usabilidad</b><br><small>Aprendibilidad</small></td><td>Una persona que nunca ha usado el producto recibe un enlace de invitación y debe inscribirse en un torneo.</td><td>≥ 90&nbsp;% completa la tarea sin ayuda externa en ≤ 90&nbsp;s (prueba moderada con 8 participantes, §3.7).</td></tr>
+      <tr><td><b>Usabilidad</b><br><small>Operabilidad</small></td><td>Una organizadora registra el marcador de un partido desde el teléfono, de pie, con una mano.</td><td>≤ 4 toques desde la pantalla de torneo; todos los objetivos ≥ 44 × 44&nbsp;px; sin desplazamiento horizontal.</td></tr>
+      <tr><td><b>Accesibilidad</b></td><td>Una persona usuaria de lector de pantalla navega del listado de partidos al detalle y vuelve.</td><td>Cero incidencias de nivel A/AA en auditoría manual (apéndice B); anuncio de cambio de ruta en ≤ 1&nbsp;s.</td></tr>
+      <tr><td><b>Eficiencia</b><br><small>Comportamiento temporal</small></td><td>Visita en frío a la vista de clasificación desde red móvil de referencia.</td><td>LCP ≤ 2,5&nbsp;s e INP ≤ 200&nbsp;ms en percentil 75 de campo; transferencia de ruta ≤ 180&nbsp;KB comprimidos.</td></tr>
+      <tr><td><b>Fiabilidad</b><br><small>Tolerancia a fallos</small></td><td>Se pierde la conectividad mientras se envía un resultado.</td><td>La interfaz conserva el dato, informa del estado y reintenta; ninguna escritura se pierde en silencio (§15.6).</td></tr>
+      <tr><td><b>Seguridad</b><br><small>Integridad</small></td><td>Un participante manipula la petición de red para alterar la clasificación.</td><td>La escritura es rechazada por reglas de servidor; el intento queda registrado (§22.8). Cobertura ASVS nivel 2 en los controles aplicables.</td></tr>
+      <tr><td><b>Mantenibilidad</b><br><small>Modularidad</small></td><td>Se añade un formato de competición nuevo.</td><td>Ningún cambio en componentes de presentación genéricos; superficie tocada ≤ 3 módulos de dominio (§12.8).</td></tr>
+      <tr><td><b>Compatibilidad</b></td><td>Uso en las dos últimas versiones mayores de los navegadores de hoja perenne y en modo de contraste forzado.</td><td>Paridad funcional; degradación controlada documentada por característica (§14.9).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.4</b> — Escenarios de calidad derivados de ISO/IEC 25010. Cada medida de aceptación es rastreable hasta una prueba concreta en el apéndice F.</caption>
+  </table>
+
+  <h2 id="s1-8">1.8 Supuestos y riesgos de diseño</h2>
+  <p>Se asume que el grupo de personas usuarias de un torneo se conoce previamente, lo que permite
+  un modelo de confianza intermedio: no hay anonimato, pero tampoco verificación de identidad
+  fuerte. Se asume también que el volumen de datos por torneo es pequeño —decenas de partidos, no
+  miles—, lo que autoriza a resolver en cliente ordenaciones y agregaciones que en otro producto
+  exigirían servidor. Ambos supuestos se revisan si el producto se abre a grupos desconocidos entre
+  sí, escenario en el que varias decisiones de este documento (notablemente §15.7 y §22.5) dejarían
+  de ser suficientes.</p>
+  <table class="compacta" id="t1-5">
+    <thead><tr><th style="width:7%">ID</th><th style="width:38%">Riesgo</th><th style="width:9%">Prob.</th><th style="width:9%">Impacto</th><th style="width:37%">Mitigación especificada</th></tr></thead>
+    <tbody>
+      <tr><td>RG-1</td><td>Divergencia entre la clasificación mostrada y los partidos registrados</td><td>Media</td><td>Alto</td><td>Derivación en servidor y recálculo idempotente; §15.7, §16.6</td></tr>
+      <tr><td>RG-2</td><td>Manipulación de resultados por participantes</td><td>Media</td><td>Alto</td><td>Autorización por rol en servidor, auditoría y validación cruzada; §22.6</td></tr>
+      <tr><td>RG-3</td><td>Degradación de rendimiento al crecer el histórico de palmarés</td><td>Alta</td><td>Medio</td><td>Agregados materializados y paginación por cursor; §15.4, §24.7</td></tr>
+      <tr><td>RG-4</td><td>Deriva visual entre componentes por falta de tokens</td><td>Alta</td><td>Medio</td><td>Tokens como única fuente de valores y verificación en integración continua; §6.8, §27.3</td></tr>
+      <tr><td>RG-5</td><td>Regresión de accesibilidad al añadir funcionalidad</td><td>Alta</td><td>Alto</td><td>Pruebas automatizadas de accesibilidad por componente y por ruta; §26.5</td></tr>
+      <tr><td>RG-6</td><td>Compromiso de una dependencia del ecosistema de paquetes</td><td>Media</td><td>Crítico</td><td>Instalación desde fichero de bloqueo, revisión de scripts de ciclo de vida y verificación de procedencia; §23.2</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 1.5</b> — Registro de riesgos de diseño con la sección que especifica su mitigación.</caption>
+  </table>
+
+  <h2 id="s1-9">1.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-GEN-01.</b> La interfaz DEBE usar exclusivamente el vocabulario de la tabla 1.1; ningún texto visible introducirá sinónimos no registrados.</li>
+    <li><b>RQ-GEN-02.</b> Toda operación de escritura competitiva DEBE validarse en servidor conforme a la matriz de la tabla 1.3, con independencia de lo que la interfaz muestre o esconda.</li>
+    <li><b>RQ-GEN-03.</b> El diseño DEBE partir del ancho de 360&nbsp;px y añadir capacidades al crecer el espacio, nunca al revés.</li>
+    <li><b>RQ-GEN-04.</b> Cada escenario de la tabla 1.4 DEBE tener al menos una prueba automatizada o un procedimiento manual documentado que lo verifique.</li>
+    <li><b>RQ-GEN-05.</b> Las decisiones que se aparten de este documento DEBEN registrarse como decisión de arquitectura en el apéndice H, con alternativas consideradas y consecuencias.</li>
+  </ul>
+</section>

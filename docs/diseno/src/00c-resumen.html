@@ -1,0 +1,88 @@
+<section class="liminar" id="resumen">
+  <h1>Resumen ejecutivo</h1>
+
+  <p class="entradilla">FIFA Friends es una aplicación web de página única para organizar torneos
+  recreativos entre grupos de amistades: creación de competiciones, sorteo y asignación de equipos,
+  generación de calendario, registro de resultados, clasificaciones automáticas, cuadros eliminatorios
+  y palmarés histórico. Este documento especifica cómo debe verse, comportarse, defenderse y rendir
+  esa interfaz, y por qué cada decisión es la correcta a la luz de la evidencia disponible.</p>
+
+  <h2 id="res-problema">El problema de diseño</h2>
+  <p>La aplicación tiene tres características que condicionan todo el diseño. Primero, es
+  <b>intensiva en datos tabulares y jerárquicos</b>: clasificaciones, calendarios, cuadros de
+  eliminación y estadísticas acumuladas. Segundo, su uso real ocurre <b>en movilidad y en sesiones
+  cortas</b> —consultar quién juega, registrar un resultado durante la partida, comprobar la tabla—
+  mayoritariamente desde teléfono y con conectividad irregular. Tercero, tiene <b>dos perfiles con
+  poderes radicalmente distintos</b>: participantes que leen y se inscriben, y organizadores que
+  modifican el estado competitivo de todos los demás. Un diseño que ignore cualquiera de los tres
+  rasgos produce una interfaz densa e ilegible en pantalla pequeña, lenta en la red real, o
+  insegura en el límite de confianza entre cliente y base de datos.</p>
+
+  <h2 id="res-tesis">Tesis del documento</h2>
+  <p>La calidad de esta interfaz no se obtiene acumulando buenas prácticas sueltas, sino derivando
+  todas las decisiones de un pequeño conjunto de invariantes verificables. El documento sostiene y
+  desarrolla seis:</p>
+  <ol>
+    <li><b>El sistema visual es un sistema de tokens, no un catálogo de pantallas.</b> Color,
+    tipografía, espaciado, radios, elevación y movimiento se definen como variables con semántica
+    explícita (§6, §7, §8, apéndice A), expresadas en un espacio de color perceptualmente uniforme
+    (OKLCH) para que las escalas de luminosidad sean predecibles y el contraste calculable a priori.</li>
+    <li><b>La accesibilidad es un requisito funcional, no una revisión final.</b> El objetivo es
+    conformidad WCAG 2.2 nivel AA sin excepciones, con los nueve criterios nuevos de la versión 2.2
+    tratados uno a uno (§18), patrones de teclado tomados de la guía de prácticas ARIA del W3C
+    (apéndice E) y verificación automatizada integrada en la cadena de entrega (§26).</li>
+    <li><b>La seguridad de una aplicación de página única vive en el servidor.</b> El cliente es
+    código público e inspeccionable: toda regla que importe debe ser inexpugnable desde el navegador.
+    Se especifica un modelo de amenazas STRIDE (§20), una política de seguridad de contenido estricta
+    basada en <i>nonce</i> con <code>strict-dynamic</code> y Trusted Types (§21), y un modelo de
+    autorización declarativa en el motor de reglas de la base de datos con control de acceso basado en
+    roles por torneo (§22), que sustituye la autorización por dirección de correo electrónico
+    incrustada en las reglas actuales.</li>
+    <li><b>El rendimiento es un presupuesto, no una aspiración.</b> Se fijan objetivos en percentil 75
+    de campo alineados con Core Web Vitals —LCP ≤ 2,5 s; INP ≤ 200 ms; CLS ≤ 0,1— y presupuestos de
+    transferencia por ruta que fallan la integración continua cuando se exceden (§24, §25,
+    apéndice D).</li>
+    <li><b>El patrón maestro&ndash;detalle es la columna vertebral de la navegación.</b> Las tres
+    superficies principales —torneos, partidos y equipos— son instancias del mismo patrón, con una
+    especificación única de sincronización de selección, representación del estado en la URL,
+    comportamiento adaptativo entre uno y dos paneles, y gestión de foco al cambiar de elemento
+    (§11).</li>
+    <li><b>La interfaz se compone por regiones estables.</b> La distribución de componentes se define
+    por regiones semánticas y plantillas de página reutilizables, con jerarquía atómica explícita
+    (fundamentos, primitivas, compuestos, patrones, plantillas, vistas) y reglas de propiedad y
+    dependencia que impiden el acoplamiento accidental entre dominios (§10, §12).</li>
+  </ol>
+
+  <h2 id="res-hallazgos">Hallazgos sobre la implementación actual</h2>
+  <p>El diagnóstico del código existente identifica nueve brechas respecto a esta especificación. Se
+  resumen aquí con su tratamiento detallado:</p>
+  <table class="compacta" id="t0-1">
+    <thead><tr><th style="width:7%">#</th><th style="width:65%">Hallazgo</th><th style="width:14%">Severidad</th><th style="width:14%">Sección</th></tr></thead>
+    <tbody>
+      <tr><td>H1</td><td>La autorización administrativa está codificada como una dirección de correo literal en las reglas de la base de datos: no es auditable, no admite delegación y acopla la seguridad a una identidad personal.</td><td>Crítica</td><td>§22.4</td></tr>
+      <tr><td>H2</td><td>No existe política de seguridad de contenido ni cabeceras de seguridad en el despliegue perimetral.</td><td>Alta</td><td>§21.3</td></tr>
+      <tr><td>H3</td><td>La regla de incorporación a un torneo en estado borrador permite escribir el arreglo de participantes completo, sin acotar la mutación a la propia identidad de quien la solicita.</td><td>Alta</td><td>§22.5</td></tr>
+      <tr><td>H4</td><td>El idioma declarado del documento es inglés mientras la interfaz es castellana, lo que degrada la pronunciación de los lectores de pantalla y la separación silábica.</td><td>Media</td><td>§18.3</td></tr>
+      <tr><td>H5</td><td>La fuente tipográfica se carga desde un tercero en la ruta crítica, sin autoalojamiento ni subconjunto, lo que introduce una dependencia de red y una fuga de metadatos de navegación.</td><td>Media</td><td>§7.7, §24.5</td></tr>
+      <tr><td>H6</td><td>No hay anuncio de cambio de ruta ni traslado de foco al navegar, con la pérdida de contexto que ello supone en lector de pantalla.</td><td>Alta</td><td>§17.3</td></tr>
+      <tr><td>H7</td><td>No existe división de código por ruta: el paquete inicial carga vistas que la mayoría de sesiones nunca visita.</td><td>Media</td><td>§14.6</td></tr>
+      <tr><td>H8</td><td>Las clasificaciones se recalculan y escriben desde el cliente, lo que permite divergencia entre réplica y fuente y abre una vía de manipulación.</td><td>Alta</td><td>§15.7, §16.6</td></tr>
+      <tr><td>H9</td><td>No hay suite de pruebas ni verificación automatizada de accesibilidad o rendimiento en integración continua.</td><td>Media</td><td>§26</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 0.1</b> — Hallazgos del diagnóstico inicial, severidad y sección donde se especifica el tratamiento.</caption>
+  </table>
+
+  <h2 id="res-estructura">Cómo leer este documento</h2>
+  <p>El documento se organiza en ocho partes. La parte I establece el marco metodológico y normativo
+  y los principios de diseño. La parte II define el sistema visual: color, tipografía, retícula y
+  movimiento. La parte III especifica la arquitectura de la interfaz: información, distribución de
+  componentes, patrón maestro&ndash;detalle, catálogo de componentes y patrones de interacción. La
+  parte IV describe la arquitectura de la aplicación de página única, la gestión de estado y datos y
+  el modelo de dominio. La parte V desarrolla la accesibilidad. La parte VI, la seguridad. La parte
+  VII, el rendimiento, la calidad y la gobernanza. La parte VIII reúne los apéndices normativos, que
+  son la parte operativa del documento: tablas de tokens, listas de verificación, mapas de patrones
+  ARIA, matriz de trazabilidad, decisiones de arquitectura, glosario y bibliografía.</p>
+  <p>Cada capítulo comienza con una entradilla que resume su contenido y termina con una síntesis de
+  requisitos identificados. Los perfiles con menos tiempo disponible encontrarán el núcleo operativo
+  en los apéndices A a D y en las síntesis de los capítulos 11, 18, 21 y 24.</p>
+</section>

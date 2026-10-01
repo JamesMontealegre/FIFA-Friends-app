@@ -1,0 +1,190 @@
+<section class="capitulo" id="cap3">
+  <h1 id="h1-3"><span class="cnum">Capítulo 3</span>Proceso de diseño centrado en las personas</h1>
+
+  <p class="entradilla">El diseño descrito en este documento no es el resultado de una preferencia,
+  sino de un proceso repetible. Este capítulo describe ese proceso conforme a ISO 9241-210: cómo se
+  investiga el contexto, cómo se representa a quienes usan el producto, cómo se formulan los
+  recorridos críticos, cómo se evalúan las soluciones con personas reales y qué métricas deciden si
+  una iteración ha mejorado o empeorado la experiencia.</p>
+
+  <h2 id="s3-1">3.1 Modelo de proceso</h2>
+  <p>ISO 9241-210 establece cuatro actividades encadenadas e iterativas, y exige que la iteración no
+  sea opcional: un diseño se considera terminado cuando satisface los requisitos verificados con
+  usuarios, no cuando se agota el calendario. Las actividades se instancian así en este producto:</p>
+
+  <figure id="f3-1">
+    <svg viewBox="0 0 700 220" width="100%" height="210" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="fa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" fill="#0B6E4F"/></marker></defs>
+      <g font-family="DejaVu Sans" font-size="10" text-anchor="middle">
+        <circle cx="350" cy="110" r="96" fill="none" stroke="#C9D1D6" stroke-width="1" stroke-dasharray="4 4"/>
+        <rect x="258" y="6" width="184" height="42" rx="5" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="350" y="24" font-weight="bold" fill="#074733">1 · Comprender el contexto</text>
+        <text x="350" y="39" font-size="8.5" fill="#3C464D">entrevistas · analítica · inventario</text>
+
+        <rect x="468" y="88" width="184" height="42" rx="5" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="560" y="106" font-weight="bold" fill="#1B4E8C">2 · Especificar requisitos</text>
+        <text x="560" y="121" font-size="8.5" fill="#3C464D">escenarios · criterios medibles</text>
+
+        <rect x="258" y="170" width="184" height="42" rx="5" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="350" y="188" font-weight="bold" fill="#074733">3 · Producir soluciones</text>
+        <text x="350" y="203" font-size="8.5" fill="#3C464D">bocetos · prototipo · implementación</text>
+
+        <rect x="48" y="88" width="184" height="42" rx="5" fill="#FBF2E2" stroke="#8A5300"/>
+        <text x="140" y="106" font-weight="bold" fill="#8A5300">4 · Evaluar frente a requisitos</text>
+        <text x="140" y="121" font-size="8.5" fill="#3C464D">prueba moderada · auditoría · campo</text>
+
+        <path d="M 452 40 A 96 96 0 0 1 520 84" fill="none" stroke="#0B6E4F" stroke-width="1.4" marker-end="url(#fa)"/>
+        <path d="M 520 136 A 96 96 0 0 1 452 178" fill="none" stroke="#0B6E4F" stroke-width="1.4" marker-end="url(#fa)"/>
+        <path d="M 248 178 A 96 96 0 0 1 180 136" fill="none" stroke="#0B6E4F" stroke-width="1.4" marker-end="url(#fa)"/>
+        <path d="M 180 84 A 96 96 0 0 1 248 42" fill="none" stroke="#0B6E4F" stroke-width="1.4" marker-end="url(#fa)"/>
+        <text x="350" y="104" font-size="9" fill="#6B7780">iteración obligatoria</text>
+        <text x="350" y="118" font-size="8" fill="#6B7780">hasta satisfacer los criterios</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 3.1</b> — Ciclo de diseño centrado en las personas conforme a ISO 9241-210. La evaluación no cierra el ciclo: lo realimenta.</figcaption>
+  </figure>
+
+  <h2 id="s3-2">3.2 Investigación: métodos y alcance</h2>
+  <p>La investigación es proporcionada al riesgo de equivocarse. Para un producto de este tamaño, un
+  programa ligero y continuo supera a un estudio extenso y único. El programa consta de cinco
+  instrumentos:</p>
+  <table id="t3-1">
+    <thead><tr><th style="width:22%">Instrumento</th><th style="width:16%">Frecuencia</th><th style="width:30%">Pregunta que responde</th><th style="width:32%">Limitación conocida</th></tr></thead>
+    <tbody>
+      <tr><td>Entrevista semiestructurada (6–8 personas)</td><td>Al inicio y ante cambio mayor</td><td>Qué hace realmente el grupo antes y después de cada partida; dónde está la fricción.</td><td>Sesgo de deseabilidad; las personas describen procesos idealizados.</td></tr>
+      <tr><td>Observación contextual de una jornada real</td><td>Dos veces al año</td><td>Cómo se registra un resultado en el momento, con el teléfono en la mano.</td><td>Efecto de observación; muestra pequeña.</td></tr>
+      <tr><td>Analítica de producto anonimizada</td><td>Continua</td><td>Qué rutas se usan, dónde se abandona, con qué frecuencia y en qué dispositivo.</td><td>Explica el qué, nunca el porqué.</td></tr>
+      <tr><td>Prueba de usabilidad moderada (5–8 personas)</td><td>Cada incremento relevante</td><td>Si una tarea concreta se completa sin ayuda y a qué coste.</td><td>No mide adopción a largo plazo ni aprendizaje acumulado.</td></tr>
+      <tr><td>Encuesta breve en producto</td><td>Trimestral</td><td>Percepción de facilidad y satisfacción; evolución frente al trimestre anterior.</td><td>Autoselección de quien responde.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 3.1</b> — Programa de investigación. Cada instrumento se declara con su limitación para evitar conclusiones que la muestra no sostiene.</caption>
+  </table>
+  <div class="nota">
+    <span class="et">Sobre el tamaño de muestra</span>
+    <p>La regla difundida de que «cinco personas bastan» procede de modelos de detección de problemas
+    con probabilidad de descubrimiento alta y homogénea. No se aplica cuando existen perfiles con
+    tareas distintas: aquí hay al menos dos (participante y organización), de modo que la prueba se
+    ejecuta con cinco personas <i>por perfil</i>. Para medir —no descubrir— se requieren muestras
+    mucho mayores; por eso las métricas cuantitativas de §3.8 proceden de analítica y de encuesta, no
+    de las sesiones moderadas.</p>
+  </div>
+
+  <h2 id="s3-3">3.3 Arquetipos de usuario</h2>
+  <p>Los arquetipos no son retratos narrativos: son conjuntos de necesidades, capacidades y
+  restricciones que permiten decidir. Se definen tres, más un conjunto de requisitos de capacidad que
+  atraviesa a todos ellos.</p>
+  <table id="t3-2">
+    <thead><tr><th style="width:18%">Arquetipo</th><th style="width:28%">Objetivo principal</th><th style="width:27%">Contexto y restricciones</th><th style="width:27%">Implicación de diseño dominante</th></tr></thead>
+    <tbody>
+      <tr><td><b>A1 · Quien organiza</b></td><td>Montar el torneo rápido, mantenerlo vivo y resolver incidencias sin perder credibilidad ante el grupo.</td><td>Carga operativa alta y concentrada; a menudo configura desde portátil y gestiona desde teléfono.</td><td>Flujos de configuración con valores por defecto sensatos y edición reversible; operaciones masivas; registro de auditoría visible.</td></tr>
+      <tr><td><b>A2 · Quien participa</b></td><td>Saber cuándo juega, contra quién y cómo va la clasificación; registrar su resultado.</td><td>Sesiones de menos de un minuto, en movilidad, con atención dividida.</td><td>Ruta de entrada directa al estado actual; densidad informativa alta pero jerarquizada; cero pasos innecesarios.</td></tr>
+      <tr><td><b>A3 · Quien observa</b></td><td>Seguir el torneo y el histórico sin participar: antiguos participantes, acompañantes.</td><td>Acceso esporádico, frecuentemente desde un enlace compartido.</td><td>Vistas de sólo lectura compartibles por URL estable y comprensibles sin contexto previo (§9.6).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 3.2</b> — Arquetipos de usuario y su implicación dominante de diseño.</caption>
+  </table>
+  <p>A estos arquetipos se superpone un <b>perfil de capacidad</b> que no es opcional: cualquiera de
+  los tres puede usar lector de pantalla, navegar exclusivamente por teclado, tener baja visión,
+  presentar deficiencia de visión del color, usar magnificación al 200&nbsp;% o interactuar con
+  temblor que reduzca la precisión del puntero. El capítulo 18 convierte ese perfil en requisitos
+  concretos; aquí basta con registrar que no se trata de un cuarto arquetipo minoritario, sino de una
+  dimensión transversal a los tres.</p>
+
+  <h2 id="s3-4">3.4 Trabajos por realizar y escenarios</h2>
+  <p>Cada recorrido crítico se formula como una declaración de trabajo por realizar —qué intenta
+  lograr la persona y en qué circunstancia— porque esa formulación resiste mejor los cambios de
+  interfaz que una lista de funcionalidades.</p>
+  <ol>
+    <li><b>JTR-1.</b> «Cuando el grupo acuerda jugar un torneo, quiero crearlo y repartir equipos sin
+    discusión, para empezar a jugar en menos de cinco minutos.»</li>
+    <li><b>JTR-2.</b> «Cuando termina una partida, quiero registrar el marcador en segundos, para que
+    la clasificación esté al día antes de la siguiente.»</li>
+    <li><b>JTR-3.</b> «Cuando llego tarde a la reunión, quiero saber de un vistazo qué se ha jugado y
+    cómo voy, para incorporarme sin preguntar.»</li>
+    <li><b>JTR-4.</b> «Cuando el torneo acaba, quiero que quede constancia de quién ganó, para poder
+    recordarlo —y recordárselo— meses después.»</li>
+    <li><b>JTR-5.</b> «Cuando alguien impugna un resultado, quiero ver quién lo introdujo y cuándo,
+    para resolverlo sin conflicto.»</li>
+  </ol>
+
+  <h2 id="s3-5">3.5 Mapa de recorrido y puntos de dolor</h2>
+  <table id="t3-3">
+    <thead><tr><th style="width:16%">Fase</th><th style="width:26%">Acción de la persona</th><th style="width:30%">Punto de dolor observado</th><th style="width:28%">Respuesta de diseño</th></tr></thead>
+    <tbody>
+      <tr><td>Descubrimiento</td><td>Recibe un enlace por mensajería y lo abre.</td><td>Aterriza en una pantalla de sesión sin contexto de a qué ha sido invitada.</td><td>La ruta de invitación muestra nombre del torneo y de quien organiza antes de pedir identificación (§9.4).</td></tr>
+      <tr><td>Incorporación</td><td>Inicia sesión y se inscribe.</td><td>Duda sobre si ha quedado inscrita; no hay confirmación persistente.</td><td>Confirmación con estado persistente en la vista de torneo y notificación efímera accesible (§13.8).</td></tr>
+      <tr><td>Preparación</td><td>Recibe o elige equipo.</td><td>El sorteo aleatorio se percibe como manipulable.</td><td>Sorteo con semilla registrada y resultado verificable; animación como refuerzo, nunca como fuente de verdad (§13.9).</td></tr>
+      <tr><td>Competición</td><td>Consulta el calendario, juega, registra.</td><td>Encontrar el propio partido en una lista larga exige desplazamiento y lectura.</td><td>Vista centrada en «mi próximo partido» y filtro persistente por participante (§11.6).</td></tr>
+      <tr><td>Resolución</td><td>Consulta la clasificación.</td><td>Los criterios de desempate no son evidentes y generan discusión.</td><td>Clasificación con explicación del desempate accesible en la propia fila (§13.6).</td></tr>
+      <tr><td>Memoria</td><td>Vuelve meses después.</td><td>El histórico es difícil de alcanzar y no cuenta una historia.</td><td>Palmarés como superficie de primer nivel con narrativa por persona (§9.3).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 3.3</b> — Mapa de recorrido con los puntos de dolor detectados en investigación y la respuesta de diseño especificada.</caption>
+  </table>
+
+  <h2 id="s3-6">3.6 Prototipado y fidelidad</h2>
+  <p>La fidelidad del prototipo se elige por la pregunta que debe responder, no por la fase del
+  proyecto. Boceto en papel o esquema de baja fidelidad para decidir estructura y prioridad; prototipo
+  interactivo de media fidelidad para validar flujo y nomenclatura; implementación real en rama
+  separada cuando la pregunta implica rendimiento, accesibilidad con tecnología de asistencia o
+  comportamiento con datos reales —tres cosas que ningún prototipo de herramienta de diseño
+  reproduce con fidelidad suficiente—. Esta última regla es la que justifica que el sistema de
+  componentes (§12) se construya como código verificable desde el principio.</p>
+
+  <h2 id="s3-7">3.7 Protocolo de evaluación</h2>
+  <p>Cada incremento relevante se evalúa con tres instrumentos complementarios:</p>
+  <dl>
+    <dt>Evaluación heurística</dt>
+    <dd>Dos personas evaluadoras recorren la interfaz contra las diez heurísticas de usabilidad
+    (§4.2) y los principios de diálogo de ISO 9241-110. Produce una lista de problemas con severidad
+    de 0 a 4. Es barata y detecta mucho, pero no sustituye a la observación: tiende a sobredetectar
+    problemas de consistencia e infradetectar problemas de comprensión del dominio.</dd>
+    <dt>Prueba de usabilidad moderada</dt>
+    <dd>Cinco personas por arquetipo ejecutan tareas reales con pensamiento en voz alta. Se mide
+    éxito, tiempo, número de errores y una pregunta de facilidad posterior a cada tarea. Se graba
+    únicamente la pantalla y la voz, con consentimiento informado y retención limitada (§3.9).</dd>
+    <dt>Auditoría de accesibilidad</dt>
+    <dd>Recorrido completo por teclado, verificación con al menos dos combinaciones de lector de
+    pantalla y navegador, inspección del árbol de accesibilidad y comprobación automatizada. El
+    procedimiento detallado está en §19.2.</dd>
+  </dl>
+  <div class="aviso">
+    <span class="et">Umbral de bloqueo</span>
+    <p>Un problema de severidad 4 (impide completar una tarea crítica) o cualquier incumplimiento de
+    nivel A o AA detectado en la auditoría <b>bloquea</b> la publicación del incremento. Los de
+    severidad 3 se corrigen antes del siguiente incremento. Esta regla es la que da fuerza real al
+    proceso: sin umbral de bloqueo, la evaluación es decorativa.</p>
+  </div>
+
+  <h2 id="s3-8">3.8 Métricas de experiencia</h2>
+  <table id="t3-4">
+    <thead><tr><th style="width:22%">Métrica</th><th style="width:26%">Definición operativa</th><th style="width:18%">Objetivo</th><th style="width:34%">Fuente y cadencia</th></tr></thead>
+    <tbody>
+      <tr><td>Tasa de éxito de tarea</td><td>Porcentaje de intentos que terminan en el estado objetivo sin ayuda.</td><td>≥ 90&nbsp;% en JTR-2 y JTR-3</td><td>Prueba moderada, por incremento.</td></tr>
+      <tr><td>Tiempo hasta primer valor</td><td>Segundos desde la apertura del enlace hasta ver el estado del torneo.</td><td>≤ 8&nbsp;s en red móvil de referencia</td><td>Analítica de campo, continua.</td></tr>
+      <tr><td>Esfuerzo percibido</td><td>Pregunta de ítem único tras la tarea, escala de 1 a 7.</td><td>Media ≥ 6</td><td>Prueba moderada y encuesta.</td></tr>
+      <tr><td>Satisfacción general</td><td>Cuestionario breve estandarizado de usabilidad percibida.</td><td>≥ 80 sobre 100</td><td>Encuesta trimestral.</td></tr>
+      <tr><td>Abandono en incorporación</td><td>Sesiones que abren la invitación y no completan la inscripción.</td><td>≤ 15&nbsp;%</td><td>Analítica de campo, continua.</td></tr>
+      <tr><td>Incidencias de accesibilidad</td><td>Número de incumplimientos A/AA abiertos.</td><td>0</td><td>Auditoría por incremento y automatización continua.</td></tr>
+      <tr><td>Reincidencia de soporte</td><td>Preguntas repetidas del grupo sobre el mismo punto de la interfaz.</td><td>Tendencia decreciente</td><td>Registro cualitativo mensual.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 3.4</b> — Cuadro de métricas de experiencia. Ninguna métrica se interpreta aislada: el aumento de velocidad con caída de éxito es una regresión, no una mejora.</caption>
+  </table>
+
+  <h2 id="s3-9">3.9 Ética, consentimiento y datos de investigación</h2>
+  <p>Toda sesión de investigación requiere consentimiento informado explícito, revocable y previo a
+  la grabación. Se graba la pantalla y la voz, nunca la imagen del rostro salvo petición expresa de
+  utilidad justificada. Los materiales se seudonimizan antes del análisis, se conservan un máximo de
+  doce meses y se almacenan cifrados con acceso restringido al equipo de producto. En los informes no
+  se citan datos que permitan reidentificar a una persona dentro de un grupo pequeño —precaución
+  especialmente relevante aquí, donde los grupos son reducidos y sus integrantes se conocen—.
+  Ninguna prueba se realiza con cuentas o datos de terceros sin su consentimiento, y la analítica de
+  producto se limita a eventos agregados sin perfilado individual (§23.5).</p>
+
+  <h2 id="s3-10">3.10 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-PRO-01.</b> Todo incremento que modifique un recorrido crítico DEBE evaluarse con al menos cinco personas por arquetipo afectado antes de su publicación.</li>
+    <li><b>RQ-PRO-02.</b> Los problemas de severidad 4 y los incumplimientos WCAG de nivel A o AA DEBEN bloquear la publicación.</li>
+    <li><b>RQ-PRO-03.</b> Cada decisión de diseño relevante DEBE poder trazarse a un trabajo por realizar, un punto de dolor documentado o un requisito normativo.</li>
+    <li><b>RQ-PRO-04.</b> La investigación con personas DEBE contar con consentimiento informado, seudonimización y retención máxima de doce meses.</li>
+    <li><b>RQ-PRO-05.</b> Las métricas de experiencia DEBEN revisarse conjuntamente; ninguna optimización puede justificarse con una métrica aislada.</li>
+  </ul>
+</section>

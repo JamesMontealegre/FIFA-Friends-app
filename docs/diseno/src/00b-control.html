@@ -1,0 +1,81 @@
+<section class="liminar" id="control">
+  <h1>Control del documento</h1>
+
+  <p class="entradilla">Este documento es la fuente única de verdad del diseño de la interfaz y de
+  los atributos de calidad transversales —accesibilidad, seguridad, rendimiento y mantenibilidad—
+  de la plataforma FIFA Friends. Toda decisión de producto, diseño o implementación que contradiga
+  lo aquí especificado requiere una enmienda registrada en la tabla de versiones.</p>
+
+  <h2 id="ctrl-ident">Identificación</h2>
+  <table class="compacta">
+    <tbody>
+      <tr><td style="width:24%"><b>Título</b></td><td>Documento de Diseño de Interfaz, Accesibilidad, Seguridad y Rendimiento — Plataforma FIFA Friends</td></tr>
+      <tr><td><b>Código</b></td><td>DDS-FF-UI-2026-001</td></tr>
+      <tr><td><b>Versión</b></td><td>1.0 (línea base aprobada)</td></tr>
+      <tr><td><b>Estado</b></td><td>Vigente</td></tr>
+      <tr><td><b>Autoría</b></td><td>Unidad de Arquitectura de Experiencia Digital y Front-End (documento corporativo; no se atribuye autoría individual)</td></tr>
+      <tr><td><b>Custodia</b></td><td>Comité de Sistema de Diseño</td></tr>
+      <tr><td><b>Audiencia</b></td><td>Diseño de producto, ingeniería front-end, ingeniería de plataforma, seguridad de aplicaciones, control de calidad, dirección de producto</td></tr>
+      <tr><td><b>Revisión</b></td><td>Semestral, o ante cambio normativo (publicación de WCAG, OWASP Top 10, EN 301 549) o cambio mayor de arquitectura</td></tr>
+      <tr><td><b>Ámbito técnico</b></td><td>Aplicación web de página única (React 19 · TypeScript · Vite · Tailwind CSS 4 · TanStack Query 5 · Firebase Authentication y Cloud Firestore · despliegue en CDN perimetral)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="ctrl-ver">Historial de versiones</h2>
+  <table class="compacta">
+    <thead><tr><th style="width:12%">Versión</th><th style="width:17%">Fecha</th><th style="width:52%">Cambios sustantivos</th><th style="width:19%">Estado</th></tr></thead>
+    <tbody>
+      <tr><td>0.1</td><td>2026-07-14</td><td>Esqueleto, alcance y marco normativo. Inventario de componentes existentes.</td><td>Borrador</td></tr>
+      <tr><td>0.4</td><td>2026-08-06</td><td>Sistema visual: teoría del color aplicada, paleta en OKLCH, escala tipográfica modular, retícula y espaciado.</td><td>Borrador</td></tr>
+      <tr><td>0.6</td><td>2026-08-28</td><td>Arquitectura de información, distribución de componentes, especificación del patrón maestro&ndash;detalle.</td><td>Revisión interna</td></tr>
+      <tr><td>0.8</td><td>2026-09-12</td><td>Arquitectura de aplicación de página única, gestión de estado servidor/cliente, contratos de datos.</td><td>Revisión interna</td></tr>
+      <tr><td>0.9</td><td>2026-09-23</td><td>Accesibilidad WCAG 2.2 AA criterio por criterio; modelo de amenazas; presupuestos de rendimiento.</td><td>Revisión cruzada</td></tr>
+      <tr><td>1.0</td><td>2026-10-01</td><td>Línea base aprobada. Apéndices normativos: tokens, listas de verificación, patrones ARIA, matriz de trazabilidad, decisiones de arquitectura, glosario y bibliografía.</td><td>Vigente</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="ctrl-aprob">Aprobaciones</h2>
+  <table class="compacta">
+    <thead><tr><th style="width:26%">Función</th><th style="width:52%">Responsabilidad sobre el documento</th><th style="width:22%">Decisión</th></tr></thead>
+    <tbody>
+      <tr><td>Dirección de Producto</td><td>Alcance funcional, prioridades y criterios de aceptación de negocio</td><td>Aprobado</td></tr>
+      <tr><td>Arquitectura de Experiencia</td><td>Sistema visual, patrones de interacción, gobernanza del sistema de diseño</td><td>Aprobado</td></tr>
+      <tr><td>Arquitectura Front-End</td><td>Modelo de componentes, estado, enrutamiento y presupuestos de rendimiento</td><td>Aprobado</td></tr>
+      <tr><td>Accesibilidad</td><td>Conformidad WCAG 2.2 AA y procedimiento de auditoría</td><td>Aprobado con observaciones (§19.6)</td></tr>
+      <tr><td>Seguridad de Aplicaciones</td><td>Modelo de amenazas, controles ASVS y reglas de autorización</td><td>Aprobado</td></tr>
+      <tr><td>Calidad</td><td>Estrategia de pruebas y Definición de Terminado</td><td>Aprobado</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="ctrl-conv">Convenciones del documento</h2>
+  <p>Las palabras clave <b>DEBE</b>, <b>NO DEBE</b>, <b>DEBERÍA</b>, <b>NO DEBERÍA</b> y <b>PUEDE</b>
+  se interpretan conforme a la práctica establecida en BCP 14 (RFC 2119 y RFC 8174):</p>
+  <table class="compacta">
+    <thead><tr><th style="width:24%">Término</th><th style="width:76%">Significado normativo en este documento</th></tr></thead>
+    <tbody>
+      <tr><td><b>DEBE</b> / <b>NO DEBE</b></td><td>Requisito absoluto. Su incumplimiento bloquea la aprobación de una entrega (véase la Definición de Terminado, §27.4).</td></tr>
+      <tr><td><b>DEBERÍA</b></td><td>Recomendación fuerte. Puede omitirse sólo con justificación registrada como decisión de arquitectura (apéndice H).</td></tr>
+      <tr><td><b>PUEDE</b></td><td>Opción legítima; ninguna alternativa es preferente.</td></tr>
+    </tbody>
+  </table>
+  <p>Las referencias cruzadas internas usan el signo § seguido del número de sección (por ejemplo,
+  §11.4). Las fuentes externas se citan de forma abreviada en el cuerpo del texto —por ejemplo
+  (W3C, <i>WCAG 2.2</i>, 2.5.8)— y se desarrollan con dirección completa en el apéndice J,
+  «Bibliografía y fuentes consultadas». Los identificadores de requisito siguen el formato
+  <code>RQ-&lt;dominio&gt;-&lt;número&gt;</code>; los de componente, <code>CMP-&lt;familia&gt;-&lt;nombre&gt;</code>;
+  los de decisión de arquitectura, <code>ADR-&lt;número&gt;</code>. El código fuente de ejemplo se
+  presenta en TypeScript y CSS; los fragmentos son ilustrativos de la especificación y no sustituyen
+  al repositorio.</p>
+
+  <div class="nota">
+    <span class="et">Nota terminológica</span>
+    <p>El documento emplea <b>maestro&ndash;detalle</b> (en inglés <i>master&ndash;detail</i> o
+    <i>list&ndash;detail</i>) para designar el patrón de interfaz en el que un panel de selección
+    gobierna el contenido de un panel dependiente. Se evita el par <i>maestro/esclavo</i> en la
+    descripción de componentes de software y réplicas de datos, siguiendo las recomendaciones de
+    lenguaje inclusivo adoptadas por la IETF y por las comunidades de Linux, Python y Redis, que
+    prefieren pares como <i>primario/réplica</i> o <i>primario/secundario</i>; cuando el término
+    heredado es imprescindible para localizar literatura previa, se indica entre paréntesis. El
+    capítulo 11 trata explícitamente esta equivalencia terminológica.</p>
+  </div>
+</section>

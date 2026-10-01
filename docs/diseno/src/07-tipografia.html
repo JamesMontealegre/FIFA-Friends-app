@@ -1,0 +1,201 @@
+<section class="capitulo" id="cap7">
+  <h1 id="h1-7"><span class="cnum">Capítulo 7</span>Tipografía y legibilidad</h1>
+
+  <p class="entradilla">La tipografía es el componente que más superficie ocupa y el que más
+  directamente determina si una interfaz se puede usar. Este capítulo especifica la selección de
+  familias, la escala modular, las métricas de composición, el tratamiento de las cifras —crítico en
+  un producto de marcadores y clasificaciones—, la estrategia de carga y los requisitos de
+  accesibilidad tipográfica.</p>
+
+  <h2 id="s7-1">7.1 Qué debe resolver la tipografía aquí</h2>
+  <p>Tres problemas, por orden de importancia: <b>jerarquizar</b> —que el ojo distinga en un barrido
+  qué es nombre de equipo, qué es marcador y qué es metadato—; <b>alinear cifras</b> —que una columna
+  de puntos se lea verticalmente sin esfuerzo—; y <b>resistir el contenido real</b> —nombres de
+  participantes de longitud imprevisible, apodos con emoji, equipos con nombres de treinta
+  caracteres—. Una tipografía que falle en el tercer punto produce interfaces que sólo funcionan con
+  datos de ejemplo.</p>
+
+  <h2 id="s7-2">7.2 Criterios de selección de familia</h2>
+  <table id="t7-1">
+    <thead><tr><th style="width:26%">Criterio</th><th style="width:40%">Por qué importa</th><th style="width:34%">Exigencia del sistema</th></tr></thead>
+    <tbody>
+      <tr><td>Altura de x elevada</td><td>Determina el tamaño percibido y la legibilidad a tamaños pequeños más que el cuerpo nominal.</td><td>Relación altura de x / altura de mayúscula ≥ 0,70 en la familia de texto.</td></tr>
+      <tr><td>Aperturas amplias</td><td>Letras como <i>c</i>, <i>e</i>, <i>s</i> con aberturas cerradas se confunden a tamaño pequeño o con baja agudeza.</td><td>Formas abiertas; se descartan familias condensadas para texto corrido.</td></tr>
+      <tr><td>Desambiguación de caracteres</td><td>1/l/I y 0/O aparecen en marcadores, códigos de invitación y tiempos.</td><td>Formas distinguibles obligatorias; el código de invitación usa además un alfabeto reducido (§13.5).</td></tr>
+      <tr><td>Cifras tabulares</td><td>Sin ellas, las columnas numéricas «bailan» y la comparación vertical falla.</td><td>Soporte de <code>tnum</code> obligatorio en la familia de texto.</td></tr>
+      <tr><td>Cobertura de caracteres</td><td>Castellano con acentos, diéresis, eñe, comillas latinas y signos de apertura.</td><td>Cobertura latina extendida completa.</td></tr>
+      <tr><td>Variabilidad</td><td>Una fuente variable sustituye a cinco ficheros estáticos y permite ajustes finos de grosor.</td><td>Preferencia por fuente variable con eje de grosor.</td></tr>
+      <tr><td>Licencia y autoalojamiento</td><td>Depender de un tercero en la ruta crítica añade latencia, riesgo de disponibilidad y fuga de metadatos de navegación.</td><td>Licencia que permita autoalojamiento; carga desde el propio dominio.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 7.1</b> — Criterios de selección de familia tipográfica y exigencia concreta del sistema.</caption>
+  </table>
+
+  <h3 id="s7-2-1">7.2.1 Decisión</h3>
+  <p>El sistema define tres roles tipográficos:</p>
+  <dl>
+    <dt>Familia de texto (<code>--fuente-texto</code>)</dt>
+    <dd>Fuente variable de palo seco humanista con altura de x elevada y cifras tabulares,
+    autoalojada y subconjuntada a latino extendido. Cubre interfaz, contenido y datos. Es la única
+    familia obligatoria para que el producto funcione.</dd>
+    <dt>Familia de titulares (<code>--fuente-display</code>)</dt>
+    <dd>Familia condensada de carácter deportivo, reservada a titulares de torneo, marcadores grandes
+    y el nombre del producto. Se carga de forma diferida y <b>no bloquea</b> el renderizado: si no
+    llega, la familia de texto la sustituye sin alterar la maquetación, gracias al ajuste de métricas
+    de §7.7.</dd>
+    <dt>Familia monoespaciada (<code>--fuente-mono</code>)</dt>
+    <dd>Sólo para códigos de invitación e identificadores técnicos. Se resuelve con la pila del
+    sistema; no se descarga ningún fichero.</dd>
+  </dl>
+  <div class="riesgo">
+    <span class="et">Hallazgo H5</span>
+    <p>La implementación actual carga una familia de titulares desde un servicio de terceros mediante
+    una hoja de estilo enlazada en el documento, lo que introduce dos viajes de red adicionales en la
+    ruta crítica, expone la navegación de las personas usuarias a un tercero y hace depender el
+    primer pintado de un dominio ajeno. Debe sustituirse por autoalojamiento con subconjunto y
+    <code>font-display: swap</code>, y la familia debe dejar de ser necesaria para el primer
+    pintado.</p>
+  </div>
+
+  <h2 id="s7-3">7.3 Escala modular</h2>
+  <p>La escala parte de un cuerpo base de 16&nbsp;px —el valor por defecto de los navegadores, que
+  nunca debe reducirse globalmente— y aplica una razón de tercera menor (1,2) redondeada a valores
+  enteros cómodos. Los tamaños se expresan en <code>rem</code> para que respeten la preferencia de
+  tamaño de letra del sistema operativo; los titulares usan interpolación fluida acotada para
+  adaptarse al ancho sin saltos.</p>
+  <table id="t7-2">
+    <thead><tr><th style="width:17%">Token</th><th style="width:15%">Tamaño</th><th style="width:13%">Interlineado</th><th style="width:13%">Grosor</th><th style="width:42%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>texto-display</code></td><td>clamp 32–48&nbsp;px</td><td>1,1</td><td>700</td><td>Marcador grande en detalle de partido; nombre de torneo en cabecera.</td></tr>
+      <tr><td><code>texto-titulo-1</code></td><td>28&nbsp;px (1,75rem)</td><td>1,2</td><td>700</td><td>Título de página. Uno solo por vista.</td></tr>
+      <tr><td><code>texto-titulo-2</code></td><td>23&nbsp;px (1,4375rem)</td><td>1,25</td><td>700</td><td>Título de sección.</td></tr>
+      <tr><td><code>texto-titulo-3</code></td><td>19&nbsp;px (1,1875rem)</td><td>1,3</td><td>600</td><td>Título de tarjeta o de bloque.</td></tr>
+      <tr><td><code>texto-cuerpo-g</code></td><td>18&nbsp;px (1,125rem)</td><td>1,55</td><td>400</td><td>Texto introductorio y estados vacíos.</td></tr>
+      <tr><td><code>texto-cuerpo</code></td><td>16&nbsp;px (1rem)</td><td>1,55</td><td>400</td><td>Texto por defecto. Mínimo para lectura continua.</td></tr>
+      <tr><td><code>texto-dato</code></td><td>16&nbsp;px</td><td>1,2</td><td>600</td><td>Cifras en tablas, con <code>font-variant-numeric: tabular-nums</code>.</td></tr>
+      <tr><td><code>texto-etiqueta</code></td><td>14&nbsp;px (0,875rem)</td><td>1,4</td><td>600</td><td>Etiquetas de formulario, encabezados de tabla, botones.</td></tr>
+      <tr><td><code>texto-auxiliar</code></td><td>14&nbsp;px</td><td>1,45</td><td>400</td><td>Metadatos, ayudas y marcas de tiempo.</td></tr>
+      <tr><td><code>texto-micro</code></td><td>12,8&nbsp;px (0,8rem)</td><td>1,4</td><td>600</td><td>Insignias y contadores. <b>Nunca</b> texto en prosa ni dato crítico.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 7.2</b> — Escala tipográfica. El peldaño <code>texto-micro</code> es el único por debajo de 14&nbsp;px y su uso está restringido por norma interna.</caption>
+  </table>
+  <pre>:root {
+  --texto-cuerpo: 1rem;
+  --texto-display: clamp(2rem, 1.2rem + 3.2vw, 3rem);
+  --interlineado-lectura: 1.55;
+}
+.tabla-clasificacion td.num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1;
+  text-align: right;         <span class="c">/* alineación por la derecha para comparar magnitudes */</span>
+  font-variant-ligatures: none;
+}</pre>
+
+  <h2 id="s7-4">7.4 Composición: medida, interlineado y alineación</h2>
+  <ul>
+    <li><b>Medida de línea.</b> Entre 45 y 75 caracteres para texto continuo; el óptimo clásico se
+    sitúa alrededor de 66. Se implementa con <code>max-inline-size: 68ch</code> en los bloques de
+    prosa. Las tablas quedan excluidas de esta restricción.</li>
+    <li><b>Interlineado.</b> 1,5 en texto continuo (coincide con el mínimo exigido por el criterio
+    1.4.12 cuando el usuario modifica el espaciado), 1,2–1,3 en titulares, donde un interlineado
+    amplio rompe la unidad visual del bloque.</li>
+    <li><b>Alineación.</b> Alineación a la izquierda, sin justificar. El texto justificado sin
+    partición de palabras de calidad produce ríos y espaciado irregular, penaliza a lectores con
+    dislexia y está desaconsejado por el criterio 1.4.8.</li>
+    <li><b>Espaciado de letras.</b> Neutro en texto; ligeramente negativo (−0,01em) sólo en titulares
+    grandes; positivo (+0,04em) en versalitas y etiquetas en mayúsculas, que de otro modo se
+    apelmazan.</li>
+    <li><b>Mayúsculas.</b> No se usan bloques de texto en mayúsculas: reducen la velocidad de lectura
+    al eliminar la silueta de palabra. Se admiten en etiquetas de una o dos palabras.</li>
+    <li><b>Truncamiento.</b> Nunca se trunca un dato identificativo sin que su valor completo sea
+    recuperable (atributo <code>title</code> no basta: debe existir en el nombre accesible o
+    desplegarse al enfocar).</li>
+  </ul>
+
+  <h2 id="s7-5">7.5 Tratamiento de cifras</h2>
+  <p>Este producto es, en buena medida, una interfaz de cifras. Las reglas son explícitas:</p>
+  <table class="compacta" id="t7-3">
+    <thead><tr><th style="width:24%">Elemento</th><th style="width:30%">Formato</th><th style="width:46%">Regla</th></tr></thead>
+    <tbody>
+      <tr><td>Marcador de partido</td><td><code>3 – 1</code></td><td>Cifras tabulares, separador con espacios finos, nunca guion corto pegado. En detalle, cuerpo <code>texto-display</code>.</td></tr>
+      <tr><td>Puntos y diferencia</td><td><code>+7</code>, <code>−3</code></td><td>Signo explícito en la diferencia; menos tipográfico (U+2212), no guion.</td></tr>
+      <tr><td>Columnas numéricas</td><td>alineadas a la derecha</td><td>Cifras tabulares obligatorias; encabezado con abreviatura y desarrollo accesible.</td></tr>
+      <tr><td>Porcentajes</td><td><code>62 %</code></td><td>Espacio fino antes del símbolo, conforme a la norma ortográfica castellana.</td></tr>
+      <tr><td>Fechas</td><td><code>12 oct 2026</code></td><td>Formato local, mes abreviado sin punto; fecha completa en el nombre accesible.</td></tr>
+      <tr><td>Horas</td><td><code>21:30</code></td><td>Formato de 24 horas; se evita la ambigüedad del formato de 12 horas.</td></tr>
+      <tr><td>Tiempo relativo</td><td><code>hace 2 h</code></td><td>Siempre acompañado de la marca absoluta en el elemento <code>&lt;time&gt;</code>.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 7.3</b> — Reglas de composición numérica. La coherencia de estas reglas es lo que hace que una tabla de clasificación se lea de un vistazo.</caption>
+  </table>
+
+  <h2 id="s7-6">7.6 Carga y rendimiento tipográfico</h2>
+  <p>Las fuentes web son uno de los principales causantes de desplazamiento de diseño y de retraso en
+  el mayor despliegue de contenido. La estrategia es:</p>
+  <ol>
+    <li><b>Autoalojamiento</b> en el mismo origen, servido con caché inmutable de un año y nombre con
+    huella de contenido.</li>
+    <li><b>Subconjunto</b> a los caracteres realmente usados (latino básico y extendido, signos y
+    cifras), con formato comprimido moderno. Reduce típicamente el peso entre un 60 y un 80&nbsp;%.</li>
+    <li><b>Precarga</b> exclusivamente del fichero de la familia de texto en el grosor usado por
+    encima del pliegue. Precargar más de un fichero compite con el recurso que determina el mayor
+    despliegue de contenido.</li>
+    <li><b><code>font-display: swap</code></b> con fuente alternativa del sistema ajustada mediante
+    <code>size-adjust</code>, <code>ascent-override</code> y <code>descent-override</code>, de modo
+    que el intercambio no mueva el texto: así el desplazamiento acumulado atribuible a la tipografía
+    tiende a cero.</li>
+    <li><b>Fuente variable</b> con un único fichero para todos los grosores empleados.</li>
+  </ol>
+  <pre>@font-face {
+  font-family: "Texto";
+  src: url("/fuentes/texto-var.woff2") format("woff2-variations");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2018-201E, U+2212;
+}
+<span class="c">/* Alternativa del sistema con métricas ajustadas: evita el salto al intercambiar */</span>
+@font-face {
+  font-family: "Texto alterna";
+  src: local("Arial");
+  size-adjust: 103.5%;
+  ascent-override: 92%;
+  descent-override: 24%;
+}
+:root { --fuente-texto: "Texto", "Texto alterna", system-ui, sans-serif; }</pre>
+
+  <h2 id="s7-7">7.7 Accesibilidad tipográfica</h2>
+  <ul>
+    <li><b>Unidades relativas.</b> Todo tamaño de texto en <code>rem</code>; ningún
+    <code>px</code> absoluto en tipografía. Reducir el tamaño base del documento para «que quepa
+    más» anula la preferencia de la persona y es una violación práctica del criterio 1.4.4.</li>
+    <li><b>Ampliación al 200&nbsp;%.</b> Todo el contenido y toda la funcionalidad deben permanecer
+    disponibles; se verifica en las tres rutas críticas (§19.3).</li>
+    <li><b>Reflujo.</b> A 320&nbsp;px de ancho equivalente no debe aparecer desplazamiento horizontal
+    (criterio 1.4.10). Las tablas anchas se tratan con el patrón de §13.6, no con zoom reducido.</li>
+    <li><b>Espaciado de texto.</b> El diseño debe tolerar interlineado 1,5, espaciado entre párrafos
+    2em, entre letras 0,12em y entre palabras 0,16em sin pérdida de contenido (criterio 1.4.12). Esto
+    obliga a contenedores que crezcan con el contenido, nunca de altura fija.</li>
+    <li><b>Dislexia.</b> La evidencia disponible no respalda que las tipografías comercializadas como
+    «para dislexia» mejoren de forma consistente la velocidad de lectura; sí hay respaldo para el
+    aumento de espaciado entre caracteres y líneas y para la alineación a la izquierda. El sistema
+    aplica lo segundo y no impone lo primero.</li>
+    <li><b>Mayúsculas y abreviaturas.</b> Las abreviaturas de columna («PJ», «GF», «GC», «DG») se
+    acompañan de su desarrollo mediante <code>&lt;abbr&gt;</code> y de un encabezado accesible
+    completo, porque los lectores de pantalla las deletrean de forma impredecible.</li>
+  </ul>
+
+  <h2 id="s7-8">7.8 Contenido real y casos límite</h2>
+  <p>El diseño tipográfico se valida contra un conjunto fijo de cadenas hostiles, que forma parte de
+  los datos de prueba: nombre de participante de 1 carácter; de 40 caracteres sin espacios; con
+  emoji; con diacríticos apilados; equipo con nombre largo y paréntesis; marcador de dos dígitos por
+  lado; y cadena en un alfabeto no latino. Toda vista debe soportar esas siete cadenas sin
+  desbordamiento, sin truncamiento de datos críticos y sin romper la alineación de columnas.</p>
+
+  <h2 id="s7-9">7.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-TIP-01.</b> El tamaño base DEBE ser de 16&nbsp;px y todos los tamaños de texto se expresarán en unidades relativas.</li>
+    <li><b>RQ-TIP-02.</b> Las fuentes DEBEN autoalojarse, subconjuntarse y declararse con alternativa de métricas ajustadas.</li>
+    <li><b>RQ-TIP-03.</b> Toda cifra comparable DEBE componerse con cifras tabulares y alinearse a la derecha.</li>
+    <li><b>RQ-TIP-04.</b> El diseño DEBE superar la prueba de espaciado de texto del criterio 1.4.12 y el reflujo a 320&nbsp;px.</li>
+    <li><b>RQ-TIP-05.</b> Ningún dato identificativo DEBE truncarse sin vía accesible de recuperación del valor completo.</li>
+    <li><b>RQ-TIP-06.</b> La familia de titulares NO DEBE formar parte de la ruta crítica de renderizado.</li>
+  </ul>
+</section>

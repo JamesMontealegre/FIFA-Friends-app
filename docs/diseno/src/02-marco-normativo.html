@@ -1,0 +1,178 @@
+<section class="capitulo" id="cap2">
+  <h1 id="h1-2"><span class="cnum">Capítulo 2</span>Marco normativo y de referencia</h1>
+
+  <p class="entradilla">Diseñar «según buenas prácticas» no significa nada si no se nombra la fuente,
+  su versión y su carácter —obligatorio, recomendado u orientativo—. Este capítulo enumera el corpus
+  normativo que gobierna el producto, distingue lo exigible de lo aconsejable, fija la versión
+  concreta que aplica y asigna a cada norma un método de verificación. El resto del documento se
+  limita a aplicar lo aquí declarado.</p>
+
+  <h2 id="s2-1">2.1 Tipología de las fuentes</h2>
+  <p>No todas las referencias tienen la misma fuerza. Este documento distingue cuatro categorías,
+  que determinan qué ocurre cuando una recomendación se incumple:</p>
+  <dl>
+    <dt>Normativa legal o contractual</dt>
+    <dd>Obligatoria por ley aplicable o por contrato. Su incumplimiento es un defecto bloqueante y
+    puede acarrear consecuencias jurídicas. Ejemplo: los requisitos de accesibilidad exigibles a
+    servicios digitales en el ámbito europeo.</dd>
+    <dt>Estándar técnico de organismo reconocido</dt>
+    <dd>Especificaciones del W3C, ISO, IETF o ETSI. No siempre son obligatorias por sí mismas, pero
+    la legislación suele remitirse a ellas y la industria las trata como mínimo profesional.</dd>
+    <dt>Guía de plataforma o de proyecto de referencia</dt>
+    <dd>Documentación oficial de fabricantes de sistemas operativos, navegadores o bibliotecas, y
+    guías de organizaciones de referencia en seguridad. Tienen autoridad práctica alta.</dd>
+    <dt>Evidencia empírica</dt>
+    <dd>Investigación publicada y estudios de campo sobre percepción, legibilidad, comportamiento y
+    rendimiento. Informan decisiones donde no hay norma, y se citan con su limitación.</dd>
+  </dl>
+
+  <h2 id="s2-2">2.2 Usabilidad y diseño centrado en las personas</h2>
+  <table id="t2-1">
+    <thead><tr><th style="width:22%">Referencia</th><th style="width:45%">Contenido aplicable</th><th style="width:33%">Uso en este documento</th></tr></thead>
+    <tbody>
+      <tr><td><b>ISO 9241-210</b><br><small>Diseño centrado en las personas para sistemas interactivos</small></td><td>Define las actividades del proceso: comprender el contexto de uso, especificar requisitos, producir soluciones y evaluar frente a requisitos, con iteración obligatoria y participación de usuarios reales.</td><td>Estructura del proceso de diseño del capítulo 3 y de los ciclos de validación de §3.7.</td></tr>
+      <tr><td><b>ISO 9241-11</b><br><small>Usabilidad: definiciones y conceptos</small></td><td>Usabilidad como eficacia, eficiencia y satisfacción en un contexto de uso específico; obliga a declarar usuarios, objetivos y entorno.</td><td>Caracterización del contexto de uso (§1.4) y métricas de usabilidad (§3.8).</td></tr>
+      <tr><td><b>ISO 9241-110</b><br><small>Principios de diálogo</small></td><td>Siete principios: adecuación a la tarea, autodescripción, conformidad con las expectativas, aprendibilidad, controlabilidad, robustez frente a errores y adaptabilidad.</td><td>Base de los principios del capítulo 4 y criterio de arbitraje en revisiones de diseño.</td></tr>
+      <tr><td><b>ISO 9241-112</b><br><small>Presentación de la información</small></td><td>Principios de detectabilidad, discriminabilidad, concisión, consistencia y legibilidad de la información presentada.</td><td>Reglas de densidad, agrupación y jerarquía visual (§8, §10).</td></tr>
+      <tr><td><b>ISO 9241-125 / -143</b></td><td>Presentación visual de información y diálogos de formulario.</td><td>Especificación de formularios y validación (§13.3).</td></tr>
+      <tr><td><b>ISO/IEC 25010</b><br><small>Modelo de calidad del producto</small></td><td>Características de calidad: adecuación funcional, eficiencia, compatibilidad, usabilidad, fiabilidad, seguridad, mantenibilidad y portabilidad.</td><td>Escenarios de calidad medibles (tabla 1.4) y criterios de aceptación.</td></tr>
+      <tr><td><b>EN 17161</b><br><small>Diseño para todos</small></td><td>Enfoque de accesibilidad mediante diseño universal aplicado a productos, bienes y servicios.</td><td>Justificación del tratamiento de la accesibilidad como requisito de producto y no como adaptación (§18.1).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 2.1</b> — Normas de usabilidad y proceso aplicables, y la sección de este documento que las operacionaliza.</caption>
+  </table>
+
+  <h2 id="s2-3">2.3 Accesibilidad</h2>
+  <p>El núcleo normativo de accesibilidad es WCAG 2.2, publicada como recomendación del W3C el 5 de
+  octubre de 2023 y revisada posteriormente sin cambios de requisitos. Añade nueve criterios de
+  conformidad sobre WCAG 2.1 y retira el criterio 4.1.1 «Procesamiento», cuya verificación quedó
+  obsoleta con los analizadores sintácticos modernos. La tabla 2.2 enumera esos nueve criterios
+  porque, al ser los más recientes, son también los que con mayor frecuencia se incumplen en
+  productos construidos sobre patrones heredados.</p>
+
+  <table id="t2-2">
+    <thead><tr><th style="width:9%">Criterio</th><th style="width:28%">Denominación</th><th style="width:8%">Nivel</th><th style="width:55%">Exigencia esencial y dónde impacta en este producto</th></tr></thead>
+    <tbody>
+      <tr><td>2.4.11</td><td>Foco no oscurecido (mínimo)</td><td>AA</td><td>El elemento con foco no puede quedar completamente tapado por contenido superpuesto. Afecta a barras fijas, hojas inferiores y banners (§10.4, §18.6).</td></tr>
+      <tr><td>2.4.12</td><td>Foco no oscurecido (mejorado)</td><td>AAA</td><td>Ninguna parte del elemento con foco queda tapada. Se adopta como objetivo de calidad, no como requisito.</td></tr>
+      <tr><td>2.4.13</td><td>Apariencia del foco</td><td>AAA</td><td>Indicador de foco con área y contraste mínimos. Se adopta como requisito interno por su impacto real (§6.5).</td></tr>
+      <tr><td>2.5.7</td><td>Movimientos de arrastre</td><td>AA</td><td>Toda acción que requiera arrastre debe tener alternativa con un solo puntero. Afecta al reordenamiento de participantes y al cuadro eliminatorio (§13.7).</td></tr>
+      <tr><td>2.5.8</td><td>Tamaño del objetivo (mínimo)</td><td>AA</td><td>Objetivos de al menos 24 × 24&nbsp;px CSS, salvo excepciones tasadas. Este documento eleva el mínimo a 44 × 44&nbsp;px por el contexto de uso (§8.6).</td></tr>
+      <tr><td>3.2.6</td><td>Ayuda consistente</td><td>A</td><td>Los mecanismos de ayuda aparecen en el mismo orden relativo en todas las páginas. Afecta a la ubicación del acceso a soporte (§9.5).</td></tr>
+      <tr><td>3.3.7</td><td>Entrada redundante</td><td>A</td><td>No se puede exigir reintroducir información ya aportada en el mismo proceso. Afecta al alta de torneo en varios pasos (§13.4).</td></tr>
+      <tr><td>3.3.8</td><td>Autenticación accesible (mínimo)</td><td>AA</td><td>No exigir pruebas cognitivas (recordar, transcribir, resolver acertijos) sin alternativa. Justifica la autenticación federada y el pegado de credenciales (§22.3).</td></tr>
+      <tr><td>3.3.9</td><td>Autenticación accesible (mejorado)</td><td>AAA</td><td>Elimina también el reconocimiento de objetos. Se cumple de facto con el mecanismo elegido.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 2.2</b> — Los nueve criterios de conformidad incorporados en WCAG 2.2 y su traducción a decisiones concretas de este producto.</caption>
+  </table>
+
+  <h3 id="s2-3-1">2.3.1 Marco legal y estado de WCAG 3.0</h3>
+  <p>En el ámbito europeo, la norma armonizada de referencia es EN 301 549, cuya versión V4.1.1
+  —adoptada en agosto de 2026— alinea sus requisitos web con WCAG 2.2 niveles A y AA, sustituyendo
+  la referencia previa a WCAG 2.1. La Directiva de accesibilidad web obliga desde hace años al
+  sector público, y el Acta Europea de Accesibilidad extendió obligaciones a determinados servicios
+  privados a partir del 28 de junio de 2025. Aunque este producto sea de ámbito recreativo y privado,
+  el documento adopta el mismo listón: la conformidad AA es el requisito interno, no una
+  aspiración.</p>
+  <div class="nota">
+    <span class="et">Sobre WCAG 3.0</span>
+    <p>WCAG 3.0 continúa en estado de borrador de trabajo, con recomendación final no esperada antes
+    del final de la década, y su modelo de contraste visual permanece sin decidir: el algoritmo APCA
+    es una línea de trabajo exploratoria, no normativa. En consecuencia, <b>todas</b> las decisiones
+    de contraste de este documento se verifican con la relación de contraste de WCAG 2.x, y APCA se
+    utiliza únicamente como señal complementaria de diseño cuando dos opciones empatan en el criterio
+    normativo (§5.8).</p>
+  </div>
+
+  <h3 id="s2-3-2">2.3.2 Especificaciones técnicas de accesibilidad</h3>
+  <ul>
+    <li><b>WAI-ARIA 1.2</b> — Define roles, estados y propiedades. Regla rectora: no usar ARIA cuando
+    exista un elemento nativo con la semántica necesaria; ARIA mal aplicado es peor que ausente.</li>
+    <li><b>ARIA Authoring Practices Guide (APG)</b> — Patrones de teclado y semántica para diálogos,
+    pestañas, menús, tablas de datos y combos. Es la fuente de los contratos de interacción del
+    apéndice E.</li>
+    <li><b>Accessible Name and Description Computation</b> — Algoritmo de cálculo del nombre
+    accesible. Determina por qué el orden de precedencia entre <code>aria-labelledby</code>,
+    <code>aria-label</code> y contenido es relevante (§18.4).</li>
+    <li><b>HTML Living Standard</b> — Semántica nativa, requisitos de etiquetado de controles y
+    criterios de contenido alternativo.</li>
+  </ul>
+
+  <h2 id="s2-4">2.4 Seguridad</h2>
+  <p>El marco de seguridad aplicable combina una lista de riesgos priorizada, un catálogo de
+  requisitos verificables y las especificaciones de los mecanismos del navegador.</p>
+  <table id="t2-3">
+    <thead><tr><th style="width:24%">Referencia</th><th style="width:40%">Contenido</th><th style="width:36%">Aplicación en el producto</th></tr></thead>
+    <tbody>
+      <tr><td><b>OWASP Top 10:2025</b></td><td>Diez categorías de riesgo ordenadas por prevalencia e impacto, publicadas en noviembre de 2025. Incorpora dos categorías nuevas: fallos en la cadena de suministro de software y gestión inadecuada de condiciones excepcionales.</td><td>Estructura del modelo de amenazas (§20.4) y lista de verificación del apéndice C.</td></tr>
+      <tr><td><b>OWASP ASVS 5.0</b></td><td>Estándar de verificación con unos 350 requisitos organizados en 17 capítulos, con identificadores versionados para trazabilidad.</td><td>Nivel 2 como objetivo de verificación para los controles aplicables a una aplicación sin servidor propio (§20.6).</td></tr>
+      <tr><td><b>RFC 9700 (BCP 240)</b></td><td>Mejores prácticas actuales de seguridad de OAuth 2.0: PKCE obligatorio, defensa frente a confusión de servidores de autorización, prohibición de flujos implícitos.</td><td>Diseño del flujo de identidad y custodia de credenciales (§22.2).</td></tr>
+      <tr><td><b>CSP Nivel 3</b></td><td>Política de seguridad de contenido con <i>nonce</i>, <code>strict-dynamic</code> y restricción de destinos.</td><td>Política de despliegue y mitigación de ejecución de scripts inyectados (§21.3).</td></tr>
+      <tr><td><b>Trusted Types</b></td><td>Prevención de puntos de inyección en el DOM mediante políticas de creación de valores peligrosos.</td><td>Control de <code>innerHTML</code> y bibliotecas de terceros (§21.4).</td></tr>
+      <tr><td><b>Fetch Metadata y CORS</b></td><td>Cabeceras de contexto de petición y política de origen cruzado.</td><td>Validación de origen en funciones gestionadas y aislamiento del documento (§21.6).</td></tr>
+      <tr><td><b>SLSA y procedencia de paquetes</b></td><td>Marco de integridad de la cadena de construcción y atestación de procedencia.</td><td>Política de dependencias e instalación reproducible (§23.2).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 2.3</b> — Marco de seguridad aplicable. Los identificadores ASVS se citan siempre con su versión para evitar ambigüedad entre ediciones.</caption>
+  </table>
+
+  <h2 id="s2-5">2.5 Rendimiento</h2>
+  <p>El marco de rendimiento es el conjunto de métricas Core Web Vitals, con umbrales evaluados en el
+  percentil 75 de las visitas reales. Un sitio se considera «bueno» en una métrica cuando al menos el
+  75&nbsp;% de las visitas alcanza el umbral correspondiente.</p>
+  <table id="t2-4">
+    <thead><tr><th style="width:26%">Métrica</th><th style="width:16%">Bueno</th><th style="width:20%">Deficiente</th><th style="width:38%">Qué mide realmente</th></tr></thead>
+    <tbody>
+      <tr><td><b>LCP</b> — Mayor despliegue de contenido</td><td>≤ 2,5&nbsp;s</td><td>&gt; 4,0&nbsp;s</td><td>Velocidad de carga percibida: cuándo aparece el elemento de contenido principal.</td></tr>
+      <tr><td><b>INP</b> — Interacción hasta el siguiente pintado</td><td>≤ 200&nbsp;ms</td><td>&gt; 500&nbsp;ms</td><td>Capacidad de respuesta a lo largo de toda la sesión, no sólo en la primera interacción.</td></tr>
+      <tr><td><b>CLS</b> — Desplazamiento acumulado de diseño</td><td>≤ 0,1</td><td>&gt; 0,25</td><td>Estabilidad visual: cuánto se mueve el contenido sin que la persona lo provoque.</td></tr>
+      <tr><td><b>TTFB</b> — Tiempo hasta el primer byte</td><td>≤ 0,8&nbsp;s</td><td>&gt; 1,8&nbsp;s</td><td>Diagnóstico de la fase de red y servidor que antecede a LCP.</td></tr>
+      <tr><td><b>FCP</b> — Primer despliegue de contenido</td><td>≤ 1,8&nbsp;s</td><td>&gt; 3,0&nbsp;s</td><td>Cuándo deja de verse una pantalla en blanco.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 2.4</b> — Métricas de rendimiento y umbrales de referencia. INP sustituyó a FID como métrica de capacidad de respuesta en marzo de 2024.</caption>
+  </table>
+  <p>Complementariamente, la puntuación sintética de la herramienta de auditoría más extendida pondera
+  tiempo total de bloqueo (30&nbsp;%), LCP (25&nbsp;%), CLS (25&nbsp;%), primer despliegue (10&nbsp;%)
+  e índice de velocidad (10&nbsp;%). Este documento la usa como señal de laboratorio y
+  <b>no</b> como objetivo: los objetivos se fijan sobre datos de campo (§25.2).</p>
+
+  <h2 id="s2-6">2.6 Plataforma web y sistema de diseño</h2>
+  <ul>
+    <li><b>HTML Living Standard</b> y <b>DOM Standard</b> — semántica, formularios y eventos.</li>
+    <li><b>CSS Color Module Level 4</b> — espacios de color modernos (<code>oklch()</code>,
+    <code>lab()</code>), gama extendida y función <code>color-mix()</code>. Fundamento del sistema de
+    color del capítulo 6.</li>
+    <li><b>CSS Cascade Layers, Container Queries, <code>:has()</code>, Subgrid</b> — mecanismos de
+    composición empleados en la retícula y en los componentes adaptativos (§8.3, §10.6).</li>
+    <li><b>Design Tokens Format Module</b>, versión estable 2025.10 — formato de intercambio de
+    tokens entre herramientas de diseño y código. Es el formato canónico del apéndice A.</li>
+    <li><b>Guías de plataforma</b> — las guías de interfaz de los principales sistemas operativos y
+    el sistema de diseño de referencia para Android aportan convenciones de disposición adaptativa,
+    entre ellas la formulación canónica de la disposición lista&ndash;detalle que el capítulo 11
+    adapta a la web.</li>
+  </ul>
+
+  <h2 id="s2-7">2.7 Jerarquía de resolución de conflictos</h2>
+  <p>Cuando dos fuentes se contradicen —y ocurre—, se resuelve en este orden:</p>
+  <ol>
+    <li>Obligación legal aplicable.</li>
+    <li>Criterio de conformidad WCAG 2.2 de nivel A o AA.</li>
+    <li>Requisito de seguridad clasificado como crítico o alto en el modelo de amenazas.</li>
+    <li>Estándar técnico del W3C o de la IETF.</li>
+    <li>Guía oficial de plataforma.</li>
+    <li>Evidencia empírica publicada.</li>
+    <li>Convención interna del sistema de diseño.</li>
+  </ol>
+  <p>Un ejemplo real de este arbitraje: la guía de una plataforma móvil recomienda ocultar
+  completamente la barra de navegación al desplazarse para maximizar el contenido; el criterio 2.4.11
+  exige que el elemento con foco no quede oculto tras contenido superpuesto. Prevalece el criterio
+  WCAG: la barra se oculta, pero reaparece íntegra cuando el foco entra en ella por teclado
+  (§10.4).</p>
+
+  <h2 id="s2-8">2.8 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-NOR-01.</b> El producto DEBE cumplir WCAG 2.2 nivel A y AA en su totalidad; cualquier excepción se documenta con justificación técnica y plan de corrección fechado.</li>
+    <li><b>RQ-NOR-02.</b> Las verificaciones de contraste DEBEN realizarse con el algoritmo de relación de contraste de WCAG 2.x mientras WCAG 3.0 no alcance estado de recomendación.</li>
+    <li><b>RQ-NOR-03.</b> Los controles de seguridad DEBEN trazarse a requisitos ASVS 5.0 citados con versión completa, y cubrir las diez categorías del OWASP Top 10:2025 en el modelo de amenazas.</li>
+    <li><b>RQ-NOR-04.</b> Los objetivos de rendimiento DEBEN fijarse sobre datos de campo en percentil 75, no sobre puntuaciones sintéticas de laboratorio.</li>
+    <li><b>RQ-NOR-05.</b> Los tokens de diseño DEBEN serializarse en el formato estable del módulo de tokens de diseño para permitir intercambio entre herramienta y código.</li>
+  </ul>
+</section>

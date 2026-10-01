@@ -1,0 +1,226 @@
+<section class="capitulo" id="cap5">
+  <h1 id="h1-5"><span class="cnum">Capítulo 5</span>Teoría del color aplicada a interfaces</h1>
+
+  <p class="entradilla">El color es la variable de diseño con mayor capacidad de comunicar y con
+  mayor probabilidad de fallar: depende de la pantalla, de la luz ambiente, de la fisiología de quien
+  mira y del significado que su cultura le atribuye. Este capítulo establece los fundamentos físicos
+  y perceptivos necesarios para tomar decisiones cromáticas que sean reproducibles y verificables, y
+  explica por qué este documento construye su paleta en un espacio perceptualmente uniforme y la
+  valida con la relación de contraste normativa.</p>
+
+  <h2 id="s5-1">5.1 Luz, superficie y síntesis aditiva</h2>
+  <p>En una pantalla el color se produce por síntesis aditiva: tres emisores —rojo, verde y azul—
+  suman radiancia hasta componer un estímulo. Es una diferencia sustantiva respecto al color
+  impreso, sustractivo, y explica por qué la intuición cromática heredada de la pintura conduce a
+  errores: en pantalla, la suma de todos los primarios es blanco, no negro, y la «mezcla» de
+  complementarios produce gris claro, no barro. La rueda de color de pigmentos (rojo-amarillo-azul)
+  que todavía se enseña en diseño gráfico no describe el comportamiento de un panel emisor; las
+  armonías que de ella se derivan deben reinterpretarse en un espacio adecuado al medio (§5.5).</p>
+  <p>Dos consecuencias prácticas. Primera: dos colores con la misma especificación numérica se
+  perciben distintos en paneles distintos, por diferencias de gama, de calibración y de función de
+  transferencia; el diseño debe ser robusto a esa variación, lo que desaconseja basar significados en
+  matices próximos. Segunda: el brillo percibido no es proporcional al valor numérico del canal, por
+  la codificación no lineal de sRGB; un gris «del 50&nbsp;%» en notación hexadecimal no es la mitad de
+  luminoso que el blanco. Esta no linealidad es la raíz de la mayoría de los errores de contraste que
+  se cometen al elegir colores «a ojo».</p>
+
+  <h2 id="s5-2">5.2 El observador: cómo vemos el color</h2>
+  <p>La retina humana contiene tres tipos de conos con sensibilidades espectrales solapadas —de onda
+  larga, media y corta— y bastones responsables de la visión en penumbra. De esta arquitectura se
+  derivan hechos con consecuencias directas de diseño:</p>
+  <ul>
+    <li><b>La sensibilidad no es uniforme.</b> El ojo es mucho más sensible a la luz en la región
+    verde del espectro que en la azul. Por eso la luminancia relativa pondera los canales de forma
+    muy desigual (0,2126·R + 0,7152·G + 0,0722·B tras linealización), y por eso un azul saturado
+    sobre negro es casi ilegible mientras un verde del mismo «brillo nominal» resulta cómodo.</li>
+    <li><b>Hay muchos menos conos de onda corta.</b> La agudeza para el detalle fino en azul es
+    pobre: el texto fino en azul puro sobre fondo oscuro produce fatiga y aberración cromática
+    perceptible. No se usa azul saturado para tipografía pequeña.</li>
+    <li><b>La adaptación cromática es constante.</b> El sistema visual normaliza la iluminación; un
+    blanco frío parece neutro tras unos segundos. De ahí que el modo oscuro no deba ser una inversión
+    literal: la percepción del contraste cambia con el nivel de adaptación (§6.6).</li>
+    <li><b>El brillo percibido crece con la saturación</b> (efecto Helmholtz&ndash;Kohlrausch) y el
+    tono percibido se desplaza con la intensidad (efecto Bezold&ndash;Brücke). Dos colores con
+    idéntica luminancia medida pueden no parecer igual de luminosos. Es la razón de que las escalas
+    construidas en HSL no resulten perceptualmente regulares.</li>
+    <li><b>El contraste simultáneo</b> altera la apariencia según el entorno: un mismo gris parece más
+    claro sobre fondo oscuro. Por eso los tokens se definen por pareja fondo/primer plano y nunca
+    de forma aislada (§6.3).</li>
+  </ul>
+
+  <h2 id="s5-3">5.3 Espacios de color y su idoneidad</h2>
+  <table id="t5-1">
+    <thead><tr><th style="width:17%">Espacio</th><th style="width:40%">Qué modela</th><th style="width:43%">Idoneidad para un sistema de diseño</th></tr></thead>
+    <tbody>
+      <tr><td><b>sRGB</b> (hexadecimal)</td><td>Valores de emisión de los tres primarios con codificación no lineal, referidos a una gama estándar.</td><td>Formato de salida y de intercambio. Inadecuado para <i>razonar</i>: distancias numéricas iguales no equivalen a diferencias perceptivas iguales.</td></tr>
+      <tr><td><b>HSL / HSV</b></td><td>Reparametrización geométrica de RGB en tono, saturación y claridad nominal.</td><td>Intuitivo pero engañoso: a igual «claridad», un amarillo y un azul difieren enormemente en luminancia. Produce escalas visualmente irregulares. No se usa en este sistema.</td></tr>
+      <tr><td><b>CIE XYZ</b></td><td>Espacio de referencia derivado de la colorimetría del observador estándar.</td><td>Base de conversión; no es un espacio de trabajo cómodo para diseño.</td></tr>
+      <tr><td><b>CIELAB / LCh</b></td><td>Espacio de oposición de colores con intención de uniformidad perceptual; L* aproxima la claridad percibida.</td><td>Muy superior a HSL. Presenta no uniformidades conocidas en azules intensos (desplazamiento de tono al variar el croma).</td></tr>
+      <tr><td><b>OKLab / OKLCh</b></td><td>Reformulación moderna con mejor uniformidad, especialmente en azules y en degradados.</td><td><b>Espacio de trabajo de este sistema.</b> Permite construir escalas donde un paso de claridad equivale a un paso perceptivo similar en todas las familias cromáticas.</td></tr>
+      <tr><td><b>Display P3 / Rec. 2020</b></td><td>Gamas extendidas disponibles en pantallas modernas.</td><td>Uso opcional para acentos no portadores de información, siempre con alternativa en gama estándar mediante consulta de características del dispositivo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 5.1</b> — Espacios de color y su idoneidad. La elección de OKLCh como espacio de trabajo es la decisión cromática más consecuente del sistema: hace predecible la construcción de escalas.</caption>
+  </table>
+
+  <h3 id="s5-3-1">5.3.1 Por qué importa la uniformidad perceptual</h3>
+  <p>Una escala de color de un sistema de diseño debe cumplir una promesa muy simple: que el paso
+  «600» de cualquier familia tenga aproximadamente la misma presencia visual que el «600» de otra.
+  Sólo así es posible sustituir un color de acento por otro sin rehacer todas las verificaciones de
+  contraste. En HSL esa promesa es imposible: fijando <i>L</i>=50&nbsp;% se obtienen un amarillo
+  deslumbrante y un azul casi negro. En OKLCh, fijando la claridad y el croma, las familias conservan
+  una presencia comparable y las verificaciones se trasladan entre ellas con mínimas correcciones.</p>
+
+  <figure id="f5-1">
+    <svg viewBox="0 0 700 170" width="100%" height="168" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="7.5" fill="#3C464D">
+        <text x="4" y="10" font-size="8.5" font-weight="bold" fill="#15191C">Escala construida en OKLCh: la claridad desciende de forma regular</text>
+        <rect x="4" y="16" width="62" height="28" fill="#E0FFE7"/><rect x="66" y="16" width="62" height="28" fill="#ADEBBD"/><rect x="128" y="16" width="62" height="28" fill="#68BE81"/><rect x="190" y="16" width="62" height="28" fill="#3FA663"/><rect x="252" y="16" width="62" height="28" fill="#188D4A"/><rect x="314" y="16" width="62" height="28" fill="#087139"/><rect x="376" y="16" width="62" height="28" fill="#005628"/><rect x="438" y="16" width="62" height="28" fill="#003A19"/><rect x="500" y="16" width="62" height="28" fill="#00250D"/>
+        <text x="4" y="54">50</text><text x="66" y="54">200</text><text x="128" y="54">400</text><text x="190" y="54">500</text><text x="252" y="54">600</text><text x="314" y="54">700</text><text x="376" y="54">800</text><text x="438" y="54">900</text><text x="500" y="54">950</text>
+        <text x="572" y="34" font-size="8">L: 0,97 → 0,23</text>
+
+        <text x="4" y="76" font-size="8.5" font-weight="bold" fill="#15191C">La misma claridad en cuatro familias: presencia visual comparable</text>
+        <rect x="4" y="82" width="110" height="26" fill="#087139"/><text x="59" y="99" fill="#FFFFFF" text-anchor="middle" font-size="8">verde 700</text>
+        <rect x="118" y="82" width="110" height="26" fill="#315D9F"/><text x="173" y="99" fill="#FFFFFF" text-anchor="middle" font-size="8">índigo 700</text>
+        <rect x="232" y="82" width="110" height="26" fill="#7F5500"/><text x="287" y="99" fill="#FFFFFF" text-anchor="middle" font-size="8">ámbar 700</text>
+        <rect x="346" y="82" width="110" height="26" fill="#9E3531"/><text x="401" y="99" fill="#FFFFFF" text-anchor="middle" font-size="8">granate 700</text>
+        <text x="466" y="99" font-size="8">contraste sobre blanco: 6,1 · 6,6 · 6,6 · 7,0</text>
+
+        <text x="4" y="126" font-size="8.5" font-weight="bold" fill="#15191C">Misma «claridad» en HSL (L = 50 %): presencia visual dispar</text>
+        <rect x="4" y="132" width="110" height="26" fill="#19E686"/><text x="59" y="149" fill="#15191C" text-anchor="middle" font-size="8">verde</text>
+        <rect x="118" y="132" width="110" height="26" fill="#5719E6"/><text x="173" y="149" fill="#FFFFFF" text-anchor="middle" font-size="8">índigo</text>
+        <rect x="232" y="132" width="110" height="26" fill="#E6C419"/><text x="287" y="149" fill="#15191C" text-anchor="middle" font-size="8">amarillo</text>
+        <rect x="346" y="132" width="110" height="26" fill="#E67219"/><text x="401" y="149" fill="#15191C" text-anchor="middle" font-size="8">naranja</text>
+        <text x="466" y="149" font-size="8">contraste sobre blanco: 1,65 · 7,82 · 1,71 · 3,09</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 5.1</b> — Comparación entre una escala construida en OKLCh y colores de idéntica claridad nominal en HSL. La dispersión de contraste de la fila inferior es la razón por la que este sistema no utiliza HSL para generar escalas.</figcaption>
+  </figure>
+
+  <h2 id="s5-4">5.4 Luminancia relativa y relación de contraste</h2>
+  <p>El criterio normativo de contraste de WCAG 2.x se calcula sobre la luminancia relativa de los
+  dos colores comparados. El procedimiento es: tomar cada canal en el intervalo [0,1], linealizarlo
+  —dividir por 12,92 si es menor o igual a 0,04045, y en caso contrario aplicar
+  ((c+0,055)/1,055)<sup>2,4</sup>—, ponderar los canales linealizados por 0,2126, 0,7152 y 0,0722, y
+  componer la relación:</p>
+  <pre>relación = (L_claro + 0,05) / (L_oscuro + 0,05)</pre>
+  <p>El sumando 0,05 modela la reflexión ambiental de la pantalla; por eso la relación máxima
+  alcanzable entre negro y blanco es 21:1 y no infinito. Los umbrales exigidos son:</p>
+  <table class="compacta" id="t5-2">
+    <thead><tr><th style="width:36%">Elemento</th><th style="width:16%">Nivel AA</th><th style="width:16%">Nivel AAA</th><th style="width:32%">Criterio</th></tr></thead>
+    <tbody>
+      <tr><td>Texto normal (&lt; 24&nbsp;px, o &lt; 19&nbsp;px en negrita)</td><td>4,5:1</td><td>7:1</td><td>1.4.3 / 1.4.6</td></tr>
+      <tr><td>Texto grande (≥ 24&nbsp;px, o ≥ 19&nbsp;px en negrita)</td><td>3:1</td><td>4,5:1</td><td>1.4.3 / 1.4.6</td></tr>
+      <tr><td>Componentes de interfaz y gráficos informativos</td><td>3:1</td><td>—</td><td>1.4.11</td></tr>
+      <tr><td>Indicador de foco (área mínima y cambio de contraste)</td><td>3:1</td><td>—</td><td>1.4.11 / 2.4.13</td></tr>
+      <tr><td>Texto decorativo, logotipos, texto inactivo</td><td>exento</td><td>exento</td><td>1.4.3, excepciones</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 5.2</b> — Umbrales de contraste exigibles. Este documento añade un margen de seguridad: los valores objetivo del sistema superan el umbral en al menos 0,3 puntos para absorber variaciones de representación.</caption>
+  </table>
+
+  <h3 id="s5-4-1">5.4.1 Límites conocidos del criterio y el papel de APCA</h3>
+  <p>La relación de contraste de WCAG 2.x tiene limitaciones documentadas: no modela el tamaño ni el
+  grosor del trazo tipográfico más allá de un umbral binario, trata de forma simétrica texto claro
+  sobre fondo oscuro y texto oscuro sobre fondo claro —cuando la percepción no es simétrica— y es
+  excesivamente permisiva con ciertos pares de alta saturación. El algoritmo de contraste perceptual
+  avanzado (APCA) aborda esos problemas, pero permanece como línea de investigación dentro del
+  trabajo de WCAG 3.0 y no es normativo. La política de este documento es inequívoca: <b>la
+  conformidad se verifica con WCAG 2.x</b>; APCA se usa sólo como criterio de desempate entre dos
+  opciones que ya cumplen, típicamente para elegir el tono del texto secundario en modo oscuro.</p>
+
+  <h2 id="s5-5">5.5 Armonías cromáticas</h2>
+  <p>Las armonías —complementaria, análoga, triádica, dividida— son heurísticas de partida, no reglas.
+  En interfaz tienen un uso muy acotado porque la paleta no se elige por belleza abstracta sino por
+  capacidad de codificar estados. El sistema adopta una estructura deliberadamente austera:</p>
+  <ul>
+    <li><b>Un tono dominante</b> (verde, por el campo de juego y por su asociación con validez) que
+    identifica el producto y marca las acciones primarias.</li>
+    <li><b>Un tono de acento análogo-distante</b> (índigo) para información, enlaces y selección, lo
+    bastante separado en tono para ser inconfundible sin competir con el dominante.</li>
+    <li><b>Dos tonos semánticos</b> (ámbar y granate) reservados a atención y error, nunca
+    decorativos.</li>
+    <li><b>Una familia neutra ligeramente teñida</b> hacia el tono dominante, que cohesiona la
+    interfaz sin introducir un quinto color.</li>
+  </ul>
+  <p>La proporción de uso sigue una regla práctica de reparto aproximado 60/30/10: superficie neutra
+  dominante, contenido y estructura en neutros medios, y una fracción pequeña reservada al color
+  portador de significado. La regla no es normativa, pero su violación —interfaces donde el color de
+  marca cubre grandes superficies— destruye la capacidad de destacar lo importante.</p>
+
+  <h2 id="s5-6">5.6 Semántica y convención</h2>
+  <p>El significado del color es convencional y depende del dominio. En este producto conviven dos
+  convenciones que podrían chocar: la del software (verde = correcto, rojo = error) y la del deporte
+  (verde = victoria, rojo = derrota o tarjeta). Coinciden lo suficiente para ser compatibles, pero
+  obligan a una decisión explícita: el verde de «victoria» en una tabla de resultados <b>no</b> es el
+  mismo token que el verde de «acción primaria», aunque pertenezcan a la misma familia. Confundirlos
+  produce tablas donde el usuario cree que una fila es pulsable. La separación entre tokens de marca
+  y tokens semánticos (§6.2) existe exactamente para evitar esa ambigüedad.</p>
+  <table class="compacta" id="t5-3">
+    <thead><tr><th style="width:20%">Estado del dominio</th><th style="width:22%">Codificación cromática</th><th style="width:28%">Codificación redundante obligatoria</th><th style="width:30%">Nota</th></tr></thead>
+    <tbody>
+      <tr><td>Victoria</td><td>Verde 700 sobre verde 50</td><td>Letra «V» y posición de columna</td><td>Nunca sólo el relleno de celda.</td></tr>
+      <tr><td>Empate</td><td>Neutro 600 sobre neutro 100</td><td>Letra «E»</td><td>El neutro evita que el empate parezca un estado de error.</td></tr>
+      <tr><td>Derrota</td><td>Granate 700 sobre granate 50</td><td>Letra «D»</td><td>Se evita el rojo puro saturado por fatiga visual en listas largas.</td></tr>
+      <tr><td>Pendiente</td><td>Neutro 500, sin relleno</td><td>Guion largo y texto «por jugar»</td><td>La ausencia de color comunica ausencia de resultado.</td></tr>
+      <tr><td>En disputa</td><td>Ámbar 700 sobre ámbar 50</td><td>Icono de aviso y texto</td><td>Reservado a resultados impugnados (§13.12).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 5.3</b> — Codificación de estados del dominio. Cada estado tiene, como mínimo, color y una segunda codificación textual o posicional.</caption>
+  </table>
+
+  <h2 id="s5-7">5.7 Color, superficie y profundidad</h2>
+  <p>En interfaces planas la profundidad se construye con claridad de superficie, no con sombras
+  pronunciadas. El sistema define una jerarquía de superficies —fondo de aplicación, superficie de
+  contenido, superficie elevada, superficie flotante— donde cada nivel se separa del anterior por un
+  salto de claridad suficiente para ser perceptible sin bordes. En modo claro la elevación aclara; en
+  modo oscuro, también: oscurecer para elevar produce el efecto contrario al esperado porque la luz
+  en el entorno simulado proviene de arriba. Las sombras acompañan, pero nunca son la única señal:
+  en modo de contraste forzado desaparecen, y por eso cada superficie elevada declara además un borde
+  de contraste mínimo 3:1 frente a su fondo inmediato (§6.7).</p>
+
+  <h2 id="s5-8">5.8 Contraste en situaciones difíciles</h2>
+  <ul>
+    <li><b>Texto sobre imagen.</b> Nunca se confía en la imagen: se aplica una capa de velado con
+    opacidad calculada para garantizar el contraste en el peor píxel, o se reserva una banda sólida.
+    En este producto afecta a las cabeceras de torneo con imagen de fondo.</li>
+    <li><b>Texto sobre degradado.</b> Se verifica el contraste en ambos extremos del degradado, no en
+    el punto medio.</li>
+    <li><b>Estados deshabilitados.</b> Están exentos del criterio, pero la exención no es una licencia:
+    un control deshabilitado ilegible impide entender por qué no se puede actuar. Se fija un mínimo
+    interno de 3:1 y se acompaña siempre de explicación textual (principio P3).</li>
+    <li><b>Marcas de datos en gráficos.</b> Las series se distinguen por color <i>y</i> por forma de
+    marcador o patrón de trazo, con contraste mínimo 3:1 frente al fondo del gráfico.</li>
+  </ul>
+
+  <h2 id="s5-9">5.9 Deficiencias de visión del color</h2>
+  <p>Las deficiencias congénitas de visión del color rojo-verde afectan aproximadamente al 8&nbsp;% de
+  los hombres y a menos del 1&nbsp;% de las mujeres de ascendencia europea, con variación entre
+  poblaciones. En un grupo de doce participantes, la probabilidad de que al menos una persona tenga
+  alguna deficiencia es considerable. Puesto que el producto codifica resultados con verde y rojo
+  —precisamente el eje más afectado—, la redundancia no es una recomendación: es una condición de
+  funcionamiento.</p>
+  <table class="compacta" id="t5-4">
+    <thead><tr><th style="width:20%">Tipo</th><th style="width:30%">Alteración</th><th style="width:50%">Consecuencia en este producto</th></tr></thead>
+    <tbody>
+      <tr><td>Protanopia / protanomalía</td><td>Ausencia o alteración del cono de onda larga; los rojos se oscurecen.</td><td>El granate de «derrota» puede confundirse con neutro oscuro: se exige la letra identificativa.</td></tr>
+      <tr><td>Deuteranopia / deuteranomalía</td><td>Ausencia o alteración del cono de onda media; es la más frecuente.</td><td>Verde y rojo se aproximan: victoria y derrota serían indistinguibles sólo por color.</td></tr>
+      <tr><td>Tritanopia</td><td>Alteración del cono de onda corta; afecta al eje azul-amarillo. Poco frecuente.</td><td>El ámbar de «en disputa» puede acercarse a neutro: se exige icono.</td></tr>
+      <tr><td>Acromatopsia</td><td>Visión sin discriminación cromática.</td><td>Exige que toda la información sea recuperable sólo con diferencias de luminancia.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 5.4</b> — Tipos de deficiencia de visión del color y su efecto sobre la codificación cromática del producto.</caption>
+  </table>
+  <div class="clave">
+    <span class="et">Prueba de escala de grises</span>
+    <p>Toda pantalla DEBE superar la prueba de conversión a escala de grises: si al eliminar el color
+    se pierde información —qué fila ganó, qué campo tiene error, qué elemento está seleccionado—, el
+    diseño incumple el criterio 1.4.1 y debe corregirse antes de la revisión de código. Esta prueba se
+    automatiza en la verificación visual de regresión (§26.6).</p>
+  </div>
+
+  <h2 id="s5-10">5.10 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-COL-01.</b> Las escalas de color DEBEN generarse en OKLCh y publicarse también en sRGB para compatibilidad.</li>
+    <li><b>RQ-COL-02.</b> Todo par texto/fondo DEBE verificarse con la relación de contraste de WCAG 2.x y superar el umbral aplicable con margen ≥ 0,3.</li>
+    <li><b>RQ-COL-03.</b> Ninguna información DEBE transmitirse únicamente mediante color; la prueba de escala de grises es obligatoria.</li>
+    <li><b>RQ-COL-04.</b> Los tokens de marca y los tokens semánticos NO DEBEN compartir identificador aunque compartan valor.</li>
+    <li><b>RQ-COL-05.</b> Los colores de gama extendida PUEDEN usarse sólo como realce no informativo y con alternativa en gama estándar.</li>
+  </ul>
+</section>

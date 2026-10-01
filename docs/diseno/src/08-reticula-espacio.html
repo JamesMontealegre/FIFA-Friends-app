@@ -1,0 +1,203 @@
+<section class="capitulo" id="cap8">
+  <h1 id="h1-8"><span class="cnum">Capítulo 8</span>Retícula, espaciado, iconografía y movimiento</h1>
+
+  <p class="entradilla">El espacio es el material con el que se construye la jerarquía cuando el
+  color está reservado al significado. Este capítulo fija la escala de espaciado, la retícula y los
+  puntos de ruptura, los radios y las sombras, el tamaño mínimo y la separación de los objetivos
+  interactivos, el sistema iconográfico y la gramática del movimiento.</p>
+
+  <h2 id="s8-1">8.1 Escala de espaciado</h2>
+  <p>Toda distancia del producto procede de una escala geométrica de base 4&nbsp;px. Una escala
+  cerrada evita el fenómeno más común de deriva visual: los márgenes de 13, 15 y 17 píxeles que
+  aparecen cuando cada persona ajusta a ojo. Los nombres son numéricos y no describen uso, para que
+  puedan reutilizarse en cualquier contexto.</p>
+  <table class="compacta" id="t8-1">
+    <thead><tr><th style="width:14%">Token</th><th style="width:12%">Valor</th><th style="width:36%">Uso característico</th><th style="width:14%">Token</th><th style="width:12%">Valor</th><th style="width:12%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>esp-0</code></td><td>0</td><td>Anulación explícita de espacio heredado</td><td><code>esp-6</code></td><td>24&nbsp;px</td><td>Separación entre bloques</td></tr>
+      <tr><td><code>esp-1</code></td><td>4&nbsp;px</td><td>Separación icono-texto</td><td><code>esp-8</code></td><td>32&nbsp;px</td><td>Secciones de página</td></tr>
+      <tr><td><code>esp-2</code></td><td>8&nbsp;px</td><td>Interior de insignias, separación de controles contiguos</td><td><code>esp-10</code></td><td>40&nbsp;px</td><td>Cabecera de vista</td></tr>
+      <tr><td><code>esp-3</code></td><td>12&nbsp;px</td><td>Interior vertical de campos y filas</td><td><code>esp-12</code></td><td>48&nbsp;px</td><td>Separación de regiones</td></tr>
+      <tr><td><code>esp-4</code></td><td>16&nbsp;px</td><td>Margen lateral en móvil; interior de tarjeta</td><td><code>esp-16</code></td><td>64&nbsp;px</td><td>Espacio de respiro en escritorio</td></tr>
+      <tr><td><code>esp-5</code></td><td>20&nbsp;px</td><td>Interior de tarjeta ampliada</td><td><code>esp-24</code></td><td>96&nbsp;px</td><td>Estados vacíos centrados</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.1</b> — Escala de espaciado. Cualquier distancia que no pertenezca a esta escala es un defecto, verificable mediante análisis estático de las utilidades empleadas.</caption>
+  </table>
+  <p>El <b>ritmo vertical</b> se construye por agrupación, no por regla de rejilla: dentro de un
+  bloque, los elementos se separan con <code>esp-2</code> o <code>esp-3</code>; entre bloques, con
+  <code>esp-6</code>; entre secciones, con <code>esp-8</code> o <code>esp-12</code>. La relación
+  interior/exterior siempre es asimétrica —lo que está junto pertenece junto— y es la aplicación
+  directa del principio de proximidad (§4.4).</p>
+
+  <h2 id="s8-2">8.2 Retícula y contenedores</h2>
+  <p>La retícula no se define por número de columnas sino por <b>comportamiento del contenido</b>.
+  Se emplean tres mecanismos, por orden de preferencia:</p>
+  <ol>
+    <li><b>Flujo intrínseco.</b> La mayoría de las vistas son una columna de bloques apilados cuyo
+    ancho lo limita el contenedor. No necesitan retícula.</li>
+    <li><b>Retícula automática.</b> Las colecciones homogéneas —cuadrícula de equipos, tarjetas de
+    torneo— usan <code>grid-template-columns: repeat(auto-fill, minmax(…))</code>, que se adapta sin
+    puntos de ruptura.</li>
+    <li><b>Retícula explícita de 12 columnas.</b> Reservada a las plantillas de dos y tres paneles
+    (§10.5), donde la proporción entre regiones sí debe fijarse.</li>
+  </ol>
+  <table class="compacta" id="t8-2">
+    <thead><tr><th style="width:16%">Contenedor</th><th style="width:20%">Ancho</th><th style="width:20%">Margen lateral</th><th style="width:44%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>cont-estrecho</code></td><td>≤ 42rem (672&nbsp;px)</td><td><code>esp-4</code> / <code>esp-6</code></td><td>Formularios, textos largos, autenticación.</td></tr>
+      <tr><td><code>cont-estandar</code></td><td>≤ 64rem (1024&nbsp;px)</td><td><code>esp-4</code> / <code>esp-8</code></td><td>Vistas de una columna: listado de torneos, palmarés.</td></tr>
+      <tr><td><code>cont-ancho</code></td><td>≤ 90rem (1440&nbsp;px)</td><td><code>esp-4</code> / <code>esp-8</code></td><td>Maestro&ndash;detalle de dos paneles, cuadro eliminatorio.</td></tr>
+      <tr><td><code>cont-pleno</code></td><td>100&nbsp;%</td><td>0</td><td>Barras fijas y fondos; nunca contiene texto sin contenedor interior.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.2</b> — Contenedores del sistema. El límite superior existe porque una línea de texto de 1600&nbsp;px es ilegible por exceso de medida (§7.4).</caption>
+  </table>
+
+  <h2 id="s8-3">8.3 Puntos de ruptura</h2>
+  <p>Los puntos de ruptura se eligen por el contenido, no por dispositivos concretos. Se definen
+  cuatro, y la regla es que un componente use <b>consultas de contenedor</b> siempre que su
+  adaptación dependa del espacio disponible y no del tamaño de la ventana: una tarjeta de partido
+  debe reorganizarse igual si está en un panel estrecho dentro de una pantalla ancha.</p>
+
+  <figure id="f8-1">
+    <svg viewBox="0 0 700 180" width="100%" height="180" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="8">
+        <text x="4" y="12" font-size="9" font-weight="bold" fill="#15191C">Comportamiento de la plantilla maestro–detalle según el ancho disponible</text>
+
+        <rect x="4" y="24" width="96" height="140" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="12" y="46" width="80" height="108" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="52" y="38" text-anchor="middle" fill="#15191C" font-weight="bold">&lt; 640</text>
+        <text x="52" y="100" text-anchor="middle" fill="#074733">maestro</text>
+        <text x="52" y="112" text-anchor="middle" fill="#3C464D" font-size="7">(detalle = ruta propia)</text>
+
+        <rect x="120" y="24" width="150" height="140" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="128" y="46" width="134" height="108" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="195" y="38" text-anchor="middle" fill="#15191C" font-weight="bold">640 – 1023</text>
+        <text x="195" y="100" text-anchor="middle" fill="#074733">maestro, densidad media</text>
+
+        <rect x="290" y="24" width="190" height="140" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="298" y="46" width="66" height="108" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <rect x="370" y="46" width="102" height="108" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="385" y="38" text-anchor="middle" fill="#15191C" font-weight="bold">1024 – 1439</text>
+        <text x="331" y="100" text-anchor="middle" fill="#074733" font-size="7.5">maestro</text>
+        <text x="421" y="100" text-anchor="middle" fill="#1B4E8C" font-size="7.5">detalle</text>
+
+        <rect x="500" y="24" width="196" height="140" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="508" y="46" width="58" height="108" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <rect x="572" y="46" width="76" height="108" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <rect x="654" y="46" width="34" height="108" rx="3" fill="#FBF2E2" stroke="#8A5300"/>
+        <text x="598" y="38" text-anchor="middle" fill="#15191C" font-weight="bold">≥ 1440</text>
+        <text x="537" y="100" text-anchor="middle" fill="#074733" font-size="7.5">maestro</text>
+        <text x="610" y="100" text-anchor="middle" fill="#1B4E8C" font-size="7.5">detalle</text>
+        <text x="671" y="94" text-anchor="middle" fill="#8A5300" font-size="7">panel</text>
+        <text x="671" y="104" text-anchor="middle" fill="#8A5300" font-size="7">auxiliar</text>
+        <text x="4" y="176" fill="#6B7780" font-size="7.5">Anchos en píxeles CSS. El panel auxiliar es opcional y nunca contiene información que no esté accesible de otro modo.</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 8.1</b> — Progresión de la plantilla principal. La transición de uno a dos paneles ocurre a 1024&nbsp;px porque por debajo de ese ancho ninguno de los dos paneles alcanza una medida de línea aceptable.</figcaption>
+  </figure>
+
+  <h2 id="s8-4">8.4 Densidad</h2>
+  <p>El producto ofrece dos densidades: <b>cómoda</b> (por defecto, obligatoria en pantallas táctiles)
+  y <b>compacta</b> (opcional, disponible a partir de 1024&nbsp;px y con puntero fino detectado
+  mediante <code>pointer: fine</code>). La densidad compacta reduce el espaciado vertical interno un
+  escalón, nunca el tamaño del texto ni el área táctil mínima. La preferencia se persiste por
+  dispositivo y se expone en ajustes, no en una barra de herramientas flotante.</p>
+
+  <h2 id="s8-5">8.5 Radios, bordes y sombras</h2>
+  <table class="compacta" id="t8-3">
+    <thead><tr><th style="width:18%">Token</th><th style="width:14%">Valor</th><th style="width:68%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>radio-sm</code></td><td>4&nbsp;px</td><td>Insignias, campos de entrada, celdas con relleno.</td></tr>
+      <tr><td><code>radio-md</code></td><td>8&nbsp;px</td><td>Botones, tarjetas, menús.</td></tr>
+      <tr><td><code>radio-lg</code></td><td>16&nbsp;px</td><td>Diálogos y hojas inferiores.</td></tr>
+      <tr><td><code>radio-pleno</code></td><td>9999&nbsp;px</td><td>Avatares, conmutadores, contadores circulares.</td></tr>
+      <tr><td><code>borde-fino</code></td><td>1&nbsp;px</td><td>Separadores y contornos por defecto.</td></tr>
+      <tr><td><code>borde-grueso</code></td><td>2&nbsp;px</td><td>Selección, foco y estado de error.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.3</b> — Radios y grosores. Los radios anidados mantienen la regla <i>radio interior = radio exterior − espaciado</i> para que las esquinas resulten concéntricas.</caption>
+  </table>
+
+  <h2 id="s8-6">8.6 Objetivos interactivos</h2>
+  <p>El criterio 2.5.8 exige objetivos de al menos 24 × 24&nbsp;px CSS, con excepciones tasadas. Dado
+  el contexto de uso —teléfono, una mano, a menudo de pie y con prisa— este documento fija un listón
+  superior:</p>
+  <table class="compacta" id="t8-4">
+    <thead><tr><th style="width:26%">Situación</th><th style="width:20%">Mínimo del sistema</th><th style="width:54%">Observación</th></tr></thead>
+    <tbody>
+      <tr><td>Control táctil primario</td><td>44 × 44&nbsp;px</td><td>Área de activación, no tamaño visual: el icono puede medir 20&nbsp;px con relleno hasta 44.</td></tr>
+      <tr><td>Control táctil secundario</td><td>40 × 40&nbsp;px</td><td>Sólo si está separado ≥ 8&nbsp;px de cualquier otro objetivo.</td></tr>
+      <tr><td>Control con puntero fino</td><td>32 × 32&nbsp;px</td><td>Admisible en densidad compacta y sólo con <code>pointer: fine</code>.</td></tr>
+      <tr><td>Enlace en línea de texto</td><td>exento</td><td>Excepción prevista por el criterio; se compensa con espaciado de línea 1,55.</td></tr>
+      <tr><td>Separación entre objetivos</td><td>≥ 8&nbsp;px</td><td>Reduce activaciones accidentales; crítico en filas de acciones de partido.</td></tr>
+      <tr><td>Acción destructiva</td><td>44 × 44&nbsp;px y aislada</td><td>Separación ≥ 16&nbsp;px de cualquier acción frecuente (§4.8).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.4</b> — Tamaños y separaciones mínimas de objetivos interactivos.</caption>
+  </table>
+  <p>Las acciones más frecuentes se sitúan en la mitad inferior de la pantalla en móvil, donde el
+  pulgar alcanza sin recolocar el dispositivo. La navegación principal se ancla abajo en móvil y
+  arriba en escritorio; ambas posiciones son convencionales en sus respectivos contextos (ley de
+  Jakob, §4.3).</p>
+
+  <h2 id="s8-7">8.7 Iconografía</h2>
+  <ul>
+    <li><b>Formato.</b> Conjunto SVG único referenciado por símbolo, con trazo de 1,5&nbsp;px sobre
+    lienzo de 24&nbsp;px y alineación a la rejilla de píxel. Un solo fichero cacheable frente a
+    docenas de peticiones.</li>
+    <li><b>Tamaños.</b> 16, 20 y 24&nbsp;px. Por debajo de 16 los iconos de trazo pierden
+    legibilidad.</li>
+    <li><b>Color.</b> Heredado del texto mediante <code>fill="currentColor"</code>; nunca se codifican
+    colores dentro del símbolo.</li>
+    <li><b>Semántica.</b> Un icono decorativo lleva <code>aria-hidden="true"</code> y <code>focusable="false"</code>.
+    Un icono que porta información tiene texto accesible equivalente. Un botón sólo con icono
+    <b>debe</b> tener nombre accesible y, salvo que la convención sea universal (cerrar, buscar),
+    etiqueta visible.</li>
+    <li><b>Significado estable.</b> Un icono tiene un único significado en todo el producto. El
+    icono de trofeo no puede significar «torneo» en una vista y «premio» en otra.</li>
+    <li><b>Contraste.</b> Los iconos informativos cumplen 3:1 frente a su fondo (criterio 1.4.11).</li>
+  </ul>
+
+  <h2 id="s8-8">8.8 Movimiento</h2>
+  <p>El movimiento tiene tres funciones legítimas: <b>orientar</b> (de dónde viene y a dónde va un
+  elemento), <b>informar</b> (algo está ocurriendo) y <b>confirmar</b> (la acción surtió efecto).
+  Cualquier animación que no cumpla una de las tres se elimina.</p>
+  <table class="compacta" id="t8-5">
+    <thead><tr><th style="width:22%">Token</th><th style="width:14%">Duración</th><th style="width:30%">Curva</th><th style="width:34%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>mov-instantaneo</code></td><td>80&nbsp;ms</td><td><code>linear</code></td><td>Cambio de estado de color en controles.</td></tr>
+      <tr><td><code>mov-rapido</code></td><td>140&nbsp;ms</td><td><code>cubic-bezier(.2,0,.2,1)</code></td><td>Aparición de menús e información emergente.</td></tr>
+      <tr><td><code>mov-estandar</code></td><td>220&nbsp;ms</td><td><code>cubic-bezier(.2,0,0,1)</code></td><td>Transición de panel, hojas, diálogos.</td></tr>
+      <tr><td><code>mov-enfatico</code></td><td>320&nbsp;ms</td><td><code>cubic-bezier(.3,0,0,1)</code></td><td>Entrada de elementos grandes; sorteo de equipos.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 8.5</b> — Tokens de movimiento. Ninguna transición de interfaz supera 320&nbsp;ms: por encima, el movimiento deja de orientar y empieza a estorbar.</caption>
+  </table>
+  <p>Reglas adicionales, todas verificables:</p>
+  <ul>
+    <li>Sólo se animan <code>transform</code> y <code>opacity</code>; animar propiedades que
+    provocan recálculo de diseño es un defecto de rendimiento (§25.4).</li>
+    <li>Se respeta <code>prefers-reduced-motion</code>: las transiciones de posición se sustituyen
+    por fundidos de 80&nbsp;ms, y las animaciones autónomas —como la ruleta del sorteo— se reducen a
+    un cambio de estado con anuncio textual del resultado.</li>
+    <li>Nada parpadea más de tres veces por segundo (criterio 2.3.1).</li>
+    <li>Ninguna animación bloquea la interacción: la interfaz acepta entrada durante la
+    transición.</li>
+    <li>Las transiciones de vista se implementan con la interfaz de transiciones del navegador cuando
+    está disponible, con degradación silenciosa cuando no lo está (§14.8).</li>
+  </ul>
+  <pre>@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}</pre>
+
+  <h2 id="s8-9">8.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-ESP-01.</b> Toda distancia DEBE proceder de la escala de espaciado; no se admiten valores arbitrarios.</li>
+    <li><b>RQ-ESP-02.</b> Los componentes DEBERÍAN adaptarse mediante consultas de contenedor y no de ventana.</li>
+    <li><b>RQ-ESP-03.</b> Los objetivos táctiles DEBEN medir al menos 44 × 44&nbsp;px con separación mínima de 8&nbsp;px.</li>
+    <li><b>RQ-ESP-04.</b> Los iconos decorativos DEBEN ocultarse a la capa de accesibilidad; los informativos DEBEN tener equivalente textual.</li>
+    <li><b>RQ-ESP-05.</b> El movimiento DEBE limitarse a <code>transform</code> y <code>opacity</code> y respetar la preferencia de movimiento reducido.</li>
+  </ul>
+</section>

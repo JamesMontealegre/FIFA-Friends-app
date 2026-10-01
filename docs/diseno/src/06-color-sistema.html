@@ -1,0 +1,303 @@
+<section class="capitulo" id="cap6">
+  <h1 id="h1-6"><span class="cnum">Capítulo 6</span>Sistema de color del producto</h1>
+
+  <p class="entradilla">Este capítulo convierte la teoría del capítulo anterior en valores concretos:
+  una arquitectura de tokens en tres niveles, cinco familias cromáticas generadas en OKLCh con su
+  contraste verificado, un mapa semántico para modo claro y modo oscuro, reglas de superficie y
+  elevación, y el mecanismo de implementación y verificación automática que impide la deriva.</p>
+
+  <h2 id="s6-1">6.1 Arquitectura de tokens</h2>
+  <p>Un sistema de color sostenible no expone colores: expone <i>intenciones</i>. Se definen tres
+  niveles, y sólo el intermedio puede usarse al construir pantallas.</p>
+  <table id="t6-1">
+    <thead><tr><th style="width:20%">Nivel</th><th style="width:26%">Ejemplo</th><th style="width:30%">Quién lo consume</th><th style="width:24%">Regla</th></tr></thead>
+    <tbody>
+      <tr><td><b>1 · Primitivo</b></td><td><code>cesped-700 = #087139</code></td><td>Sólo el nivel 2. Nunca una pantalla ni un componente.</td><td>Describe un color, no un significado. Cambiarlo altera todo el sistema.</td></tr>
+      <tr><td><b>2 · Semántico</b></td><td><code>color-accion-primaria = cesped-700</code></td><td>Componentes y pantallas.</td><td>Describe una intención. Es el único nivel que se escribe en el código de interfaz.</td></tr>
+      <tr><td><b>3 · De componente</b></td><td><code>boton-primario-fondo-hover</code></td><td>Un único componente.</td><td>Se crea sólo cuando un componente necesita una excepción justificada.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 6.1</b> — Niveles de token. La regla de oro: ningún archivo de componente contiene un literal hexadecimal ni un token primitivo.</caption>
+  </table>
+
+  <h2 id="s6-2">6.2 Nomenclatura</h2>
+  <p>El nombre de un token semántico se compone como
+  <code>color-&lt;rol&gt;-&lt;elemento&gt;[-&lt;estado&gt;]</code>, donde el rol es la función
+  (acción primaria, superficie, texto, borde, estado), el elemento indica qué parte se colorea
+  (fondo, texto, borde, icono) y el estado es opcional (reposo implícito, <i>hover</i>, activo,
+  foco, deshabilitado, seleccionado). Ejemplos válidos:
+  <code>color-superficie-elevada</code>, <code>color-texto-secundario</code>,
+  <code>color-estado-error-borde</code>, <code>color-accion-primaria-fondo-hover</code>. Los nombres
+  nunca contienen el color («verde», «rojo») ni valores («claro-2»): un token llamado
+  <code>color-verde-boton</code> impide cambiar la marca sin renombrar todo el sistema.</p>
+
+  <h2 id="s6-3">6.3 Paleta primitiva</h2>
+  <p>Las cinco familias se generan algorítmicamente en OKLCh con once pasos de claridad decreciente y
+  croma atenuado en los extremos para evitar que los tonos claros parezcan lavados y los oscuros,
+  embarrados. Todos los valores están dentro de la gama sRGB; cuando el croma nominal excedía la
+  gama, se redujo hasta el máximo representable conservando claridad y tono, de modo que la
+  regularidad perceptual de la escala se mantiene. Las dos últimas columnas documentan el contraste
+  verificado numéricamente y son la razón por la que cada paso tiene el uso asignado que tiene.</p>
+<h4>cesped — Primario · identidad, acción principal, estado de victoria</h4>
+<table class="compacta" id="t6-cesped">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>cesped-50</code></td><td><code>oklch(0.971 0.0460 152)</code></td><td><code>#E0FFE7</code></td><td>1,07:1</td><td>17,5:1</td><td>fondo sutil</td></tr>
+<tr><td><code>cesped-100</code></td><td><code>oklch(0.939 0.0783 152)</code></td><td><code>#C4FBD1</code></td><td>1,16:1</td><td>16,1:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>cesped-200</code></td><td><code>oklch(0.886 0.0892 152)</code></td><td><code>#ADEBBD</code></td><td>1,36:1</td><td>13,72:1</td><td>borde suave</td></tr>
+<tr><td><code>cesped-300</code></td><td><code>oklch(0.816 0.1036 152)</code></td><td><code>#8FD6A2</code></td><td>1,71:1</td><td>10,97:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>cesped-400</code></td><td><code>oklch(0.730 0.1213 152)</code></td><td><code>#68BE81</code></td><td>2,27:1</td><td>8,26:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>cesped-500</code></td><td><code>oklch(0.648 0.1381 152)</code></td><td><code>#3FA663</code></td><td>3,07:1</td><td>6,1:1</td><td>icono no textual</td></tr>
+<tr><td><code>cesped-600</code></td><td><code>oklch(0.566 0.1410 152)</code></td><td><code>#188D4A</code></td><td>4,24:1</td><td>4,41:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>cesped-700</code></td><td><code>oklch(0.482 0.1237 152)</code></td><td><code>#087139</code></td><td>6,12:1</td><td>3,06:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>cesped-800</code></td><td><code>oklch(0.396 0.1051 152)</code></td><td><code>#005628</code></td><td>8,89:1</td><td>2,11:1</td><td>texto enfático</td></tr>
+<tr><td><code>cesped-900</code></td><td><code>oklch(0.306 0.0820 152)</code></td><td><code>#003A19</code></td><td>12,97:1</td><td>1,44:1</td><td>superficie oscura</td></tr>
+<tr><td><code>cesped-950</code></td><td><code>oklch(0.232 0.0636 152)</code></td><td><code>#00250D</code></td><td>16,53:1</td><td>1,13:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.2</b> — Familia <i>cesped</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+<h4>indigo — Acento · información, selección, enlaces</h4>
+<table class="compacta" id="t6-indigo">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>indigo-50</code></td><td><code>oklch(0.971 0.0138 258)</code></td><td><code>#F0F6FF</code></td><td>1,09:1</td><td>17,23:1</td><td>fondo sutil</td></tr>
+<tr><td><code>indigo-100</code></td><td><code>oklch(0.939 0.0294 258)</code></td><td><code>#DFECFF</code></td><td>1,19:1</td><td>15,67:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>indigo-200</code></td><td><code>oklch(0.886 0.0560 258)</code></td><td><code>#C3DBFF</code></td><td>1,41:1</td><td>13,28:1</td><td>borde suave</td></tr>
+<tr><td><code>indigo-300</code></td><td><code>oklch(0.816 0.0928 258)</code></td><td><code>#9EC5FF</code></td><td>1,77:1</td><td>10,59:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>indigo-400</code></td><td><code>oklch(0.730 0.1147 258)</code></td><td><code>#7AA9EF</code></td><td>2,4:1</td><td>7,8:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>indigo-500</code></td><td><code>oklch(0.648 0.1307 258)</code></td><td><code>#5A8FDD</code></td><td>3,28:1</td><td>5,71:1</td><td>icono no textual</td></tr>
+<tr><td><code>indigo-600</code></td><td><code>oklch(0.566 0.1334 258)</code></td><td><code>#4176C3</code></td><td>4,56:1</td><td>4,1:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>indigo-700</code></td><td><code>oklch(0.482 0.1171 258)</code></td><td><code>#315D9F</code></td><td>6,57:1</td><td>2,85:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>indigo-800</code></td><td><code>oklch(0.396 0.1003 258)</code></td><td><code>#21467B</code></td><td>9,43:1</td><td>1,98:1</td><td>texto enfático</td></tr>
+<tr><td><code>indigo-900</code></td><td><code>oklch(0.306 0.0828 258)</code></td><td><code>#122E58</code></td><td>13,48:1</td><td>1,39:1</td><td>superficie oscura</td></tr>
+<tr><td><code>indigo-950</code></td><td><code>oklch(0.232 0.0684 258)</code></td><td><code>#061C3D</code></td><td>16,92:1</td><td>1,11:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.3</b> — Familia <i>indigo</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+<h4>ambar — Atención · avisos y estados en disputa</h4>
+<table class="compacta" id="t6-ambar">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>ambar-50</code></td><td><code>oklch(0.971 0.0239 76)</code></td><td><code>#FFF4E4</code></td><td>1,09:1</td><td>17,21:1</td><td>fondo sutil</td></tr>
+<tr><td><code>ambar-100</code></td><td><code>oklch(0.939 0.0510 76)</code></td><td><code>#FFE7C6</code></td><td>1,2:1</td><td>15,6:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>ambar-200</code></td><td><code>oklch(0.886 0.0904 76)</code></td><td><code>#FCD295</code></td><td>1,42:1</td><td>13,19:1</td><td>borde suave</td></tr>
+<tr><td><code>ambar-300</code></td><td><code>oklch(0.816 0.1050 76)</code></td><td><code>#EABA73</code></td><td>1,78:1</td><td>10,49:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>ambar-400</code></td><td><code>oklch(0.730 0.1229 76)</code></td><td><code>#D49C44</code></td><td>2,43:1</td><td>7,7:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>ambar-500</code></td><td><code>oklch(0.648 0.1365 76)</code></td><td><code>#BD8100</code></td><td>3,33:1</td><td>5,62:1</td><td>icono no textual</td></tr>
+<tr><td><code>ambar-600</code></td><td><code>oklch(0.566 0.1194 76)</code></td><td><code>#9E6B00</code></td><td>4,61:1</td><td>4,06:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>ambar-700</code></td><td><code>oklch(0.482 0.1019 76)</code></td><td><code>#7F5500</code></td><td>6,56:1</td><td>2,85:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>ambar-800</code></td><td><code>oklch(0.396 0.0841 76)</code></td><td><code>#603F00</code></td><td>9,51:1</td><td>1,97:1</td><td>texto enfático</td></tr>
+<tr><td><code>ambar-900</code></td><td><code>oklch(0.306 0.0659 76)</code></td><td><code>#422A00</code></td><td>13,44:1</td><td>1,39:1</td><td>superficie oscura</td></tr>
+<tr><td><code>ambar-950</code></td><td><code>oklch(0.232 0.0516 76)</code></td><td><code>#2B1900</code></td><td>16,91:1</td><td>1,11:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.4</b> — Familia <i>ambar</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+<h4>granate — Peligro · errores, destrucción, derrota</h4>
+<table class="compacta" id="t6-granate">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>granate-50</code></td><td><code>oklch(0.971 0.0143 26)</code></td><td><code>#FFF2F0</code></td><td>1,09:1</td><td>17,12:1</td><td>fondo sutil</td></tr>
+<tr><td><code>granate-100</code></td><td><code>oklch(0.939 0.0307 26)</code></td><td><code>#FFE4E0</code></td><td>1,21:1</td><td>15,53:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>granate-200</code></td><td><code>oklch(0.886 0.0601 26)</code></td><td><code>#FFCBC5</code></td><td>1,44:1</td><td>13,01:1</td><td>borde suave</td></tr>
+<tr><td><code>granate-300</code></td><td><code>oklch(0.816 0.1037 26)</code></td><td><code>#FFA9A0</code></td><td>1,84:1</td><td>10,19:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>granate-400</code></td><td><code>oklch(0.730 0.1377 26)</code></td><td><code>#F28379</code></td><td>2,53:1</td><td>7,4:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>granate-500</code></td><td><code>oklch(0.648 0.1568 26)</code></td><td><code>#DE625A</code></td><td>3,5:1</td><td>5,35:1</td><td>icono no textual</td></tr>
+<tr><td><code>granate-600</code></td><td><code>oklch(0.566 0.1601 26)</code></td><td><code>#C34741</code></td><td>4,89:1</td><td>3,83:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>granate-700</code></td><td><code>oklch(0.482 0.1405 26)</code></td><td><code>#9E3531</code></td><td>6,98:1</td><td>2,68:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>granate-800</code></td><td><code>oklch(0.396 0.1204 26)</code></td><td><code>#7B2422</code></td><td>9,92:1</td><td>1,89:1</td><td>texto enfático</td></tr>
+<tr><td><code>granate-900</code></td><td><code>oklch(0.306 0.0994 26)</code></td><td><code>#571312</code></td><td>13,93:1</td><td>1,34:1</td><td>superficie oscura</td></tr>
+<tr><td><code>granate-950</code></td><td><code>oklch(0.232 0.0821 26)</code></td><td><code>#3C0607</code></td><td>17,2:1</td><td>1,09:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.5</b> — Familia <i>granate</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+<h4>neutro — Neutro · texto, superficies, bordes</h4>
+<table class="compacta" id="t6-neutro">
+<thead><tr><th style="width:13%">Token</th><th style="width:30%">OKLCh</th><th style="width:15%">sRGB</th><th style="width:14%">c/ blanco</th><th style="width:14%">c/ tinta</th><th style="width:14%">Uso típico</th></tr></thead><tbody>
+<tr><td><code>neutro-50</code></td><td><code>oklch(0.971 0.0058 170)</code></td><td><code>#F2F7F5</code></td><td>1,08:1</td><td>17,29:1</td><td>fondo sutil</td></tr>
+<tr><td><code>neutro-100</code></td><td><code>oklch(0.939 0.0064 170)</code></td><td><code>#E7ECEA</code></td><td>1,19:1</td><td>15,67:1</td><td>fondo de aviso</td></tr>
+<tr><td><code>neutro-200</code></td><td><code>oklch(0.886 0.0072 170)</code></td><td><code>#D5DBD9</code></td><td>1,4:1</td><td>13,34:1</td><td>borde suave</td></tr>
+<tr><td><code>neutro-300</code></td><td><code>oklch(0.816 0.0084 170)</code></td><td><code>#BEC5C2</code></td><td>1,76:1</td><td>10,66:1</td><td>borde / texto en oscuro</td></tr>
+<tr><td><code>neutro-400</code></td><td><code>oklch(0.730 0.0098 170)</code></td><td><code>#A2AAA7</code></td><td>2,37:1</td><td>7,88:1</td><td>gráfico en oscuro</td></tr>
+<tr><td><code>neutro-500</code></td><td><code>oklch(0.648 0.0112 170)</code></td><td><code>#88918D</code></td><td>3,24:1</td><td>5,78:1</td><td>icono no textual</td></tr>
+<tr><td><code>neutro-600</code></td><td><code>oklch(0.566 0.0114 170)</code></td><td><code>#707875</code></td><td>4,53:1</td><td>4,13:1</td><td>componente (≥3:1)</td></tr>
+<tr><td><code>neutro-700</code></td><td><code>oklch(0.482 0.0100 170)</code></td><td><code>#59605D</code></td><td>6,45:1</td><td>2,9:1</td><td>texto sobre claro</td></tr>
+<tr><td><code>neutro-800</code></td><td><code>oklch(0.396 0.0086 170)</code></td><td><code>#424846</code></td><td>9,35:1</td><td>2,0:1</td><td>texto enfático</td></tr>
+<tr><td><code>neutro-900</code></td><td><code>oklch(0.306 0.0071 170)</code></td><td><code>#2C302F</code></td><td>13,37:1</td><td>1,4:1</td><td>superficie oscura</td></tr>
+<tr><td><code>neutro-950</code></td><td><code>oklch(0.232 0.0059 170)</code></td><td><code>#1B1E1D</code></td><td>16,8:1</td><td>1,11:1</td><td>fondo profundo</td></tr>
+</tbody><caption class="tcap"><b>Tabla 6.6</b> — Familia <i>neutro</i>. «c/ blanco» es la relación de contraste frente a <code>#FFFFFF</code>; «c/ tinta», frente a <code>#0D1316</code>, el fondo del modo oscuro.</caption></table>
+
+  <div class="nota">
+    <span class="et">Lectura de las tablas</span>
+    <p>El paso <b>600</b> es el primero que alcanza 3:1 sobre blanco y por tanto el mínimo admisible
+    para bordes de control, iconos informativos y gráficos. El paso <b>700</b> es el primero que
+    supera 4,5:1 y por tanto el mínimo para texto normal sobre fondo claro. En modo oscuro la
+    relación se invierte: los pasos <b>300</b> y <b>400</b> son los que ofrecen contraste suficiente
+    sobre la tinta de fondo. Esta correspondencia —600 para componentes, 700 para texto, 300/400 en
+    oscuro— es la regla mnemotécnica que el equipo debe memorizar.</p>
+  </div>
+
+  <h2 id="s6-4">6.4 Tokens semánticos: modo claro</h2>
+  <table id="t6-7">
+    <thead><tr><th style="width:30%">Token semántico</th><th style="width:20%">Valor</th><th style="width:16%">Contraste</th><th style="width:34%">Uso y restricción</th></tr></thead>
+    <tbody>
+      <tr><td><code>color-fondo-aplicacion</code></td><td><code>neutro-50</code></td><td>—</td><td>Lienzo de la ventana. Nunca contiene texto directamente.</td></tr>
+      <tr><td><code>color-superficie</code></td><td><code>#FFFFFF</code></td><td>base</td><td>Tarjetas, tablas, paneles.</td></tr>
+      <tr><td><code>color-superficie-elevada</code></td><td><code>#FFFFFF</code> + sombra 1</td><td>base</td><td>Menús, diálogos, hojas. Borde <code>neutro-200</code> obligatorio.</td></tr>
+      <tr><td><code>color-superficie-sutil</code></td><td><code>neutro-100</code></td><td>—</td><td>Filas alternas, cabeceras de tabla, zonas inactivas.</td></tr>
+      <tr><td><code>color-texto-principal</code></td><td><code>neutro-900</code></td><td>13,4:1</td><td>Texto de lectura y cifras.</td></tr>
+      <tr><td><code>color-texto-secundario</code></td><td><code>neutro-700</code></td><td>6,5:1</td><td>Metadatos, descripciones. Nunca para datos críticos.</td></tr>
+      <tr><td><code>color-texto-terciario</code></td><td><code>neutro-600</code></td><td>4,5:1</td><td>Marcas de tiempo, ayudas. Límite inferior admisible.</td></tr>
+      <tr><td><code>color-texto-inverso</code></td><td><code>#FFFFFF</code></td><td>≥ 6,1:1</td><td>Sobre fondos de acción primaria (<code>cesped-700</code> o más oscuro).</td></tr>
+      <tr><td><code>color-borde</code></td><td><code>neutro-300</code></td><td>1,8:1</td><td>Separadores no informativos. No sirve como único indicador de control.</td></tr>
+      <tr><td><code>color-borde-fuerte</code></td><td><code>neutro-600</code></td><td>4,5:1</td><td>Bordes de campos de formulario y de controles (cumple 1.4.11).</td></tr>
+      <tr><td><code>color-accion-primaria-fondo</code></td><td><code>cesped-700</code></td><td>6,1:1</td><td>Botón primario; texto en blanco.</td></tr>
+      <tr><td><code>color-accion-primaria-fondo-hover</code></td><td><code>cesped-800</code></td><td>8,9:1</td><td>Oscurece al apuntar; nunca aclara.</td></tr>
+      <tr><td><code>color-accion-secundaria-texto</code></td><td><code>cesped-800</code></td><td>8,9:1</td><td>Botón de contorno sobre superficie blanca.</td></tr>
+      <tr><td><code>color-enlace</code></td><td><code>indigo-700</code></td><td>6,6:1</td><td>Subrayado obligatorio en texto corrido (1.4.1).</td></tr>
+      <tr><td><code>color-seleccion-fondo</code></td><td><code>indigo-50</code></td><td>—</td><td>Fila o elemento seleccionado en maestro&ndash;detalle; acompañado de barra indicadora.</td></tr>
+      <tr><td><code>color-estado-exito-texto</code></td><td><code>cesped-800</code></td><td>8,9:1</td><td>Victoria y confirmaciones.</td></tr>
+      <tr><td><code>color-estado-aviso-texto</code></td><td><code>ambar-800</code></td><td>9,5:1</td><td>Resultados en disputa y advertencias.</td></tr>
+      <tr><td><code>color-estado-error-texto</code></td><td><code>granate-700</code></td><td>7,0:1</td><td>Errores de validación y derrota.</td></tr>
+      <tr><td><code>color-foco</code></td><td><code>indigo-600</code></td><td>4,6:1</td><td>Anillo de foco; véase §6.5.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 6.7</b> — Tokens semánticos del modo claro con el contraste verificado frente a su fondo de uso previsto.</caption>
+  </table>
+
+  <h2 id="s6-5">6.5 Indicador de foco</h2>
+  <p>El foco de teclado es el único mecanismo de orientación de quien no usa puntero, y es el
+  elemento que más a menudo se destruye por motivos estéticos. La especificación es estricta:</p>
+  <ul>
+    <li>Anillo de <b>2&nbsp;px</b> sólido en <code>color-foco</code>, con desplazamiento exterior de
+    <b>2&nbsp;px</b> respecto al control, de modo que no reduzca el área táctil ni se confunda con el
+    borde del propio control.</li>
+    <li>Contorno adicional de 1&nbsp;px en <code>color-superficie</code> entre control y anillo: así
+    el indicador sigue siendo visible tanto sobre fondos claros como oscuros, sin necesidad de dos
+    tokens distintos.</li>
+    <li>Implementación con <code>:focus-visible</code>, nunca con <code>:focus</code> a secas, para no
+    mostrar el anillo tras una pulsación con puntero.</li>
+    <li><code>outline: none</code> sin sustituto equivalente está <b>prohibido</b>; la regla se
+    verifica mediante análisis estático en integración continua (§26.4).</li>
+    <li>El anillo debe permanecer visible: ningún elemento fijo puede taparlo (criterio 2.4.11), lo
+    que obliga a reservar espacio de desplazamiento adicional bajo las barras fijas (§10.4).</li>
+  </ul>
+  <pre>:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
+  border-radius: var(--radio-sm);
+}
+<span class="c">/* En modo de contraste forzado el sistema sustituye los colores:
+   se usa la palabra clave del sistema para no perder el indicador. */</span>
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid Highlight;
+  }
+}</pre>
+
+  <h2 id="s6-6">6.6 Modo oscuro</h2>
+  <p>El modo oscuro no es una inversión: es un segundo mapa semántico sobre la misma paleta
+  primitiva. Las reglas que lo gobiernan derivan de la fisiología descrita en §5.2:</p>
+  <ol>
+    <li><b>Nunca negro puro.</b> El fondo es <code>#0D1316</code> (una tinta derivada de
+    <code>neutro-950</code> con ligera componente del tono de marca). El negro absoluto sobre panel
+    emisor maximiza el deslumbramiento del texto blanco y agrava el efecto de halo.</li>
+    <li><b>Nunca blanco puro para texto largo.</b> Se usa <code>neutro-100</code>, que reduce el
+    deslumbramiento sin perder contraste (15,7:1 sobre la tinta).</li>
+    <li><b>Reducir el croma de los acentos.</b> Los colores saturados sobre fondo oscuro producen
+    aberración cromática percibida; se usan los pasos 300 y 400, no 600 y 700.</li>
+    <li><b>Elevar aclarando.</b> Cada nivel de superficie aumenta la claridad entre 0,02 y 0,04 en
+    OKLCh respecto al anterior.</li>
+    <li><b>Respetar la preferencia del sistema y permitir anularla.</b> Se implementa con
+    <code>prefers-color-scheme</code> más un conmutador explícito de tres estados —claro, oscuro,
+    automático— persistido por dispositivo.</li>
+  </ol>
+  <table class="compacta" id="t6-8">
+    <thead><tr><th style="width:30%">Token semántico</th><th style="width:20%">Modo claro</th><th style="width:20%">Modo oscuro</th><th style="width:30%">Contraste en oscuro</th></tr></thead>
+    <tbody>
+      <tr><td><code>color-fondo-aplicacion</code></td><td><code>neutro-50</code></td><td><code>#0D1316</code></td><td>—</td></tr>
+      <tr><td><code>color-superficie</code></td><td><code>#FFFFFF</code></td><td><code>neutro-950</code></td><td>—</td></tr>
+      <tr><td><code>color-superficie-elevada</code></td><td><code>#FFFFFF</code></td><td><code>neutro-900</code></td><td>—</td></tr>
+      <tr><td><code>color-texto-principal</code></td><td><code>neutro-900</code></td><td><code>neutro-100</code></td><td>15,7:1</td></tr>
+      <tr><td><code>color-texto-secundario</code></td><td><code>neutro-700</code></td><td><code>neutro-300</code></td><td>10,7:1</td></tr>
+      <tr><td><code>color-texto-terciario</code></td><td><code>neutro-600</code></td><td><code>neutro-400</code></td><td>7,9:1</td></tr>
+      <tr><td><code>color-accion-primaria-fondo</code></td><td><code>cesped-700</code></td><td><code>cesped-400</code></td><td>8,3:1 con texto <code>#0D1316</code></td></tr>
+      <tr><td><code>color-enlace</code></td><td><code>indigo-700</code></td><td><code>indigo-300</code></td><td>10,6:1</td></tr>
+      <tr><td><code>color-estado-error-texto</code></td><td><code>granate-700</code></td><td><code>granate-300</code></td><td>10,2:1</td></tr>
+      <tr><td><code>color-estado-aviso-texto</code></td><td><code>ambar-800</code></td><td><code>ambar-300</code></td><td>10,5:1</td></tr>
+      <tr><td><code>color-borde-fuerte</code></td><td><code>neutro-600</code></td><td><code>neutro-500</code></td><td>5,8:1</td></tr>
+      <tr><td><code>color-foco</code></td><td><code>indigo-600</code></td><td><code>indigo-300</code></td><td>10,6:1</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 6.8</b> — Mapa semántico dual. Obsérvese la inversión sistemática de pasos: 700→300/400. El texto sobre acción primaria en modo oscuro es tinta, no blanco.</caption>
+  </table>
+
+  <h2 id="s6-7">6.7 Superficies, elevación y sombra</h2>
+  <table class="compacta" id="t6-9">
+    <thead><tr><th style="width:16%">Nivel</th><th style="width:26%">Uso</th><th style="width:30%">Sombra (modo claro)</th><th style="width:28%">Señal alternativa obligatoria</th></tr></thead>
+    <tbody>
+      <tr><td>0 · Base</td><td>Fondo de aplicación</td><td>ninguna</td><td>—</td></tr>
+      <tr><td>1 · Contenido</td><td>Tarjetas, tablas</td><td><code>0 1px 2px rgb(0 0 0 / .06)</code></td><td>Borde <code>neutro-200</code></td></tr>
+      <tr><td>2 · Elevada</td><td>Menús, desplegables</td><td><code>0 4px 12px rgb(0 0 0 / .10)</code></td><td>Borde <code>neutro-300</code></td></tr>
+      <tr><td>3 · Flotante</td><td>Diálogos modales, hojas</td><td><code>0 12px 32px rgb(0 0 0 / .16)</code></td><td>Borde + velo de fondo al 50&nbsp;%</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 6.9</b> — Escala de elevación. En modo oscuro las sombras se sustituyen por incrementos de claridad de superficie; en modo de contraste forzado, por bordes.</caption>
+  </table>
+
+  <h2 id="s6-8">6.8 Implementación</h2>
+  <p>Los tokens se publican en el formato estable del módulo de tokens de diseño, y de ahí se generan
+  las propiedades personalizadas de CSS y la configuración del motor de utilidades. El origen es
+  único: ninguna herramienta define colores por su cuenta.</p>
+  <pre>// tokens/color.json — formato DTCG (extracto)
+{
+  "color": {
+    "cesped": {
+      "700": { "$type": "color", "$value": "#087139",
+               "$extensions": { "oklch": "oklch(0.482 0.1237 152)" } }
+    },
+    "accion": {
+      "primaria": {
+        "fondo":  { "$type": "color", "$value": "{color.cesped.700}" },
+        "texto":  { "$type": "color", "$value": "#FFFFFF" }
+      }
+    }
+  }
+}</pre>
+  <pre>/* styles/tokens.css — generado, no editar a mano */
+@theme {
+  --color-cesped-700: oklch(0.482 0.1237 152);
+  --color-neutro-900: oklch(0.306 0.0071 170);
+  --color-accion-primaria-fondo: var(--color-cesped-700);
+  --color-texto-principal: var(--color-neutro-900);
+}
+:root[data-tema="oscuro"], :root:not([data-tema="claro"]) {
+  @media (prefers-color-scheme: dark) {
+    --color-accion-primaria-fondo: var(--color-cesped-400);
+    --color-texto-principal: var(--color-neutro-100);
+  }
+}</pre>
+  <div class="aviso">
+    <span class="et">Transición entre temas</span>
+    <p>El cambio de tema NO DEBE animarse con transiciones de color sobre toda la página: produce un
+    repintado costoso y resulta desagradable. Se aplica de forma instantánea, y se respeta
+    <code>prefers-reduced-motion</code> en cualquier caso (§8.8).</p>
+  </div>
+
+  <h2 id="s6-9">6.9 Verificación automática</h2>
+  <p>La deriva cromática se previene con una comprobación que se ejecuta en cada integración y falla
+  la construcción si un par declarado incumple su umbral. La prueba recorre el mapa semántico, no las
+  pantallas, lo que la hace barata y exhaustiva.</p>
+  <pre>// scripts/verificar-contraste.ts (extracto)
+const PARES: Array&lt;[string, string, number]&gt; = [
+  ['color-texto-principal',   'color-superficie',            4.5],
+  ['color-texto-secundario',  'color-superficie',            4.5],
+  ['color-texto-terciario',   'color-superficie',            4.5],
+  ['color-texto-inverso',     'color-accion-primaria-fondo', 4.5],
+  ['color-borde-fuerte',      'color-superficie',            3.0],
+  ['color-foco',              'color-superficie',            3.0],
+  ['color-estado-error-texto','color-superficie',            4.5],
+];
+for (const modo of ['claro', 'oscuro'] as const) {
+  for (const [frente, fondo, minimo] of PARES) {
+    const r = contraste(resolver(frente, modo), resolver(fondo, modo));
+    if (r &lt; minimo) fallar(`${frente}/${fondo} en ${modo}: ${r.toFixed(2)} &lt; ${minimo}`);
+  }
+}</pre>
+
+  <h2 id="s6-10">6.10 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-COL-06.</b> Ningún componente DEBE contener literales de color ni referencias a tokens primitivos.</li>
+    <li><b>RQ-COL-07.</b> El modo oscuro DEBE implementarse como mapa semántico independiente, no como inversión ni como filtro.</li>
+    <li><b>RQ-COL-08.</b> El indicador de foco DEBE cumplir la especificación de §6.5 en todos los controles, incluidos los personalizados.</li>
+    <li><b>RQ-COL-09.</b> La verificación de contraste DEBE ejecutarse en integración continua y bloquear la construcción ante incumplimiento.</li>
+    <li><b>RQ-COL-10.</b> El producto DEBE respetar <code>prefers-color-scheme</code> y ofrecer conmutador explícito de tres estados persistido.</li>
+  </ul>
+</section>
