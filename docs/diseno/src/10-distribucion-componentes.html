@@ -1,0 +1,193 @@
+<section class="capitulo" id="cap10">
+  <h1 id="h1-10"><span class="cnum">Capítulo 10</span>Distribución de componentes en la interfaz</h1>
+
+  <p class="entradilla">Distribuir componentes no es colocar cajas: es decidir qué regiones existen,
+  qué puede aparecer en cada una, en qué orden las recorre la lectura y el foco, y qué reglas impiden
+  que la composición degenere con el tiempo. Este capítulo define la anatomía de la pantalla, la
+  jerarquía de composición del sistema, las plantillas disponibles y el mapa de cada vista del
+  producto a su plantilla.</p>
+
+  <h2 id="s10-1">10.1 Anatomía de la pantalla</h2>
+  <p>Toda vista se construye sobre el mismo armazón de cinco regiones. El armazón es invariable: lo
+  que cambia es qué contiene la región de contenido. Esta invariabilidad es lo que permite que una
+  persona que aprende una pantalla haya aprendido todas.</p>
+
+  <figure id="f10-1">
+    <svg viewBox="0 0 700 260" width="100%" height="258" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="8">
+        <text x="4" y="10" font-size="9" font-weight="bold" fill="#15191C">Móvil (&lt; 1024 px)</text>
+        <rect x="4" y="18" width="200" height="230" rx="6" fill="#FFFFFF" stroke="#C9D1D6"/>
+        <rect x="4" y="18" width="200" height="30" rx="6" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="104" y="37" text-anchor="middle" fill="#074733" font-weight="bold">A · Cabecera (banner)</text>
+        <rect x="12" y="56" width="184" height="24" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <text x="104" y="72" text-anchor="middle" fill="#3C464D">B · Contexto de vista</text>
+        <rect x="12" y="88" width="184" height="118" rx="4" fill="#FFFFFF" stroke="#1B4E8C"/>
+        <text x="104" y="108" text-anchor="middle" fill="#1B4E8C" font-weight="bold">C · Contenido principal</text>
+        <text x="104" y="124" text-anchor="middle" fill="#6B7780" font-size="7.4">&lt;main&gt;, único por documento</text>
+        <text x="104" y="150" text-anchor="middle" fill="#6B7780" font-size="7.4">Aquí vive la plantilla</text>
+        <text x="104" y="162" text-anchor="middle" fill="#6B7780" font-size="7.4">(§10.5) y sólo aquí</text>
+        <rect x="12" y="212" width="184" height="30" rx="4" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="104" y="231" text-anchor="middle" fill="#074733" font-weight="bold">D · Navegación primaria</text>
+
+        <text x="226" y="10" font-size="9" font-weight="bold" fill="#15191C">Escritorio (≥ 1024 px)</text>
+        <rect x="226" y="18" width="470" height="230" rx="6" fill="#FFFFFF" stroke="#C9D1D6"/>
+        <rect x="226" y="18" width="470" height="30" rx="6" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="300" y="37" fill="#074733" font-weight="bold">A · Cabecera</text>
+        <text x="470" y="37" fill="#074733">D · Navegación primaria</text>
+        <text x="650" y="37" fill="#074733">E · Utilitaria</text>
+        <rect x="234" y="56" width="454" height="24" rx="4" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <text x="461" y="72" text-anchor="middle" fill="#3C464D">B · Contexto de vista: título, estado, acciones de la vista</text>
+        <rect x="234" y="88" width="160" height="154" rx="4" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="314" y="108" text-anchor="middle" fill="#074733" font-weight="bold">C1 · Maestro</text>
+        <text x="314" y="122" text-anchor="middle" fill="#6B7780" font-size="7.4">lista navegable</text>
+        <rect x="402" y="88" width="286" height="154" rx="4" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="545" y="108" text-anchor="middle" fill="#1B4E8C" font-weight="bold">C2 · Detalle</text>
+        <text x="545" y="122" text-anchor="middle" fill="#6B7780" font-size="7.4">contenido del elemento seleccionado</text>
+        <text x="545" y="142" text-anchor="middle" fill="#6B7780" font-size="7.4">region con nombre accesible propio</text>
+        <text x="234" y="256" font-size="7.2" fill="#6B7780">El orden del DOM es A → B → C1 → C2 → D en ambos tamaños: la reordenación visual nunca altera el orden de lectura ni el de foco.</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 10.1</b> — Anatomía del armazón de la aplicación en los dos modos de disposición. Las letras identifican regiones, no componentes: el mismo componente puede ocupar regiones distintas según la plantilla.</figcaption>
+  </figure>
+
+  <h2 id="s10-2">10.2 Semántica de las regiones</h2>
+  <table id="t10-1">
+    <thead><tr><th style="width:12%">Región</th><th style="width:22%">Elemento</th><th style="width:36%">Contenido admisible</th><th style="width:30%">Restricción</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td><code>&lt;header&gt;</code> (banner)</td><td>Marca, navegación primaria en escritorio, menú utilitario, enlace de salto.</td><td>Único por documento. No contiene contenido de la vista.</td></tr>
+      <tr><td>B</td><td><code>&lt;div&gt;</code> dentro de <code>&lt;main&gt;</code></td><td>Encabezado de nivel 1, estado del torneo, acciones de ámbito de vista.</td><td>Máximo tres acciones visibles; el resto, en menú.</td></tr>
+      <tr><td>C</td><td><code>&lt;main&gt;</code></td><td>La plantilla y su contenido.</td><td>Único por documento; destino del enlace de salto; recibe el foco al cambiar de ruta (§17.4).</td></tr>
+      <tr><td>C1/C2</td><td><code>&lt;section aria-label&gt;</code> / <code>&lt;article&gt;</code></td><td>Paneles maestro y detalle.</td><td>Cada panel declara nombre accesible distinto.</td></tr>
+      <tr><td>D</td><td><code>&lt;nav aria-label="Principal"&gt;</code></td><td>Cuatro destinos con icono y etiqueta.</td><td>Posición invariable; estado activo con <code>aria-current</code>.</td></tr>
+      <tr><td>E</td><td><code>&lt;nav aria-label="Cuenta"&gt;</code></td><td>Avatar, tema, ayuda, cierre de sesión.</td><td>Misma posición relativa en todas las vistas (criterio 3.2.6).</td></tr>
+      <tr><td>F</td><td><code>&lt;div role="status"&gt;</code></td><td>Notificaciones efímeras.</td><td>No es región de navegación; véase §13.8 y §17.5.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 10.1</b> — Regiones, elementos semánticos y restricciones. Los puntos de referencia permiten saltar entre regiones con lector de pantalla y son la base de la orientación no visual.</caption>
+  </table>
+
+  <h2 id="s10-3">10.3 Jerarquía de composición</h2>
+  <p>El sistema organiza sus piezas en seis niveles. Cada nivel sólo puede depender de los
+  inferiores; esa es toda la regla, y basta para evitar el acoplamiento que degrada los sistemas de
+  componentes con el tiempo.</p>
+  <table id="t10-2">
+    <thead><tr><th style="width:16%">Nivel</th><th style="width:30%">Ejemplos en este producto</th><th style="width:28%">Conoce el dominio</th><th style="width:26%">Puede depender de</th></tr></thead>
+    <tbody>
+      <tr><td><b>0 · Fundamentos</b></td><td>Tokens, retícula, utilidades, reinicio de estilos.</td><td>No</td><td>Nada.</td></tr>
+      <tr><td><b>1 · Primitivas</b></td><td><code>Boton</code>, <code>Campo</code>, <code>Insignia</code>, <code>Avatar</code>, <code>Icono</code>, <code>Spinner</code>.</td><td>No</td><td>Nivel 0.</td></tr>
+      <tr><td><b>2 · Compuestos</b></td><td><code>Tarjeta</code>, <code>Modal</code>, <code>DialogoConfirmacion</code>, <code>SeccionPlegable</code>, <code>EstadoVacio</code>, <code>Tabla</code>.</td><td>No</td><td>Niveles 0–1.</td></tr>
+      <tr><td><b>3 · Patrones de dominio</b></td><td><code>TarjetaPartido</code>, <code>TablaClasificacion</code>, <code>VistaCuadro</code>, <code>SelectorEquipo</code>, <code>InsigniaTrofeo</code>.</td><td>Sí</td><td>Niveles 0–2 y tipos de dominio.</td></tr>
+      <tr><td><b>4 · Plantillas</b></td><td><code>PlantillaUnaColumna</code>, <code>PlantillaMaestroDetalle</code>, <code>PlantillaAsistente</code>.</td><td>No</td><td>Niveles 0–2.</td></tr>
+      <tr><td><b>5 · Vistas</b></td><td><code>TournamentDetailPage</code>, <code>TeamsPage</code>, <code>PalmaresPage</code>.</td><td>Sí</td><td>Todos los niveles y la capa de datos.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 10.2</b> — Jerarquía de composición. Las plantillas no conocen el dominio: reciben contenido por composición, nunca lo construyen.</caption>
+  </table>
+  <div class="aviso">
+    <span class="et">Regla de dependencia</span>
+    <p>Está <b>prohibido</b> que una primitiva o un compuesto importe tipos, servicios o textos del
+    dominio. Un <code>Boton</code> que conozca la palabra «torneo» deja de ser reutilizable y arrastra
+    el dominio a todo el sistema. La regla se verifica con una restricción de importación en el
+    analizador estático (§26.4) y es el único mecanismo que mantiene sano un catálogo de
+    componentes a medio plazo.</p>
+  </div>
+
+  <h2 id="s10-4">10.4 Barras fijas, superposiciones y espacio seguro</h2>
+  <p>Las barras fijas resuelven alcance y orientación, pero crean tres problemas que deben tratarse
+  explícitamente:</p>
+  <ul>
+    <li><b>Oscurecimiento del foco.</b> Al tabular, un elemento puede quedar bajo la barra fija. Se
+    corrige con <code>scroll-margin-block</code> igual a la altura de las barras en todos los
+    elementos enfocables, de modo que el desplazamiento automático los deje visibles (criterio
+    2.4.11).</li>
+    <li><b>Zonas seguras del dispositivo.</b> El relleno inferior de la barra incorpora
+    <code>env(safe-area-inset-bottom)</code> para no quedar bajo el indicador de inicio.</li>
+    <li><b>Ocupación de altura útil.</b> En móvil, cabecera y navegación consumen conjuntamente un
+    máximo del 22&nbsp;% de la altura de la ventana; por encima de ese valor el contenido deja de
+    respirar y se incumple el principio P1.</li>
+  </ul>
+  <pre>:root { --alto-cabecera: 56px; --alto-navegacion: 64px; }
+main :where(a, button, input, select, textarea, [tabindex]) {
+  scroll-margin-block: calc(var(--alto-cabecera) + 8px) calc(var(--alto-navegacion) + 8px);
+}
+.navegacion-primaria {
+  padding-block-end: max(8px, env(safe-area-inset-bottom));
+}</pre>
+
+  <h2 id="s10-5">10.5 Catálogo de plantillas</h2>
+  <table id="t10-3">
+    <thead><tr><th style="width:22%">Plantilla</th><th style="width:30%">Estructura</th><th style="width:26%">Cuándo se usa</th><th style="width:22%">Vistas</th></tr></thead>
+    <tbody>
+      <tr><td><b>Una columna</b></td><td>Contenedor estándar; bloques apilados; acciones al final de cada bloque.</td><td>Contenido de consulta sin selección persistente.</td><td>Ahora, palmarés, historial, ficha de persona.</td></tr>
+      <tr><td><b>Maestro&ndash;detalle</b></td><td>Lista navegable + panel dependiente; uno o dos paneles según ancho.</td><td>Colección donde seleccionar un elemento y operar sobre él.</td><td>Torneos, calendario de partidos, catálogo de equipos.</td></tr>
+      <tr><td><b>Asistente</b></td><td>Pasos numerados, estado persistente, resumen final.</td><td>Creación con decisiones dependientes entre sí.</td><td>Creación de torneo.</td></tr>
+      <tr><td><b>Entrada</b></td><td>Contenedor estrecho centrado, una sola acción primaria.</td><td>Autenticación e incorporación por código.</td><td>Inicio de sesión, unirse.</td></tr>
+      <tr><td><b>Lienzo</b></td><td>Área desplazable en dos ejes con controles flotantes.</td><td>Representación que no cabe en el ancho disponible.</td><td>Cuadro eliminatorio.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 10.3</b> — Catálogo de plantillas. Cinco plantillas cubren la totalidad del producto; introducir una sexta exige justificación en revisión de diseño.</caption>
+  </table>
+
+  <h2 id="s10-6">10.6 Mapa de vistas</h2>
+  <table class="compacta" id="t10-4">
+    <thead><tr><th style="width:20%">Vista</th><th style="width:17%">Plantilla</th><th style="width:33%">Contenido de la región B</th><th style="width:30%">Componentes principales (nivel 3)</th></tr></thead>
+    <tbody>
+      <tr><td>Ahora (<code>/</code>)</td><td>Una columna</td><td>Saludo contextual y estado agregado.</td><td><code>TarjetaProximoPartido</code>, <code>ListaTorneosActivos</code>, <code>ResumenPalmares</code>.</td></tr>
+      <tr><td>Torneos</td><td>Maestro&ndash;detalle</td><td>Título, filtro de estado, acción «Crear torneo».</td><td><code>ListaTorneos</code>, <code>TarjetaTorneo</code>, <code>PanelResumenTorneo</code>.</td></tr>
+      <tr><td>Detalle de torneo</td><td>Maestro&ndash;detalle anidado</td><td>Nombre, estado, formato, acciones de organización.</td><td><code>TablaClasificacion</code>, <code>ListaPartidos</code>, <code>VistaCuadro</code>, <code>ListaParticipantes</code>.</td></tr>
+      <tr><td>Detalle de partido</td><td>Una columna (móvil) / panel de detalle (escritorio)</td><td>Migas, jornada, estado del partido.</td><td><code>MarcadorPartido</code>, <code>FormularioResultado</code>, <code>RegistroAuditoria</code>.</td></tr>
+      <tr><td>Equipos</td><td>Maestro&ndash;detalle</td><td>Título, filtros de liga y valoración, búsqueda.</td><td><code>CuadriculaEquipos</code>, <code>TarjetaEquipo</code>, <code>PanelEquipo</code>.</td></tr>
+      <tr><td>Palmarés</td><td>Una columna</td><td>Título y selector de temporada.</td><td><code>TablaPalmares</code>, <code>InsigniaTrofeo</code>.</td></tr>
+      <tr><td>Historial</td><td>Una columna</td><td>Título y filtro por año.</td><td><code>ListaTorneosCerrados</code>.</td></tr>
+      <tr><td>Crear torneo</td><td>Asistente</td><td>Paso actual e indicador de progreso.</td><td><code>FormularioTorneo</code>, <code>SelectorFormato</code>, <code>SelectorParticipantes</code>.</td></tr>
+      <tr><td>Unirse</td><td>Entrada</td><td>Nombre del torneo y de quien organiza.</td><td><code>CampoCodigo</code>, <code>ResumenTorneo</code>.</td></tr>
+      <tr><td>Iniciar sesión</td><td>Entrada</td><td>Marca y propósito.</td><td><code>BotonAcceso</code>.</td></tr>
+      <tr><td>No encontrada</td><td>Una columna</td><td>Mensaje y vías de salida.</td><td><code>EstadoVacio</code>.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 10.4</b> — Mapa de vistas a plantillas y componentes. Esta tabla es el índice de trabajo para implementación y la base de la matriz de trazabilidad del apéndice F.</caption>
+  </table>
+
+  <h2 id="s10-7">10.7 Reglas de colocación dentro de la vista</h2>
+  <ol>
+    <li><b>Lo que responde la pregunta de la vista va arriba.</b> En el detalle de torneo, eso es la
+    clasificación o el próximo partido, no la lista de participantes.</li>
+    <li><b>Las acciones acompañan a su objeto.</b> «Registrar resultado» vive en la fila del partido
+    y en su detalle, nunca en una barra global.</li>
+    <li><b>Máximo una acción primaria visible por región.</b> Dos botones de igual peso equivalen a
+    ninguno.</li>
+    <li><b>Lo destructivo se separa.</b> Fuera del grupo de acciones frecuentes, con separación
+    mínima de 16&nbsp;px y confirmación explícita.</li>
+    <li><b>El orden del DOM es el orden lógico.</b> Si la disposición visual difiere, se corrige con
+    retícula, nunca con reordenación que desacople el foco de la lectura.</li>
+    <li><b>Los elementos que cambian de contenido conservan su caja.</b> Reservar espacio para
+    cifras, avatares e imágenes evita desplazamiento acumulado (§24.6).</li>
+  </ol>
+
+  <h2 id="s10-8">10.8 Organización del código</h2>
+  <p>La estructura de carpetas refleja la jerarquía de composición, de modo que la regla de
+  dependencia sea visible y verificable:</p>
+  <pre>src/
+  tokens/                 <span class="c">// nivel 0 — generado desde tokens/*.json</span>
+  componentes/
+    primitivas/           <span class="c">// nivel 1 — sin dominio</span>
+    compuestos/           <span class="c">// nivel 2 — sin dominio</span>
+    dominio/
+      torneo/             <span class="c">// nivel 3 — agrupado por subdominio</span>
+      partido/
+      equipo/
+      palmares/
+  plantillas/             <span class="c">// nivel 4</span>
+  vistas/                 <span class="c">// nivel 5 — una carpeta por ruta</span>
+  datos/                  <span class="c">// consultas, mutaciones y esquemas (§15)</span>
+  dominio/                <span class="c">// tipos y reglas puras, sin React (§16)</span></pre>
+  <p>Cada componente de nivel 1 a 3 se acompaña de tres artefactos obligatorios: su archivo de
+  implementación, su conjunto de ejemplos en el catálogo navegable y su prueba de accesibilidad
+  automatizada (§26.5). Un componente sin los tres no se considera parte del sistema.</p>
+
+  <h2 id="s10-9">10.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-DIS-01.</b> Toda vista DEBE construirse sobre una de las cinco plantillas del catálogo.</li>
+    <li><b>RQ-DIS-02.</b> Las regiones DEBEN expresarse con elementos semánticos y nombres accesibles distintos cuando se repitan.</li>
+    <li><b>RQ-DIS-03.</b> Ningún componente de nivel 1 o 2 DEBE depender del dominio.</li>
+    <li><b>RQ-DIS-04.</b> El orden del DOM DEBE coincidir con el orden lógico de lectura en todos los tamaños de pantalla.</li>
+    <li><b>RQ-DIS-05.</b> Los elementos enfocables DEBEN declarar márgenes de desplazamiento que impidan quedar ocultos tras barras fijas.</li>
+    <li><b>RQ-DIS-06.</b> Cada componente DEBE publicar ejemplos navegables y prueba de accesibilidad.</li>
+  </ul>
+</section>

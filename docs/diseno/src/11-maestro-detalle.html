@@ -1,0 +1,294 @@
+<section class="capitulo" id="cap11">
+  <h1 id="h1-11"><span class="cnum">Capítulo 11</span>El patrón maestro&ndash;detalle</h1>
+
+  <p class="entradilla">Tres de las cinco superficies principales del producto son instancias del
+  mismo patrón: una colección gobierna el contenido de un panel dependiente. Especificarlo una sola
+  vez —su estado, su comportamiento adaptativo, su gestión de foco, su relación con el historial de
+  navegación y su rendimiento— evita triplicar decisiones y triplicar defectos. Este capítulo es la
+  especificación normativa de ese patrón, incluida su contrapartida en la capa de datos.</p>
+
+  <h2 id="s11-1">11.1 Terminología</h2>
+  <p>El patrón se conoce históricamente como <i>master&ndash;detail</i>, y en la literatura de
+  sistemas distribuidos el par <i>master/slave</i> designó durante décadas la relación entre un
+  componente que ordena y otro que obedece. Las comunidades técnicas —entre ellas la IETF, el núcleo
+  de Linux, Python y los principales motores de bases de datos— han sustituido ese par por
+  alternativas descriptivas que además son más precisas: <b>primario/réplica</b> cuando se trata de
+  origen y copia, <b>primario/secundario</b> cuando se trata de autoridad, <b>activo/en espera</b>
+  cuando se trata de estado y <b>escritor/lector</b> cuando se trata de función. Este documento adopta
+  esa convención y emplea:</p>
+  <ul>
+    <li><b>Maestro&ndash;detalle</b> (o <i>lista&ndash;detalle</i>) para el patrón de <i>interfaz</i>:
+    un panel de selección y un panel dependiente. Aquí «maestro» no implica subordinación de
+    personas, sino dirección del flujo de control de la interfaz.</li>
+    <li><b>Primario&ndash;réplica</b> para la relación de <i>datos</i> entre una fuente de verdad —los
+    partidos registrados— y una proyección derivada —la clasificación— (§11.10).</li>
+  </ul>
+  <p>Ambas relaciones comparten una propiedad esencial y por eso se tratan en el mismo capítulo: hay
+  un extremo que manda y otro que deriva, y todos los defectos característicos aparecen cuando el
+  extremo derivado adquiere autoridad propia.</p>
+
+  <h2 id="s11-2">11.2 Anatomía</h2>
+  <table id="t11-1">
+    <thead><tr><th style="width:20%">Elemento</th><th style="width:38%">Responsabilidad</th><th style="width:42%">Lo que NO le corresponde</th></tr></thead>
+    <tbody>
+      <tr><td><b>Panel maestro</b></td><td>Presentar la colección, permitir filtrar, ordenar y seleccionar; comunicar cuál es el elemento seleccionado.</td><td>Conocer la estructura interna del detalle ni decidir cómo se representa.</td></tr>
+      <tr><td><b>Selección</b></td><td>Identificador único del elemento activo, representado en la URL.</td><td>Contener datos del elemento: sólo su identidad.</td></tr>
+      <tr><td><b>Panel detalle</b></td><td>Cargar y presentar el elemento seleccionado; ofrecer sus acciones.</td><td>Alterar la selección salvo por una acción explícita (eliminar, navegar a hermano).</td></tr>
+      <tr><td><b>Coordinador</b></td><td>Traducir entre URL, selección y disposición; decidir uno o dos paneles.</td><td>Contener lógica de dominio.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 11.1</b> — Responsabilidades. La separación entre identidad (selección) y contenido (datos del elemento) es lo que permite que el detalle se cargue de forma independiente y cacheada.</caption>
+  </table>
+
+  <h2 id="s11-3">11.3 Variantes</h2>
+  <figure id="f11-1">
+    <svg viewBox="0 0 700 150" width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="7.6" fill="#3C464D">
+        <rect x="4" y="18" width="128" height="92" rx="4" fill="#FFFFFF" stroke="#C9D1D6"/>
+        <rect x="10" y="24" width="48" height="80" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <rect x="64" y="24" width="62" height="80" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="68" y="12" font-weight="bold" fill="#15191C" text-anchor="middle">V1 · Dos paneles</text>
+        <text x="68" y="124" text-anchor="middle">selección persistente visible</text>
+
+        <rect x="146" y="18" width="128" height="92" rx="4" fill="#FFFFFF" stroke="#C9D1D6"/>
+        <rect x="152" y="24" width="116" height="80" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="210" y="12" font-weight="bold" fill="#15191C" text-anchor="middle">V2 · Apilado</text>
+        <text x="210" y="68" text-anchor="middle" fill="#1B4E8C">detalle como ruta</text>
+        <text x="210" y="124" text-anchor="middle">retorno con botón atrás</text>
+
+        <rect x="288" y="18" width="128" height="92" rx="4" fill="#FFFFFF" stroke="#C9D1D6"/>
+        <rect x="294" y="24" width="116" height="80" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <rect x="294" y="62" width="116" height="42" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="352" y="12" font-weight="bold" fill="#15191C" text-anchor="middle">V3 · Hoja inferior</text>
+        <text x="352" y="124" text-anchor="middle">contexto visible detrás</text>
+
+        <rect x="430" y="18" width="128" height="92" rx="4" fill="#FFFFFF" stroke="#C9D1D6"/>
+        <rect x="436" y="24" width="116" height="18" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <rect x="436" y="44" width="116" height="38" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <rect x="436" y="84" width="116" height="18" rx="3" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="494" y="12" font-weight="bold" fill="#15191C" text-anchor="middle">V4 · Expansión</text>
+        <text x="494" y="124" text-anchor="middle">detalle breve en su sitio</text>
+
+        <rect x="572" y="18" width="124" height="92" rx="4" fill="#FFFFFF" stroke="#C9D1D6"/>
+        <rect x="578" y="24" width="112" height="80" rx="3" fill="#F4F7F8" stroke="#C9D1D6"/>
+        <rect x="594" y="40" width="80" height="48" rx="3" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="634" y="12" font-weight="bold" fill="#15191C" text-anchor="middle">V5 · Modal</text>
+        <text x="634" y="124" text-anchor="middle">interrumpe: uso restringido</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 11.1</b> — Variantes del patrón maestro&ndash;detalle. La elección no es estética: cada variante establece un contrato distinto con el historial de navegación y con la gestión del foco.</figcaption>
+  </figure>
+
+  <table id="t11-2">
+    <thead><tr><th style="width:12%">Variante</th><th style="width:28%">Cuándo es correcta</th><th style="width:30%">Coste</th><th style="width:30%">Uso en el producto</th></tr></thead>
+    <tbody>
+      <tr><td><b>V1</b> Dos paneles</td><td>Ancho ≥ 1024&nbsp;px y comparación frecuente entre elementos.</td><td>Requiere dos regiones con nombre y gestión de foco explícita.</td><td>Torneos, partidos y equipos en escritorio.</td></tr>
+      <tr><td><b>V2</b> Apilado</td><td>Ancho &lt; 1024&nbsp;px; el detalle necesita toda la pantalla.</td><td>Pierde el contexto de la lista; obliga a restaurar desplazamiento al volver.</td><td>Las mismas tres superficies en móvil.</td></tr>
+      <tr><td><b>V3</b> Hoja inferior</td><td>Detalle corto y acción rápida sin perder el contexto.</td><td>Altura limitada; trampa de foco obligatoria.</td><td>Registro rápido de resultado desde la lista.</td></tr>
+      <tr><td><b>V4</b> Expansión</td><td>Detalle de dos o tres datos, sin acciones complejas.</td><td>Reordena la lista y puede provocar desplazamiento acumulado.</td><td>Desglose de desempate en la clasificación.</td></tr>
+      <tr><td><b>V5</b> Modal</td><td>Sólo cuando el detalle exige una decisión antes de continuar.</td><td>Interrumpe, no es enlazable y bloquea el resto de la interfaz.</td><td>Confirmación de acciones destructivas. <b>No</b> para mostrar detalle.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 11.2</b> — Selección de variante. El antipatrón más común es usar V5 para mostrar un detalle que debería ser enlazable: destruye la compartibilidad de la URL.</caption>
+  </table>
+
+  <h2 id="s11-4">11.4 Modelo de estado</h2>
+  <p>El estado del patrón se descompone en cuatro piezas con propietario único y claramente
+  separadas, lo que evita la clase de defectos en que la lista y el detalle discrepan:</p>
+  <table class="compacta" id="t11-3">
+    <thead><tr><th style="width:22%">Pieza</th><th style="width:22%">Propietario</th><th style="width:22%">Persistencia</th><th style="width:34%">Observación</th></tr></thead>
+    <tbody>
+      <tr><td>Criterios de la colección (filtro, orden, búsqueda)</td><td>URL (cadena de consulta)</td><td>Compartible, sobrevive a recarga</td><td>Cambiarlos reemplaza la entrada de historial, no la apila.</td></tr>
+      <tr><td>Selección</td><td>URL (ruta o parámetro)</td><td>Compartible</td><td>Cambiarla apila entrada de historial en V2; la reemplaza en V1.</td></tr>
+      <tr><td>Datos de la colección</td><td>Caché de consulta</td><td>Memoria + revalidación</td><td>Clave de caché derivada de los criterios.</td></tr>
+      <tr><td>Datos del elemento</td><td>Caché de consulta</td><td>Memoria + revalidación</td><td>Clave de caché derivada de la identidad; se precalienta desde la colección (§11.9).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 11.3</b> — Propiedad del estado. Ningún estado del patrón vive en el estado local de un componente: eso es lo que rompe el botón de retroceso y la compartición de enlaces.</caption>
+  </table>
+  <pre>// hooks/useMaestroDetalle.ts — contrato del coordinador
+export function useMaestroDetalle&lt;T extends { id: string }&gt;(opciones: {
+  elementos: T[];
+  seleccionadoId: string | null;
+  alSeleccionar: (id: string, modo: 'empujar' | 'reemplazar') =&gt; void;
+  dosPaneles: boolean;             // derivado de una consulta de contenedor
+}) {
+  const seleccionado = opciones.elementos.find(e =&gt; e.id === opciones.seleccionadoId) ?? null;
+
+  // Invariante 1: si hay dos paneles y no hay selección válida, se selecciona el primero
+  // sin apilar historial; con un solo panel NO se autoselecciona nada.
+  // Invariante 2: si el elemento seleccionado desaparece de la colección, se conserva
+  // el detalle con aviso de "ya no está en la lista" en vez de saltar a otro elemento.
+  // Invariante 3: cambiar filtros nunca cambia la selección si el elemento sigue presente.
+  return { seleccionado, hayDetalle: seleccionado !== null };
+}</pre>
+
+  <h2 id="s11-5">11.5 Comportamiento adaptativo</h2>
+  <p>El umbral entre V1 y V2 es 1024&nbsp;px, justificado por la medida de línea: por debajo, ninguno
+  de los dos paneles alcanza los 45 caracteres mínimos de §7.4. La transición debe cumplir cuatro
+  condiciones:</p>
+  <ol>
+    <li>Al pasar de dos paneles a uno con un elemento seleccionado, se muestra el <b>detalle</b>, no
+    la lista: la persona estaba mirando el detalle.</li>
+    <li>Al pasar de uno a dos paneles desde el detalle, aparece la lista con el elemento seleccionado
+    visible y desplazado a la vista.</li>
+    <li>La decisión se toma con una consulta de <b>contenedor</b> cuando el patrón está anidado
+    —caso del detalle de torneo, que contiene a su vez una lista de partidos— y con consulta de
+    ventana sólo en el nivel superior.</li>
+    <li>El cambio de disposición no debe apilar entradas de historial ni mover el foco.</li>
+  </ol>
+
+  <h2 id="s11-6">11.6 Reglas de selección</h2>
+  <ul>
+    <li><b>Sin selección por defecto en un solo panel.</b> Autoseleccionar en móvil impediría ver la
+    lista.</li>
+    <li><b>Selección del primer elemento en dos paneles</b> sólo si la colección no está vacía y la
+    URL no indica otra cosa; se usa reemplazo de historial para que el botón atrás no quede
+    atrapado.</li>
+    <li><b>Persistencia bajo filtrado.</b> Si el elemento seleccionado deja de cumplir el filtro, no
+    se deselecciona: se mantiene el detalle y se informa de que no figura en la lista actual. Saltar
+    a otro elemento es un cambio de contexto no solicitado.</li>
+    <li><b>Eliminación.</b> Si el elemento seleccionado se elimina, el detalle pasa a un estado de
+    «elemento no disponible» con enlace de vuelta a la lista; nunca se selecciona el siguiente de
+    forma automática.</li>
+    <li><b>Estado vacío del detalle.</b> En dos paneles sin selección, el panel derecho muestra una
+    instrucción breve («Selecciona un torneo para ver su clasificación»), nunca una zona en blanco.</li>
+    <li><b>Selección múltiple.</b> No se soporta en la primera versión; si se incorporara, exigiría
+    un modo explícito con barra de acciones por lote y anuncio del número de elementos
+    seleccionados.</li>
+  </ul>
+
+  <h2 id="s11-7">11.7 Historial, enlaces y desplazamiento</h2>
+  <table class="compacta" id="t11-4">
+    <thead><tr><th style="width:26%">Acción</th><th style="width:22%">Efecto en historial</th><th style="width:52%">Motivo</th></tr></thead>
+    <tbody>
+      <tr><td>Seleccionar elemento (V2, un panel)</td><td>Apila</td><td>El retroceso debe devolver a la lista; es la expectativa universal en móvil.</td></tr>
+      <tr><td>Seleccionar elemento (V1, dos paneles)</td><td>Reemplaza</td><td>La lista sigue visible: apilar llenaría el historial de estados equivalentes.</td></tr>
+      <tr><td>Cambiar filtro u orden</td><td>Reemplaza</td><td>Evita que el retroceso recorra decenas de combinaciones de filtro.</td></tr>
+      <tr><td>Cambiar de pestaña dentro del detalle</td><td>Reemplaza</td><td>Mismo recurso, distinta vista; el enlace sigue siendo compartible.</td></tr>
+      <tr><td>Abrir hoja inferior (V3)</td><td>Apila</td><td>Permite cerrarla con el gesto o el botón atrás, como espera el sistema.</td></tr>
+      <tr><td>Abrir diálogo modal (V5)</td><td>No modifica</td><td>Se cierra con <kbd>Esc</kbd> y devuelve el foco; no es un destino.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 11.4</b> — Semántica de historial. La disciplina de apilar frente a reemplazar es lo que hace que el botón de retroceso resulte predecible.</caption>
+  </table>
+  <p>La posición de desplazamiento del panel maestro se restaura al volver desde el detalle. La
+  restauración se hace sobre el contenedor del panel, no sobre la ventana, y sólo tras confirmar que
+  la colección ya está en caché; de otro modo se restaura una posición sobre contenido que aún no
+  existe y el resultado es un salto visible.</p>
+
+  <h2 id="s11-8">11.8 Accesibilidad del patrón</h2>
+  <p>Es el aspecto que con más frecuencia se implementa mal. La especificación es la siguiente:</p>
+  <dl>
+    <dt>Naturaleza de la lista</dt>
+    <dd>El maestro es una <b>lista de enlaces</b> (<code>&lt;ul&gt;</code> con
+    <code>&lt;a&gt;</code>), no un <code>listbox</code>. El patrón de cuadro de lista impone
+    navegación con flechas y gestión de <code>aria-activedescendant</code>, apropiada para elegir un
+    valor en un formulario, no para navegar a un recurso con URL propia. Los enlaces conservan
+    además el menú contextual del navegador, la apertura en pestaña nueva y la copia del enlace.</dd>
+    <dt>Indicación del elemento activo</dt>
+    <dd><code>aria-current="true"</code> en el enlace seleccionado, más indicación visual redundante
+    (barra lateral de 3&nbsp;px y fondo <code>color-seleccion-fondo</code>), que cumple contraste
+    3:1 frente al fondo de la lista.</dd>
+    <dt>Nombres de región</dt>
+    <dd>El panel maestro y el panel detalle son regiones con nombre accesible distinto
+    («Lista de torneos», «Detalle del torneo»), de modo que la navegación por puntos de referencia
+    permita saltar de uno a otro.</dd>
+    <dt>Gestión del foco al seleccionar</dt>
+    <dd>En V1 el foco <b>permanece</b> en el enlace de la lista —mover el foco al detalle rompería la
+    navegación secuencial por la colección—, y el cambio se anuncia mediante una región viva cortés
+    que comunica el nombre del elemento cargado. En V2 el foco se traslada al encabezado del detalle,
+    que recibe <code>tabindex="-1"</code>, porque la lista ha dejado de estar en pantalla. Al volver,
+    el foco regresa al enlace de origen.</dd>
+    <dt>Teclado</dt>
+    <dd>Tabulación estándar dentro de la lista; <kbd>Inicio</kbd> y <kbd>Fin</kbd> saltan al primer y
+    último elemento; en escritorio, <kbd>J</kbd> y <kbd>K</kbd> o las flechas verticales como atajo
+    opcional documentado, nunca como único medio.</dd>
+    <dt>Estados de carga</dt>
+    <dd>El esqueleto de carga del detalle se marca con <code>aria-busy="true"</code> en la región, y
+    el contenido definitivo se anuncia al llegar. No se usan anuncios asertivos para contenido que la
+    persona ha solicitado explícitamente.</dd>
+  </dl>
+  <pre>&lt;section aria-label="Lista de torneos"&gt;
+  &lt;ul class="lista-maestro"&gt;
+    &lt;li&gt;&lt;a href="/tournaments/t12?vista=clasificacion" aria-current="true"&gt;
+      Liga de otoño &lt;span class="meta"&gt;8 participantes · jornada 3&lt;/span&gt;
+    &lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/section&gt;
+&lt;section aria-label="Detalle del torneo" aria-busy="false"&gt;
+  &lt;h2 id="detalle-titulo" tabindex="-1"&gt;Liga de otoño&lt;/h2&gt;
+&lt;/section&gt;
+&lt;p class="visualmente-oculta" role="status"&gt;Mostrando Liga de otoño&lt;/p&gt;</pre>
+
+  <h2 id="s11-9">11.9 Rendimiento del patrón</h2>
+  <ul>
+    <li><b>Precalentamiento desde la colección.</b> La respuesta de la lista incluye los campos que el
+    detalle muestra en primer lugar (nombre, estado, contadores), que se siembran en la caché del
+    detalle: así el panel derecho pinta contenido real de inmediato y sólo revalida el resto.</li>
+    <li><b>Prebúsqueda por intención.</b> Al apuntar o enfocar un elemento durante más de 120&nbsp;ms
+    se solicita su detalle. Es barato y elimina la espera percibida en la mayoría de las
+    selecciones.</li>
+    <li><b>Virtualización condicional.</b> Sólo a partir de 150 elementos visibles; por debajo, el
+    coste de la virtualización —complejidad, pérdida de búsqueda nativa del navegador, riesgos de
+    accesibilidad— supera su beneficio.</li>
+    <li><b>Reserva de espacio.</b> El esqueleto del detalle tiene exactamente la altura del contenido
+    previsto, para no generar desplazamiento acumulado.</li>
+    <li><b>Transición de vista.</b> Cuando el navegador la soporta, el paso lista→detalle en V2 usa
+    la interfaz de transiciones de vista; si no, aparece sin animación. Nunca se bloquea la
+    navegación esperando a una animación.</li>
+  </ul>
+
+  <h2 id="s11-10">11.10 La contrapartida en los datos: primario y réplica</h2>
+  <p>La clasificación de un torneo es una <b>réplica derivada</b>: su contenido se calcula
+  íntegramente a partir de los partidos finalizados, que son el <b>primario</b>. Tratarla como dato
+  independiente —escribirla desde el cliente, editarla a mano, almacenarla sin posibilidad de
+  recálculo— produce exactamente los mismos defectos que un detalle de interfaz con autoridad propia:
+  divergencia silenciosa entre lo que se muestra y lo que es cierto.</p>
+  <table class="compacta" id="t11-5">
+    <thead><tr><th style="width:24%">Propiedad</th><th style="width:38%">Exigencia</th><th style="width:38%">Consecuencia de incumplirla</th></tr></thead>
+    <tbody>
+      <tr><td>Fuente única de verdad</td><td>Sólo los documentos de partido son primarios.</td><td>Dos cifras contradictorias sin forma de decidir cuál vale.</td></tr>
+      <tr><td>Derivación determinista</td><td>La misma entrada produce siempre la misma clasificación, criterios de desempate incluidos.</td><td>Discusiones irresolubles sobre el orden entre participantes empatados.</td></tr>
+      <tr><td>Idempotencia</td><td>Recalcular dos veces produce el mismo resultado.</td><td>Puntuaciones duplicadas tras un reintento de red.</td></tr>
+      <tr><td>Recálculo total posible</td><td>Debe poder reconstruirse la réplica completa desde cero en cualquier momento.</td><td>Corrupción permanente ante un fallo parcial.</td></tr>
+      <tr><td>Escritura exclusiva de servidor</td><td>Ningún cliente escribe la réplica.</td><td>Manipulación trivial de la clasificación (hallazgo H8, §15.7).</td></tr>
+      <tr><td>Consistencia observable</td><td>La interfaz indica cuándo la réplica aún no refleja el último partido.</td><td>Percepción de que «la aplicación pierde resultados».</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 11.5</b> — Propiedades exigibles a la relación primario&ndash;réplica entre partidos y clasificación.</caption>
+  </table>
+  <div class="riesgo">
+    <span class="et">Hallazgo H8</span>
+    <p>La implementación actual calcula la clasificación en el cliente y la escribe en la colección
+    correspondiente. Eso convierte a cada navegador en escritor de una réplica compartida: basta
+    manipular el código en ejecución para alterar la tabla de todo el grupo, y basta una condición de
+    carrera entre dos clientes para corromperla sin intención. La especificación de §15.7 y §22.6
+    traslada ese cálculo a una función de servidor disparada por la escritura del partido, con
+    recálculo idempotente y reglas que prohíben la escritura directa desde el cliente.</p>
+  </div>
+
+  <h2 id="s11-11">11.11 Antipatrones</h2>
+  <ol>
+    <li><b>Detalle sin URL.</b> El elemento seleccionado sólo vive en memoria: no se puede compartir
+    ni recuperar tras recargar.</li>
+    <li><b>Autoselección en móvil.</b> La persona aterriza en un detalle que no pidió y debe
+    retroceder para ver la lista.</li>
+    <li><b>Cuadro de lista en lugar de enlaces.</b> Se pierde el menú contextual, la apertura en
+    pestaña nueva y la semántica de navegación.</li>
+    <li><b>Robo de foco.</b> Mover el foco al detalle en la variante de dos paneles impide recorrer
+    la lista con teclado.</li>
+    <li><b>Lista que se reordena bajo el puntero.</b> Una actualización en tiempo real que reordena
+    mientras se está pulsando provoca activaciones erróneas: las reordenaciones se aplazan hasta que
+    la lista pierde el foco o se anuncian con un control explícito de «hay cambios nuevos».</li>
+    <li><b>Detalle que escribe en la lista.</b> El detalle no muta la colección salvo por acciones
+    explícitas del usuario.</li>
+    <li><b>Doble fuente de carga.</b> Lista y detalle piden los mismos datos con claves distintas y
+    muestran cifras distintas durante unos segundos.</li>
+  </ol>
+
+  <h2 id="s11-12">11.12 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-MD-01.</b> La selección y los criterios de la colección DEBEN representarse en la URL.</li>
+    <li><b>RQ-MD-02.</b> El panel maestro DEBE implementarse como lista de enlaces con <code>aria-current</code>, no como cuadro de lista.</li>
+    <li><b>RQ-MD-03.</b> El foco DEBE permanecer en la lista en la variante de dos paneles y trasladarse al detalle en la variante apilada, con retorno al origen al volver.</li>
+    <li><b>RQ-MD-04.</b> Un elemento seleccionado que deje de cumplir el filtro NO DEBE deseleccionarse automáticamente.</li>
+    <li><b>RQ-MD-05.</b> Las réplicas derivadas DEBEN calcularse en servidor de forma determinista e idempotente y NO DEBEN ser escribibles por el cliente.</li>
+    <li><b>RQ-MD-06.</b> La interfaz DEBE informar cuando una réplica derivada aún no refleja la última escritura primaria.</li>
+  </ul>
+</section>

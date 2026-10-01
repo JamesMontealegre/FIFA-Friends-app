@@ -1,0 +1,177 @@
+<section class="capitulo" id="cap13">
+  <h1 id="h1-13"><span class="cnum">Capítulo 13</span>Patrones de interacción, formularios y estados</h1>
+
+  <p class="entradilla">Los patrones de interacción son las respuestas canónicas del producto a
+  situaciones recurrentes: pedir datos, validar, confirmar, informar, equivocarse y recuperarse. Este
+  capítulo las fija para que no se reinventen en cada pantalla, con especial atención a los
+  formularios, a las tablas de datos, a la retroalimentación y a los tres estados que más a menudo se
+  olvidan: vacío, cargando y error.</p>
+
+  <h2 id="s13-1">13.1 Formularios: estructura</h2>
+  <ul>
+    <li><b>Una columna.</b> Los formularios se disponen en una sola columna; las dos columnas obligan
+    a un recorrido visual en zigzag y aumentan los errores de cumplimentación. Única excepción:
+    pares inseparables y cortos, como los dos marcadores de un partido.</li>
+    <li><b>Etiqueta visible siempre, encima del campo.</b> La etiqueta flotante que desaparece al
+    escribir destruye la posibilidad de revisar lo introducido y degrada la ampliación.</li>
+    <li><b>Agrupación semántica.</b> Campos relacionados dentro de <code>&lt;fieldset&gt;</code> con
+    <code>&lt;legend&gt;</code>; es lo que permite a un lector de pantalla anunciar el contexto de un
+    grupo de opciones.</li>
+    <li><b>Campos opcionales marcados, no los obligatorios.</b> Cuando la mayoría son obligatorios,
+    marcar la minoría reduce el ruido. La convención se declara al inicio del formulario.</li>
+    <li><b>Ayuda antes del error.</b> El formato esperado se indica antes de escribir, no después de
+    fallar.</li>
+    <li><b>Acción primaria al final</b>, alineada con el inicio de la columna, acompañada de la
+    cancelación como acción sutil y nunca como botón de igual peso.</li>
+  </ul>
+
+  <h2 id="s13-2">13.2 Validación</h2>
+  <table id="t13-1">
+    <thead><tr><th style="width:22%">Momento</th><th style="width:30%">Qué se valida</th><th style="width:48%">Regla</th></tr></thead>
+    <tbody>
+      <tr><td>Durante la escritura</td><td>Nada, salvo restricciones de formato que impidan introducir lo imposible.</td><td>No se muestran errores mientras se escribe por primera vez: interrumpe y culpabiliza.</td></tr>
+      <tr><td>Al abandonar el campo</td><td>Formato y rango del campo individual.</td><td>Primera oportunidad de mostrar error, sólo si el campo se ha modificado.</td></tr>
+      <tr><td>Al reescribir tras un error</td><td>El mismo campo, de forma inmediata.</td><td>Aquí sí se valida en cada pulsación: la persona está corrigiendo y necesita saber cuándo acierta.</td></tr>
+      <tr><td>Al enviar</td><td>Todo, incluidas reglas entre campos.</td><td>Resumen de errores al principio del formulario con enlaces a cada campo; foco al resumen.</td></tr>
+      <tr><td>En servidor</td><td>Todo, otra vez.</td><td>La validación de cliente es ergonomía; la de servidor es la única que protege (§21.7).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 13.1</b> — Momentos de validación. El error aparece tarde y desaparece pronto: ésa es la asimetría que hace que un formulario resulte amable.</caption>
+  </table>
+  <pre>&lt;div class="campo"&gt;
+  &lt;label for="goles-local"&gt;Goles de Marta&lt;/label&gt;
+  &lt;input id="goles-local" inputmode="numeric" pattern="[0-9]*" min="0" max="99"
+         aria-describedby="goles-local-ayuda goles-local-error" aria-invalid="true"&gt;
+  &lt;p id="goles-local-ayuda" class="ayuda"&gt;Número entero entre 0 y 99.&lt;/p&gt;
+  &lt;p id="goles-local-error" class="error"&gt;
+    &lt;svg aria-hidden="true" focusable="false"&gt;…&lt;/svg&gt; Introduce un número entre 0 y 99.
+  &lt;/p&gt;
+&lt;/div&gt;</pre>
+
+  <h2 id="s13-3">13.3 Procesos de varios pasos</h2>
+  <p>La creación de torneo es el único proceso de varios pasos del producto. Se especifica así:
+  indicador de progreso con número de paso y total; estado persistido en la URL
+  (<code>?paso=</code>) y en almacenamiento local, de modo que una recarga accidental no pierda el
+  trabajo; retroceso siempre permitido sin perder lo introducido; resumen final revisable antes de
+  confirmar; y <b>ningún dato se pide dos veces</b> —el criterio 3.3.7 prohíbe la entrada
+  redundante—: si el nombre del torneo se introdujo en el paso 1, el paso 3 lo muestra, no lo vuelve
+  a pedir.</p>
+
+  <h2 id="s13-4">13.4 Entradas especiales del dominio</h2>
+  <dl>
+    <dt>Código de invitación</dt>
+    <dd>Ocho caracteres de un alfabeto reducido sin caracteres ambiguos (se excluyen I, L, O, 0, 1).
+    Entrada insensible a mayúsculas y tolerante a espacios y guiones. Se admite pegado del texto
+    completo, incluido el enlace entero, del que se extrae el código: prohibir el pegado es una
+    barrera de accesibilidad cognitiva (criterio 3.3.8).</dd>
+    <dt>Marcador</dt>
+    <dd>Dos campos numéricos con teclado numérico, incrementadores de 44&nbsp;px a ambos lados para
+    el uso con una mano, y confirmación explícita. No se envía al cambiar el valor: un marcador a
+    medio introducir no es un resultado.</dd>
+    <dt>Selección de equipo</dt>
+    <dd>Combinación de búsqueda textual y filtros por liga y valoración, con resultados visibles
+    mientras se escribe y anuncio del recuento.</dd>
+  </dl>
+
+  <h2 id="s13-5">13.5 Tablas de datos en pantalla estrecha</h2>
+  <p>La clasificación tiene diez columnas y el ancho disponible en móvil no da para más de cinco. Se
+  evalúan cuatro estrategias y se adopta una combinación:</p>
+  <table class="compacta" id="t13-2">
+    <thead><tr><th style="width:22%">Estrategia</th><th style="width:34%">Ventaja</th><th style="width:44%">Inconveniente y decisión</th></tr></thead>
+    <tbody>
+      <tr><td>Desplazamiento horizontal</td><td>Conserva la estructura tabular.</td><td>Oculta columnas y exige gesto; se usa sólo con columna identificadora fija y contenedor enfocable. <b>Adoptada</b> como complemento.</td></tr>
+      <tr><td>Reducción de columnas</td><td>Muestra lo esencial sin gestos.</td><td>Pierde información; se compensa con expansión de fila. <b>Adoptada</b> como principal.</td></tr>
+      <tr><td>Transformación en tarjetas</td><td>Legible sin desplazamiento.</td><td>Impide comparar entre filas, que es justo el propósito de una clasificación. <b>Descartada</b>.</td></tr>
+      <tr><td>Rotación de la pantalla</td><td>Sin coste de desarrollo.</td><td>Delega el problema en la persona y falla con orientación bloqueada. <b>Descartada</b>.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 13.2</b> — Estrategias para tablas anchas. La decisión combina reducción de columnas con expansión de fila y desplazamiento horizontal accesible.</caption>
+  </table>
+
+  <h2 id="s13-6">13.6 Arrastre y alternativas</h2>
+  <p>El criterio 2.5.7 exige que toda funcionalidad que use arrastre disponga de alternativa con un
+  solo puntero. En este producto el arrastre aparece al reordenar participantes y al ajustar
+  emparejamientos. La alternativa obligatoria son botones «subir» y «bajar» en cada elemento, más un
+  campo numérico de posición en el menú contextual del elemento. Ambas vías actualizan el mismo
+  estado y anuncian el resultado («Marta movida a la posición 3 de 8»).</p>
+
+  <h2 id="s13-7">13.7 Retroalimentación: qué mecanismo y cuándo</h2>
+  <table id="t13-3">
+    <thead><tr><th style="width:20%">Mecanismo</th><th style="width:30%">Cuándo</th><th style="width:26%">Semántica</th><th style="width:24%">Duración</th></tr></thead>
+    <tbody>
+      <tr><td>Cambio en el propio control</td><td>Resultado inmediato y local (conmutador, casilla).</td><td>Estado del control.</td><td>Permanente.</td></tr>
+      <tr><td>Mensaje en línea</td><td>Validación de campo y resultado de una acción sobre un elemento visible.</td><td><code>aria-describedby</code>.</td><td>Permanente hasta corrección.</td></tr>
+      <tr><td>Notificación efímera</td><td>Confirmación de acción cuyo efecto no es visible en pantalla.</td><td><code>role="status"</code>.</td><td>≥ 6&nbsp;s; persistente si incluye acción como «deshacer».</td></tr>
+      <tr><td>Banner de la vista</td><td>Estado persistente que afecta a toda la vista (sin conexión, torneo cerrado).</td><td><code>role="status"</code> o <code>role="alert"</code> según gravedad.</td><td>Mientras dure la condición.</td></tr>
+      <tr><td>Diálogo</td><td>Decisión necesaria antes de continuar.</td><td><code>&lt;dialog&gt;</code> modal.</td><td>Hasta decisión.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 13.3</b> — Mecanismos de retroalimentación. Una notificación efímera nunca es el único lugar donde consta un error: lo efímero no se puede revisar.</caption>
+  </table>
+
+  <h2 id="s13-8">13.8 Acciones destructivas y reversibilidad</h2>
+  <p>Jerarquía de preferencia: <b>deshacer</b> &gt; <b>confirmar</b> &gt; <b>bloquear</b>. Eliminar un
+  partido del calendario es reversible durante 10 segundos mediante notificación con acción de
+  deshacer, y la operación sólo se consolida al expirar ese plazo. Eliminar un torneo completo no es
+  reversible: exige diálogo con el nombre del torneo escrito por la persona y botón que nombra la
+  acción. Cerrar un torneo consolida el palmarés y tampoco es reversible: exige confirmación con
+  resumen de lo que se consolidará.</p>
+
+  <h2 id="s13-9">13.9 Aleatoriedad verificable</h2>
+  <p>El sorteo de equipos es la función con más carga social del producto: si parece manipulable, el
+  torneo entero pierde legitimidad. Se especifica: semilla generada en servidor y almacenada con el
+  torneo; algoritmo de barajado documentado y determinista a partir de la semilla; resultado
+  reproducible y consultable después («sorteo del 12 oct, semilla a3f9…»); y la animación como
+  presentación del resultado ya decidido, nunca como su causa. Con movimiento reducido activo, la
+  animación se sustituye por la aparición directa del resultado con anuncio textual.</p>
+
+  <h2 id="s13-10">13.10 Atajos y eficiencia</h2>
+  <p>Para el perfil de organización, que repite la misma operación muchas veces seguidas: tras
+  registrar un resultado, el foco pasa al siguiente partido pendiente; <kbd>Enter</kbd> envía desde
+  cualquier campo del formulario de marcador; los atajos de una sola tecla están desactivados por
+  defecto y, de activarse, deben poder remapearse o desactivarse (criterio 2.1.4). Ningún atajo es el
+  único medio de realizar una acción.</p>
+
+  <h2 id="s13-11">13.11 Catálogo de errores</h2>
+  <table class="compacta" id="t13-4">
+    <thead><tr><th style="width:22%">Situación</th><th style="width:40%">Mensaje</th><th style="width:38%">Acción ofrecida</th></tr></thead>
+    <tbody>
+      <tr><td>Sin conexión</td><td>«Sin conexión. Lo que registres se enviará al recuperarla.»</td><td>Reintentar ahora.</td></tr>
+      <tr><td>Permiso insuficiente</td><td>«Sólo quien organiza el torneo puede registrar resultados.»</td><td>Avisar a la organización.</td></tr>
+      <tr><td>Conflicto de edición</td><td>«Otra persona registró este resultado hace unos segundos.»</td><td>Ver el resultado actual · Sustituirlo.</td></tr>
+      <tr><td>Código inválido</td><td>«Ese código no corresponde a ningún torneo abierto.»</td><td>Revisar el código · Pedir uno nuevo.</td></tr>
+      <tr><td>Torneo ya iniciado</td><td>«Este torneo ya empezó y no admite nuevas inscripciones.»</td><td>Ver el torneo.</td></tr>
+      <tr><td>Error inesperado</td><td>«No hemos podido guardar el resultado. El fallo es nuestro, no tuyo.»</td><td>Reintentar · Copiar el identificador del fallo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 13.4</b> — Catálogo de errores. Tres reglas: decir qué pasó, decir qué hacer y no culpar a la persona. Nunca se muestran códigos técnicos sin traducción.</caption>
+  </table>
+
+  <h2 id="s13-12">13.12 Estados vacío, de carga y de error por vista</h2>
+  <table class="compacta" id="t13-5">
+    <thead><tr><th style="width:20%">Vista</th><th style="width:28%">Vacío</th><th style="width:26%">Cargando</th><th style="width:26%">Error</th></tr></thead>
+    <tbody>
+      <tr><td>Ahora</td><td>«Aún no participas en ningún torneo» + unirse con código.</td><td>Esqueleto de dos tarjetas.</td><td>Banner con reintento; se conserva lo cacheado.</td></tr>
+      <tr><td>Torneos</td><td>«No hay torneos todavía» + crear (si procede).</td><td>Esqueleto de lista de cinco filas.</td><td>Banner con reintento.</td></tr>
+      <tr><td>Detalle de torneo</td><td>Clasificación vacía: «Aún no se ha jugado ningún partido».</td><td>Esqueleto con la altura final de la tabla.</td><td>Error por pestaña, no en toda la vista.</td></tr>
+      <tr><td>Equipos</td><td>Filtro sin resultados: sugerencia concreta de relajación.</td><td>Cuadrícula de tarjetas atenuadas.</td><td>Reintento, con catálogo cacheado si existe.</td></tr>
+      <tr><td>Palmarés</td><td>«El palmarés se llenará cuando se cierre el primer torneo».</td><td>Esqueleto de tabla.</td><td>Banner con reintento.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 13.5</b> — Los tres estados no felices, especificados por vista. Ninguna vista puede entregarse sin los tres implementados.</caption>
+  </table>
+  <div class="nota">
+    <span class="et">Sobre los esqueletos de carga</span>
+    <p>Un esqueleto es útil cuando la espera supera los 400&nbsp;ms y su geometría coincide con la del
+    contenido final; de lo contrario produce desplazamiento acumulado y la sensación de que la
+    interfaz «salta». Por debajo de 400&nbsp;ms no se muestra nada: un destello de esqueleto es peor
+    que una pausa imperceptible. Los esqueletos se marcan con <code>aria-busy</code> en su región y no
+    se anuncian como contenido.</p>
+  </div>
+
+  <h2 id="s13-13">13.13 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-INT-01.</b> Todo campo DEBE tener etiqueta visible y persistente asociada programáticamente.</li>
+    <li><b>RQ-INT-02.</b> Los errores NO DEBEN mostrarse durante la primera escritura; DEBEN mostrarse al abandonar el campo y al enviar, con resumen enfocable.</li>
+    <li><b>RQ-INT-03.</b> Ningún dato ya aportado DEBE volver a solicitarse dentro del mismo proceso.</li>
+    <li><b>RQ-INT-04.</b> Toda funcionalidad basada en arrastre DEBE tener alternativa de un solo puntero.</li>
+    <li><b>RQ-INT-05.</b> Una notificación efímera NO DEBE ser el único registro de un error.</li>
+    <li><b>RQ-INT-06.</b> Las acciones irreversibles DEBEN exigir confirmación que nombre la acción y su alcance.</li>
+    <li><b>RQ-INT-07.</b> Toda vista DEBE implementar sus estados vacío, de carga y de error antes de considerarse terminada.</li>
+  </ul>
+</section>

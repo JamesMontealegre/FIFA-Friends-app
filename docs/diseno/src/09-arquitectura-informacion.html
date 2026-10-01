@@ -1,0 +1,187 @@
+<section class="capitulo" id="cap9">
+  <h1 id="h1-9"><span class="cnum">Capítulo 9</span>Arquitectura de información y navegación</h1>
+
+  <p class="entradilla">Antes de distribuir componentes en una pantalla hay que decidir cuántas
+  pantallas existen, qué contiene cada una, cómo se llaman y cómo se llega a ellas. Este capítulo fija
+  el modelo de contenido, la taxonomía, el esquema de rutas —que en una aplicación de página única es
+  simultáneamente arquitectura de información y contrato público—, la estructura de navegación y las
+  reglas de orientación.</p>
+
+  <h2 id="s9-1">9.1 Modelo de contenido</h2>
+  <p>El contenido se organiza en cuatro agrupaciones de primer nivel, derivadas de los trabajos por
+  realizar de §3.4 y no de la estructura de la base de datos:</p>
+  <dl>
+    <dt>Ahora</dt>
+    <dd>Qué me afecta en este momento: mi próximo partido, torneos activos en los que participo,
+    resultados pendientes de registrar. Es la raíz de la aplicación.</dd>
+    <dt>Competición</dt>
+    <dd>Los torneos y todo lo que cuelga de ellos: participantes, calendario, clasificación, cuadro,
+    partidos.</dd>
+    <dt>Referencia</dt>
+    <dd>Catálogo de equipos disponibles, con sus atributos y filtros. Contenido estable, consultado
+    sobre todo durante la preparación.</dd>
+    <dt>Memoria</dt>
+    <dd>Palmarés e historial: lo que ya ocurrió, agregado por persona y por torneo.</dd>
+  </dl>
+
+  <figure id="f9-1">
+    <svg viewBox="0 0 700 215" width="100%" height="215" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="DejaVu Sans" font-size="8.2" fill="#15191C">
+        <rect x="286" y="4" width="128" height="26" rx="4" fill="#0B6E4F"/>
+        <text x="350" y="21" text-anchor="middle" fill="#FFFFFF" font-weight="bold">/ · Ahora</text>
+
+        <line x1="350" y1="30" x2="350" y2="44" stroke="#6B7780"/>
+        <line x1="96" y1="44" x2="604" y2="44" stroke="#6B7780"/>
+        <line x1="96" y1="44" x2="96" y2="58" stroke="#6B7780"/>
+        <line x1="286" y1="44" x2="286" y2="58" stroke="#6B7780"/>
+        <line x1="446" y1="44" x2="446" y2="58" stroke="#6B7780"/>
+        <line x1="604" y1="44" x2="604" y2="58" stroke="#6B7780"/>
+
+        <rect x="26" y="58" width="140" height="24" rx="4" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="96" y="74" text-anchor="middle">/tournaments</text>
+        <rect x="216" y="58" width="140" height="24" rx="4" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="286" y="74" text-anchor="middle">/teams</text>
+        <rect x="376" y="58" width="140" height="24" rx="4" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="446" y="74" text-anchor="middle">/palmares</text>
+        <rect x="534" y="58" width="140" height="24" rx="4" fill="#E8F3EE" stroke="#0B6E4F"/>
+        <text x="604" y="74" text-anchor="middle">/historial</text>
+
+        <line x1="96" y1="82" x2="96" y2="96" stroke="#6B7780"/>
+        <rect x="16" y="96" width="160" height="24" rx="4" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="96" y="112" text-anchor="middle">/tournaments/:id</text>
+        <line x1="96" y1="120" x2="96" y2="134" stroke="#6B7780"/>
+        <rect x="6" y="134" width="180" height="24" rx="4" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="96" y="150" text-anchor="middle" font-size="7.6">/tournaments/:id/matches/:matchId</text>
+        <line x1="96" y1="158" x2="96" y2="172" stroke="#6B7780"/>
+        <rect x="26" y="172" width="140" height="24" rx="4" fill="#FBF2E2" stroke="#8A5300"/>
+        <text x="96" y="188" text-anchor="middle" font-size="7.6">/tournaments/new</text>
+
+        <line x1="604" y1="82" x2="604" y2="96" stroke="#6B7780"/>
+        <rect x="534" y="96" width="140" height="24" rx="4" fill="#E9F0F8" stroke="#1B4E8C"/>
+        <text x="604" y="112" text-anchor="middle">/history/:uid</text>
+
+        <rect x="216" y="134" width="140" height="24" rx="4" fill="#F4F7F8" stroke="#6B7780" stroke-dasharray="3 2"/>
+        <text x="286" y="150" text-anchor="middle">/login</text>
+        <rect x="376" y="134" width="140" height="24" rx="4" fill="#F4F7F8" stroke="#6B7780" stroke-dasharray="3 2"/>
+        <text x="446" y="150" text-anchor="middle">/join?code=…</text>
+        <text x="216" y="178" font-size="7.4" fill="#6B7780">Rutas de entrada: accesibles sin sesión previa o como destino de un enlace externo.</text>
+        <text x="216" y="190" font-size="7.4" fill="#6B7780">Las rutas en ámbar requieren rol de organización.</text>
+      </g>
+    </svg>
+    <figcaption><b>Figura 9.1</b> — Mapa de rutas. La profundidad máxima es de tres niveles: ninguna información relevante queda a más de tres saltos de la raíz.</figcaption>
+  </figure>
+
+  <h2 id="s9-2">9.2 Esquema de rutas</h2>
+  <p>En una aplicación de página única la URL es la única representación duradera del estado: lo que
+  no está en la URL no se puede compartir, no sobrevive a una recarga y rompe el botón de retroceso.
+  La tabla 9.1 es, por tanto, un contrato.</p>
+  <table id="t9-1">
+    <thead><tr><th style="width:27%">Ruta</th><th style="width:25%">Propósito</th><th style="width:14%">Acceso</th><th style="width:34%">Estado representado en la URL</th></tr></thead>
+    <tbody>
+      <tr><td><code>/</code></td><td>Panel «ahora»: próximo partido y torneos activos.</td><td>Sesión</td><td>Ninguno.</td></tr>
+      <tr><td><code>/login</code></td><td>Inicio de sesión federado.</td><td>Público</td><td><code>?destino=</code> con la ruta a la que volver tras autenticarse.</td></tr>
+      <tr><td><code>/join</code></td><td>Incorporación mediante código.</td><td>Sesión</td><td><code>?code=</code> código de invitación; se preserva a través del inicio de sesión.</td></tr>
+      <tr><td><code>/tournaments</code></td><td>Listado de torneos (maestro).</td><td>Sesión</td><td><code>?estado=</code>, <code>?q=</code>, <code>?orden=</code>.</td></tr>
+      <tr><td><code>/tournaments/new</code></td><td>Creación de torneo.</td><td>Organización</td><td><code>?paso=</code> del asistente.</td></tr>
+      <tr><td><code>/tournaments/:id</code></td><td>Detalle de torneo: clasificación, calendario, cuadro.</td><td>Sesión</td><td><code>?vista=clasificacion|calendario|cuadro</code>, <code>?jornada=</code>, <code>?participante=</code>.</td></tr>
+      <tr><td><code>/tournaments/:id/matches/:matchId</code></td><td>Detalle y registro de partido.</td><td>Sesión</td><td>Identidad del partido; sin estado adicional.</td></tr>
+      <tr><td><code>/teams</code></td><td>Catálogo de equipos.</td><td>Sesión</td><td><code>?liga=</code>, <code>?min=</code>, <code>?q=</code>.</td></tr>
+      <tr><td><code>/palmares</code></td><td>Palmarés agregado.</td><td>Sesión</td><td><code>?temporada=</code>.</td></tr>
+      <tr><td><code>/historial</code></td><td>Histórico de torneos cerrados.</td><td>Sesión</td><td><code>?anio=</code>.</td></tr>
+      <tr><td><code>/history/:uid</code></td><td>Ficha histórica de una persona.</td><td>Sesión</td><td>Identidad de la persona.</td></tr>
+      <tr><td><code>*</code></td><td>Ruta no encontrada.</td><td>Público</td><td>—</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 9.1</b> — Esquema de rutas y estado representado en la URL. Toda selección, filtro u orden que la persona pueda querer compartir vive en la cadena de consulta.</caption>
+  </table>
+  <div class="clave">
+    <span class="et">Regla de las URL</span>
+    <p>Las rutas son estables y legibles; los parámetros de consulta son opcionales y tolerantes:
+    un valor desconocido se ignora con el valor por defecto, nunca produce una pantalla de error. Las
+    rutas no cambian sin redirección permanente desde la anterior, porque los enlaces circulan por
+    mensajería y sobreviven meses.</p>
+  </div>
+
+  <h2 id="s9-3">9.3 Taxonomía y etiquetado</h2>
+  <p>Las etiquetas de navegación usan sustantivos del vocabulario controlado (tabla 1.1), en
+  minúscula salvo la inicial, sin artículos y con un máximo de dos palabras: «Torneos», «Equipos»,
+  «Palmarés», «Historial». Se evitan etiquetas abstractas («Panel», «Gestión») y metáforas
+  («Vestuario»), que obligan a aprender un mapa en lugar de reconocerlo. Las etiquetas de acción son
+  verbos en infinitivo o imperativo consistente a lo largo de todo el producto: «Crear torneo»,
+  «Registrar resultado», «Unirse». Nunca «Aceptar» cuando puede decirse qué se acepta.</p>
+
+  <h2 id="s9-4">9.4 Estructura de navegación</h2>
+  <table class="compacta" id="t9-2">
+    <thead><tr><th style="width:20%">Nivel</th><th style="width:26%">Contenido</th><th style="width:26%">Ubicación en móvil</th><th style="width:28%">Ubicación en escritorio</th></tr></thead>
+    <tbody>
+      <tr><td>Primaria</td><td>Ahora · Torneos · Equipos · Palmarés</td><td>Barra inferior fija, 4 destinos con icono y etiqueta</td><td>Barra superior con marca a la izquierda</td></tr>
+      <tr><td>Secundaria</td><td>Vistas del torneo: clasificación, calendario, cuadro</td><td>Pestañas desplazables bajo la cabecera</td><td>Pestañas fijas en la cabecera del detalle</td></tr>
+      <tr><td>Utilitaria</td><td>Cuenta, tema, ayuda, cierre de sesión</td><td>Menú en el avatar, esquina superior derecha</td><td>Igual, posición consistente (criterio 3.2.6)</td></tr>
+      <tr><td>Contextual</td><td>Acciones de organización del torneo</td><td>Menú de acciones en la cabecera del torneo</td><td>Botones visibles en la cabecera del detalle</td></tr>
+      <tr><td>De retorno</td><td>Volver al maestro desde el detalle</td><td>Flecha atrás en la cabecera del detalle</td><td>Implícita: el maestro permanece visible</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 9.2</b> — Niveles de navegación y su ubicación. La navegación primaria se limita a cuatro destinos: añadir un quinto obligaría a un menú y degradaría el acceso a todos.</caption>
+  </table>
+  <p>La etiqueta del destino activo se marca con <code>aria-current="page"</code> y con una señal
+  visual que no depende sólo del color (peso tipográfico e indicador de posición). El historial
+  queda accesible desde el palmarés, no como quinto destino: es contenido de consulta esporádica.</p>
+
+  <h2 id="s9-5">9.5 Orientación</h2>
+  <ul>
+    <li><b>Título de documento.</b> Cada ruta actualiza <code>document.title</code> con el patrón
+    «&lt;contexto&gt; · FIFA Friends»; es lo primero que anuncian los lectores de pantalla y lo que
+    distingue pestañas (§17.3).</li>
+    <li><b>Encabezado de nivel 1.</b> Único por vista y coincidente en esencia con el título del
+    documento.</li>
+    <li><b>Migas de pan.</b> Sólo en el detalle de partido, donde la profundidad es tres:
+    Torneos → &lt;torneo&gt; → &lt;partido&gt;. En el resto son ruido.</li>
+    <li><b>Enlace de salto.</b> Primer elemento enfocable del documento, visible al recibir foco,
+    que lleva al contenido principal (criterio 2.4.1).</li>
+    <li><b>Puntos de referencia.</b> Regiones semánticas <code>banner</code>,
+    <code>navigation</code>, <code>main</code>, <code>contentinfo</code> con nombre accesible cuando
+    hay más de una del mismo tipo (§10.2).</li>
+    <li><b>Estado vacío con salida.</b> Ninguna vista sin contenido se queda muda: explica por qué
+    está vacía y ofrece la acción que la llena (§13.13).</li>
+  </ul>
+
+  <h2 id="s9-6">9.6 Enlaces compartidos y entrada profunda</h2>
+  <p>El 80&nbsp;% de las sesiones comienza con un enlace recibido por mensajería. De ahí tres
+  requisitos: cualquier ruta debe poder cargarse directamente —lo que exige la reescritura de
+  servidor al documento raíz, ya configurada—; la ruta de invitación debe conservar el código a
+  través del inicio de sesión mediante el parámetro <code>destino</code>; y toda vista debe ser
+  comprensible sin haber visto la anterior, lo que obliga a repetir el contexto en la cabecera
+  («Partido · jornada 3 · Liga de otoño») en lugar de confiar en la navegación previa.</p>
+
+  <h2 id="s9-7">9.7 Búsqueda y filtrado</h2>
+  <p>No se implementa buscador global: con un volumen de decenas de torneos y de equipos, el filtro
+  local por lista es más rápido y más predecible. Las reglas:</p>
+  <ul>
+    <li>Filtro incremental sin botón de envío, con rechazo de rebote de 200&nbsp;ms y anuncio del
+    número de resultados en una región viva cortés (§17.5).</li>
+    <li>Los filtros activos se muestran como fichas eliminables, no como estado invisible de un
+    desplegable.</li>
+    <li>El filtro se refleja en la URL para poder compartir una vista filtrada.</li>
+    <li>Resultado vacío con sugerencia concreta («no hay equipos de esa liga con valoración ≥ 85;
+    prueba a bajar el mínimo»), nunca «sin resultados» a secas.</li>
+    <li>Comparación insensible a mayúsculas y a diacríticos, porque los nombres se escriben sin
+    acentos con frecuencia.</li>
+  </ul>
+
+  <h2 id="s9-8">9.8 Preparación para otros idiomas</h2>
+  <p>El producto se publica en castellano y no se traduce por ahora, pero el diseño no debe cerrar la
+  puerta: los textos no se concatenan a partir de fragmentos, los plurales se tratan con reglas
+  explícitas y no con «(s)», las fechas y números se formatean con las interfaces de
+  internacionalización del navegador —no con plantillas manuales—, y ningún diseño asume la longitud
+  del texto castellano (una traducción al alemán puede crecer un 35&nbsp;%). El atributo
+  <code>lang</code> del documento debe declarar <code>es</code>: actualmente declara <code>en</code>,
+  lo que degrada la pronunciación sintética y la partición de palabras (hallazgo H4).</p>
+
+  <h2 id="s9-9">9.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-AIN-01.</b> Todo estado compartible —selección, filtro, orden, pestaña— DEBE representarse en la URL.</li>
+    <li><b>RQ-AIN-02.</b> Las rutas DEBEN ser cargables directamente y tolerantes a parámetros desconocidos.</li>
+    <li><b>RQ-AIN-03.</b> La navegación primaria NO DEBE superar cuatro destinos.</li>
+    <li><b>RQ-AIN-04.</b> Cada vista DEBE actualizar el título del documento y contener un único encabezado de nivel 1.</li>
+    <li><b>RQ-AIN-05.</b> El documento DEBE declarar <code>lang="es"</code> y marcar los fragmentos en otro idioma.</li>
+    <li><b>RQ-AIN-06.</b> Toda vista DEBE ser comprensible sin la pantalla anterior.</li>
+  </ul>
+</section>
