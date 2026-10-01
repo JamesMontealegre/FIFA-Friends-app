@@ -1,0 +1,78 @@
+<section class="capitulo" id="apc">
+  <h1 id="h1-apc"><span class="cnum">Apéndice C</span>Lista de verificación de seguridad</h1>
+
+  <p class="entradilla">Controles de seguridad exigibles al producto, agrupados por dominio de
+  verificación, con su estado respecto a la implementación vigente y el medio de comprobación. El
+  estado «pendiente» identifica deuda conocida con sección responsable; el estado «no aplica» se
+  declara expresamente para evitar que se interprete como cumplimiento.</p>
+
+  <h2 id="sc-1">C.1 Arquitectura y autorización</h2>
+  <table class="compacta" id="tc-1">
+    <thead><tr><th style="width:36%">Control</th><th style="width:14%">Estado</th><th style="width:50%">Verificación</th></tr></thead>
+    <tbody>
+      <tr><td>Ninguna decisión de autorización depende del cliente</td><td>Pendiente</td><td>Revisión de reglas + prueba negativa por operación. §22.6</td></tr>
+      <tr><td>Denegación por defecto en el motor de reglas</td><td>Pendiente</td><td>Regla final <code>allow read, write: if false</code> y prueba sobre colección inexistente.</td></tr>
+      <tr><td>Roles con alcance de recurso, no identidades literales</td><td>Pendiente</td><td>Prueba: una segunda persona organizadora puede operar; una participante no. §22.4</td></tr>
+      <tr><td>Lectura restringida a personas con relación con el recurso</td><td>Pendiente</td><td>Prueba: cuenta ajena al torneo recibe permiso denegado.</td></tr>
+      <tr><td>Proyecciones derivadas no escribibles por clientes</td><td>Pendiente</td><td>Prueba negativa sobre la colección de clasificación. §11.10</td></tr>
+      <tr><td>Validación de forma y rango en servidor</td><td>Pendiente</td><td>Pruebas con marcadores fuera de rango y campos no previstos.</td></tr>
+      <tr><td>Inmutabilidad de lo consolidado</td><td>Pendiente</td><td>Prueba: escritura sobre torneo cerrado denegada. §22.6</td></tr>
+      <tr><td>Auditoría de cambios sólo de creación</td><td>Pendiente</td><td>Prueba: actualización y borrado de entrada de auditoría denegados.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla C.1</b> — Controles de arquitectura y autorización. Todos ellos constituyen la fase F0 de la hoja de ruta (§27.6).</caption>
+  </table>
+
+  <h2 id="sc-2">C.2 Sesión e identidad</h2>
+  <table class="compacta" id="tc-2">
+    <thead><tr><th style="width:36%">Control</th><th style="width:14%">Estado</th><th style="width:50%">Verificación</th></tr></thead>
+    <tbody>
+      <tr><td>Autenticación delegada sin custodia de contraseñas</td><td>Implementado</td><td>Revisión de arquitectura.</td></tr>
+      <tr><td>Testigo de acceso fuera de almacenamiento accesible por script</td><td>Implementado</td><td>Inspección del almacenamiento del navegador tras iniciar sesión.</td></tr>
+      <tr><td>Cierre de sesión que purga cachés, cola y preferencias</td><td>Pendiente</td><td>Prueba de extremo a extremo: tras cerrar sesión no queda dato del dominio.</td></tr>
+      <tr><td>Aviso previo a la caducidad de sesión</td><td>Pendiente</td><td>Prueba manual con reloj adelantado.</td></tr>
+      <tr><td>Verificación de integridad de la aplicación en el acceso a datos</td><td>Pendiente</td><td>Petición desde cliente no autorizado rechazada. §22.8</td></tr>
+      <tr><td>Sin elevación de privilegios por datos escribibles</td><td>Pendiente</td><td>Prueba: modificar el propio documento no otorga rol.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla C.2</b> — Controles de sesión e identidad.</caption>
+  </table>
+
+  <h2 id="sc-3">C.3 Cliente web y configuración</h2>
+  <table class="compacta" id="tc-3">
+    <thead><tr><th style="width:36%">Control</th><th style="width:14%">Estado</th><th style="width:50%">Verificación</th></tr></thead>
+    <tbody>
+      <tr><td>Política de seguridad de contenido estricta con <i>nonce</i></td><td>Pendiente</td><td>Inspección de cabeceras en vista previa y producción. §21.3</td></tr>
+      <tr><td>Conjunto completo de cabeceras de seguridad</td><td>Pendiente</td><td>Comprobación automatizada de la tabla 21.2 en integración.</td></tr>
+      <tr><td>Trusted Types en modo de aplicación</td><td>Pendiente</td><td>Prueba que intenta asignar HTML y espera excepción.</td></tr>
+      <tr><td>Prohibición de inserción de HTML y evaluación dinámica</td><td>Implementado por convención</td><td>Regla de análisis estático que lo convierte en error. §26.4</td></tr>
+      <tr><td>Validación de parámetros de redirección</td><td>Pendiente</td><td>Prueba con destino absoluto externo; debe redirigir a la raíz.</td></tr>
+      <tr><td>Enlaces externos con aislamiento de ventana</td><td>Parcial</td><td>Regla de análisis estático.</td></tr>
+      <tr><td>Sin recursos de terceros en la ruta crítica</td><td>Pendiente</td><td>Inventario de peticiones de la carga inicial. §21.7</td></tr>
+      <tr><td>Mensajes de error sin detalles internos</td><td>Implementado</td><td>Revisión del catálogo de mensajes. §13.12</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla C.3</b> — Controles del cliente web y de la configuración de entrega.</caption>
+  </table>
+
+  <h2 id="sc-4">C.4 Cadena de suministro y operación</h2>
+  <table class="compacta" id="tc-4">
+    <thead><tr><th style="width:36%">Control</th><th style="width:14%">Estado</th><th style="width:50%">Verificación</th></tr></thead>
+    <tbody>
+      <tr><td>Instalación estricta desde fichero de bloqueo</td><td>Pendiente</td><td>Etapa 1 de la integración continua. §26.7</td></tr>
+      <tr><td><i>Scripts</i> de ciclo de vida desactivados por defecto</td><td>Pendiente</td><td>Configuración del gestor de paquetes revisada.</td></tr>
+      <tr><td>Cuarentena de 72 horas para versiones nuevas</td><td>Pendiente</td><td>Configuración del robot de dependencias. §23.2</td></tr>
+      <tr><td>Credenciales de integración de corta vida y permisos mínimos</td><td>Pendiente</td><td>Revisión de la configuración de los flujos.</td></tr>
+      <tr><td>Exploración de dependencias y de secretos</td><td>Pendiente</td><td>Etapa 8 de la integración continua.</td></tr>
+      <tr><td>Publicación trazable y reversible en un paso</td><td>Implementado</td><td>Prueba de reversión trimestral. §23.3</td></tr>
+      <tr><td>Registro y alerta de denegaciones y consumo anómalo</td><td>Pendiente</td><td>Configuración de alertas. §23.6</td></tr>
+      <tr><td>Procedimiento de respuesta ante incidentes documentado</td><td>Implementado por este documento</td><td>Simulacro anual. §23.6</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla C.4</b> — Controles de cadena de suministro y operación.</caption>
+  </table>
+
+  <h2 id="sc-5">C.5 Requisitos declarados no aplicables</h2>
+  <p>Se declaran expresamente no aplicables, por ausencia de la funcionalidad correspondiente: gestión
+  y almacenamiento de contraseñas; criptografía implementada por el producto; procesamiento de pagos;
+  carga de ficheros por personas usuarias; comunicación por correo electrónico transaccional propio;
+  interfaces de programación públicas; y sesiones de larga duración con credenciales persistentes
+  propias. Cualquier incorporación de estas funcionalidades reabre los controles correspondientes del
+  estándar de verificación y obliga a revisar el modelo de amenazas (§20.7).</p>
+</section>

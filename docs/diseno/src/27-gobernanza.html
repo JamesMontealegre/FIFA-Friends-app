@@ -1,0 +1,111 @@
+<section class="capitulo" id="cap27">
+  <h1 id="h1-27"><span class="cnum">Capítulo 27</span>Gobernanza, evolución y hoja de ruta</h1>
+
+  <p class="entradilla">Un sistema de diseño sin gobierno se convierte en una carpeta de componentes
+  obsoletos en menos de un año. Este capítulo define quién decide, cómo se propone y adopta un cambio,
+  cómo se versiona y se retira lo que deja de servir, cuál es la Definición de Terminado que cierra
+  cada incremento y en qué orden debe abordarse la adopción de este documento.</p>
+
+  <h2 id="s27-1">27.1 Modelo de gobierno</h2>
+  <p>Se adopta un modelo federado con custodia central: cualquiera puede proponer y contribuir; un
+  grupo reducido —el comité de sistema de diseño— custodia la coherencia y decide la adopción. La
+  alternativa centralizada pura convierte al equipo custodio en un cuello de botella; la federada pura
+  produce cinco botones distintos en seis meses.</p>
+  <table class="compacta" id="t27-1">
+    <thead><tr><th style="width:26%">Función</th><th style="width:34%">Decide sobre</th><th style="width:40%">No decide sobre</th></tr></thead>
+    <tbody>
+      <tr><td>Comité de sistema de diseño</td><td>Tokens, primitivas, compuestos, plantillas, patrones, obsolescencias.</td><td>Prioridades de producto ni contenido.</td></tr>
+      <tr><td>Equipo de producto</td><td>Qué se construye y en qué orden; componentes de dominio.</td><td>Valores de tokens ni semántica de primitivas.</td></tr>
+      <tr><td>Responsable de accesibilidad</td><td>Veto sobre cualquier cambio que introduzca una barrera.</td><td>Decisiones estéticas.</td></tr>
+      <tr><td>Seguridad de aplicaciones</td><td>Veto sobre cambios que debiliten controles.</td><td>Diseño de interacción.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 27.1</b> — Reparto de decisiones. Los dos vetos son el mecanismo que impide que la presión de entrega erosione lo no negociable.</caption>
+  </table>
+
+  <h2 id="s27-2">27.2 Ciclo de vida de un cambio en el sistema</h2>
+  <ol>
+    <li><b>Propuesta.</b> Problema, casos de uso, alternativas consideradas y evidencia de que no
+    existe ya una solución en el catálogo.</li>
+    <li><b>Prototipo.</b> Implementación en una rama con ejemplos navegables y pruebas.</li>
+    <li><b>Revisión.</b> Diseño, accesibilidad y front-end revisan con la lista del apéndice G.</li>
+    <li><b>Adopción.</b> Se incorpora al catálogo con versión, documentación y guía de migración si
+    sustituye a algo.</li>
+    <li><b>Difusión.</b> Nota de versión y, si procede, cambio automatizado sobre el código existente.</li>
+  </ol>
+
+  <h2 id="s27-3">27.3 Versionado y publicación</h2>
+  <p>Tokens y componentes se versionan con semántica explícita: un cambio incompatible —renombrar un
+  token, eliminar una variante, cambiar el comportamiento por defecto— incrementa la versión mayor y
+  exige guía de migración; añadir sin romper incrementa la menor; corregir, la de parche. Un cambio de
+  valor de token que altere el aspecto sin romper la interfaz se considera menor pero exige revisión
+  visual. La regla de oro: <b>ningún cambio incompatible se publica sin una vía mecánica de
+  migración</b>, sea una transformación automatizada o una lista exhaustiva de puntos a modificar.</p>
+
+  <h2 id="s27-4">27.4 Definición de Terminado</h2>
+  <p>Un incremento se considera terminado cuando cumple todas las condiciones siguientes. No es una
+  lista aspiracional: es la puerta de publicación.</p>
+  <ul class="check">
+    <li>Cumple la especificación aplicable de este documento, o su desviación está registrada como decisión de arquitectura.</li>
+    <li>Implementa los estados vacío, de carga y de error de cada vista afectada.</li>
+    <li>Pasa el análisis estático, el tipado y todas las pruebas automatizadas.</li>
+    <li>Pasa el recorrido completo por teclado y la verificación automática de accesibilidad; sin incumplimientos A o AA.</li>
+    <li>Respeta los presupuestos de transferencia y no empeora las métricas de campo.</li>
+    <li>Las reglas de servidor afectadas tienen pruebas positivas y negativas.</li>
+    <li>Los textos nuevos siguen las reglas de redacción accesible y el vocabulario controlado.</li>
+    <li>Los componentes nuevos están en el catálogo con ejemplos y contenido hostil.</li>
+    <li>La documentación afectada —incluido este documento— está actualizada.</li>
+  </ul>
+
+  <h2 id="s27-5">27.5 Obsolescencia</h2>
+  <p>Retirar es tan importante como añadir. El procedimiento tiene tres fases: <b>marcar</b> —el
+  elemento queda señalado como obsoleto en el catálogo y genera aviso en el análisis estático, con
+  indicación de su sustituto—; <b>migrar</b> —se sustituyen los usos, preferentemente con
+  transformación automatizada—; y <b>eliminar</b> —no antes de dos ciclos de publicación desde el
+  marcado—. Nada se elimina sin sustituto documentado.</p>
+
+  <h2 id="s27-6">27.6 Hoja de ruta de adopción</h2>
+  <table id="t27-2">
+    <thead><tr><th style="width:14%">Fase</th><th style="width:40%">Contenido</th><th style="width:22%">Criterio de salida</th><th style="width:24%">Secciones</th></tr></thead>
+    <tbody>
+      <tr><td><b>F0 · Contención</b></td><td>Sustitución de las reglas de autorización; acotación de la incorporación a torneos; cabeceras y política de contenido; idioma del documento.</td><td>Hallazgos H1, H2, H3 y H4 cerrados con pruebas.</td><td>§22.6, §21.3, §18.4</td></tr>
+      <tr><td><b>F1 · Cimientos</b></td><td>Tokens generados y verificados; tipografía autoalojada; escala de espaciado; anillo de foco; primitivas y compuestos del catálogo.</td><td>Cero literales de color y de medida; catálogo publicado.</td><td>§6, §7, §8, §12</td></tr>
+      <tr><td><b>F2 · Estructura</b></td><td>Armazón de regiones, plantillas, patrón maestro&ndash;detalle con estado en la URL, anuncio de ruta y gestión de foco.</td><td>Hallazgo H6 cerrado; auditoría de teclado sin incidencias.</td><td>§10, §11, §17</td></tr>
+      <tr><td><b>F3 · Integridad</b></td><td>Participación como subcolección; derivación de clasificación en servidor; auditoría de partidos; idempotencia de mutaciones.</td><td>Hallazgo H8 cerrado; invariantes verificadas.</td><td>§15.6, §16, §22</td></tr>
+      <tr><td><b>F4 · Rendimiento</b></td><td>División de código por ruta, presupuestos en integración, medición de campo y alertas.</td><td>Hallazgos H5 y H7 cerrados; objetivos de la tabla 24.2 alcanzados.</td><td>§14.4, §24, §25</td></tr>
+      <tr><td><b>F5 · Calidad sostenida</b></td><td>Suite completa, regresión visual, lista manual, declaración de accesibilidad publicada.</td><td>Hallazgo H9 cerrado; Definición de Terminado operativa.</td><td>§19.7, §26</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 27.2</b> — Hoja de ruta de adopción. El orden no es negociable en su primera fase: la contención precede a cualquier mejora, porque una interfaz excelente sobre una autorización rota sigue siendo un producto roto.</caption>
+  </table>
+
+  <h2 id="s27-7">27.7 Métricas de salud del sistema</h2>
+  <table class="compacta" id="t27-3">
+    <thead><tr><th style="width:34%">Métrica</th><th style="width:22%">Objetivo</th><th style="width:44%">Qué revela</th></tr></thead>
+    <tbody>
+      <tr><td>Cobertura de tokens</td><td>≥ 98&nbsp;% de valores</td><td>Deriva visual incipiente.</td></tr>
+      <tr><td>Proporción de componentes del catálogo frente a componentes locales</td><td>≥ 80&nbsp;%</td><td>Si cae, el catálogo no resuelve las necesidades reales.</td></tr>
+      <tr><td>Antigüedad media de las obsolescencias sin migrar</td><td>≤ 2 ciclos</td><td>Deuda acumulada por migraciones incompletas.</td></tr>
+      <tr><td>Tiempo de la integración continua</td><td>≤ 15 min</td><td>Si crece, el equipo empieza a eludir la verificación.</td></tr>
+      <tr><td>Incumplimientos de accesibilidad abiertos</td><td>0 de nivel A/AA</td><td>Salud real del compromiso de accesibilidad.</td></tr>
+      <tr><td>Desviaciones registradas por trimestre</td><td>Tendencia estable</td><td>Un repunte indica que la especificación no encaja con la realidad y hay que revisarla.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 27.3</b> — Métricas de salud del sistema de diseño.</caption>
+  </table>
+
+  <h2 id="s27-8">27.8 Cierre</h2>
+  <p>Este documento no describe un estado alcanzado, sino el estado al que el producto debe
+  converger, con el orden y los criterios para hacerlo. Su utilidad depende de dos condiciones: que
+  sus requisitos sean verificables —de ahí el énfasis en umbrales, listas y pruebas— y que se
+  actualice cuando la realidad lo desmienta. Una especificación que contradice al producto durante
+  más de un trimestre deja de ser una guía y pasa a ser un obstáculo; por eso la revisión semestral
+  del §27.2 no es una formalidad administrativa, sino la condición de que todo lo anterior siga
+  significando algo.</p>
+
+  <h2 id="s27-9">27.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-GOB-01.</b> Todo cambio del sistema de diseño DEBE seguir el ciclo de §27.2 y quedar versionado.</li>
+    <li><b>RQ-GOB-02.</b> Ningún cambio incompatible DEBE publicarse sin vía mecánica de migración.</li>
+    <li><b>RQ-GOB-03.</b> La Definición de Terminado DEBE cumplirse íntegramente antes de publicar un incremento.</li>
+    <li><b>RQ-GOB-04.</b> La fase F0 de la hoja de ruta DEBE completarse antes de cualquier ampliación funcional.</li>
+    <li><b>RQ-GOB-05.</b> Este documento DEBE revisarse semestralmente y ante cambio normativo o de arquitectura.</li>
+  </ul>
+</section>

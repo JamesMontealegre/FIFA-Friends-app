@@ -1,0 +1,120 @@
+<section class="capitulo" id="cap26">
+  <h1 id="h1-26"><span class="cnum">Capítulo 26</span>Calidad, pruebas y entrega continua</h1>
+
+  <p class="entradilla">Todo lo especificado en los capítulos anteriores se degrada en cuestión de
+  semanas si no existe un mecanismo que lo verifique en cada cambio. Este capítulo define la
+  estrategia de pruebas, el análisis estático, las verificaciones automáticas de accesibilidad,
+  seguridad y rendimiento, las etapas de la integración continua y la Definición de Terminado que
+  cierra el ciclo.</p>
+
+  <h2 id="s26-1">26.1 Estrategia</h2>
+  <p>La proporción de pruebas no sigue una pirámide dogmática sino el riesgo real del producto: la
+  lógica competitiva es pequeña pero crítica; los componentes son numerosos y cambian a menudo; los
+  recorridos completos son pocos y caros de automatizar.</p>
+  <table class="compacta" id="t26-1">
+    <thead><tr><th style="width:24%">Nivel</th><th style="width:18%">Volumen</th><th style="width:28%">Qué verifica</th><th style="width:30%">Qué no verifica</th></tr></thead>
+    <tbody>
+      <tr><td>Dominio puro</td><td>Alto</td><td>Clasificación, desempates, generación de calendario, progresión del cuadro.</td><td>Nada de interfaz; son funciones sin dependencias.</td></tr>
+      <tr><td>Componente</td><td>Alto</td><td>Comportamiento observable, estados, teclado, semántica accesible.</td><td>Integración con datos reales.</td></tr>
+      <tr><td>Reglas de servidor</td><td>Medio</td><td>Autorización permitida y denegada, validación de forma.</td><td>Rendimiento de las consultas.</td></tr>
+      <tr><td>Integración de datos</td><td>Medio</td><td>Consultas, mutaciones, caché e invalidación contra emulador.</td><td>Comportamiento visual.</td></tr>
+      <tr><td>Extremo a extremo</td><td>Bajo</td><td>Los tres recorridos críticos completos.</td><td>Casos límite; serían lentos y frágiles.</td></tr>
+      <tr><td>Regresión visual</td><td>Bajo</td><td>Deriva no intencionada del sistema visual.</td><td>Corrección funcional.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 26.1</b> — Niveles de prueba, con lo que cada uno verifica y lo que deliberadamente no verifica.</caption>
+  </table>
+
+  <h2 id="s26-2">26.2 Pruebas del dominio</h2>
+  <p>La lógica competitiva se implementa como funciones puras sin dependencia de la interfaz ni de la
+  base de datos, lo que permite probarla de forma exhaustiva y barata. Además de los casos
+  tabulados, se emplean pruebas basadas en propiedades que generan torneos aleatorios y comprueban
+  las invariantes de §16.4: la suma de partidos jugados cuadra; ningún participante se enfrenta a sí
+  mismo; el orden de la clasificación es total y determinista; recalcular dos veces da el mismo
+  resultado. Las propiedades encuentran los casos que nadie habría escrito a mano, y en un dominio
+  con desempates encadenados eso es exactamente lo que se necesita.</p>
+  <pre>test.prop('la clasificación es determinista e idempotente', [torneoArbitrario()], (t) =&gt; {
+  const a = calcularClasificacion(t.partidos, t.config);
+  const b = calcularClasificacion([...t.partidos].reverse(), t.config);
+  expect(a).toEqual(b);                       <span class="c">// el orden de entrada no influye</span>
+  expect(calcularClasificacion(t.partidos, t.config)).toEqual(a);
+});</pre>
+
+  <h2 id="s26-3">26.3 Pruebas de componente</h2>
+  <p>Se prueban por su comportamiento observable, nunca por su estructura interna: se consulta por
+  rol accesible y por nombre, igual que lo haría una tecnología de asistencia, y se interactúa
+  simulando eventos reales de usuario. Una prueba que busca por clase CSS o por estructura del árbol
+  se rompe con cualquier refactorización y no comprueba lo que importa. Cada componente del catálogo
+  verifica, como mínimo: que expone el rol y el nombre esperados; que es operable con teclado según
+  su contrato; que refleja sus estados en los atributos correspondientes; y que no introduce
+  incumplimientos detectables de forma automática.</p>
+
+  <h2 id="s26-4">26.4 Análisis estático</h2>
+  <table class="compacta" id="t26-2">
+    <thead><tr><th style="width:36%">Regla</th><th style="width:28%">Motivación</th><th style="width:36%">Sección</th></tr></thead>
+    <tbody>
+      <tr><td>Reglas de accesibilidad en el marcado</td><td>Detecta etiquetas ausentes, roles inválidos, texto alternativo faltante.</td><td>§18</td></tr>
+      <tr><td>Prohibición de <code>outline: none</code> sin sustituto</td><td>Protege el indicador de foco.</td><td>§6.5</td></tr>
+      <tr><td>Prohibición de literales de color y de medidas fuera de escala</td><td>Evita la deriva visual.</td><td>§6.1, §8.1</td></tr>
+      <tr><td>Frontera de importación entre niveles</td><td>Impide que primitivas y compuestos conozcan el dominio.</td><td>§10.3</td></tr>
+      <tr><td>Prohibición de inserción de HTML y de evaluación dinámica</td><td>Cierra vectores de inyección.</td><td>§21.2</td></tr>
+      <tr><td>Tipado estricto sin escapes</td><td>Un tipo <code>any</code> en el límite de datos anula la validación.</td><td>§15.7</td></tr>
+      <tr><td>Prohibición de dependencias no declaradas</td><td>Evita paquetes transitivos usados por accidente.</td><td>§23.2</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 26.2</b> — Reglas de análisis estático que materializan requisitos del documento.</caption>
+  </table>
+
+  <h2 id="s26-5">26.5 Verificación de accesibilidad, seguridad y rendimiento</h2>
+  <ul>
+    <li><b>Accesibilidad</b>: verificación automática por componente y por ruta, más la comprobación
+    de contraste del mapa semántico de tokens (§6.9). Bloquea la integración.</li>
+    <li><b>Seguridad</b>: suite de reglas contra el emulador con casos permitidos y denegados
+    (§22.7); exploración de dependencias; detección de secretos en el repositorio; comprobación de
+    que las cabeceras esperadas están presentes en el entorno de vista previa.</li>
+    <li><b>Rendimiento</b>: verificación de los presupuestos de la tabla 24.3 tras la construcción y
+    auditoría sintética sobre la vista previa con red y CPU limitadas, comparando con la rama
+    principal.</li>
+  </ul>
+
+  <h2 id="s26-6">26.6 Datos y entornos de prueba</h2>
+  <p>Los datos de prueba son sintéticos y cubren los casos difíciles por construcción: nombres con las
+  siete cadenas hostiles de §7.8, torneo con dos participantes y torneo con veinticuatro, torneo con
+  todos los partidos empatados —caso que ejercita todos los desempates—, torneo con resultados en
+  disputa y torneo cerrado. Nunca se usan copias de datos reales de personas. Existen tres entornos:
+  local con emuladores, vista previa por propuesta de cambio, y producción; las reglas de seguridad
+  son idénticas en los tres, lo que evita la clase de defecto en que algo funciona en desarrollo
+  porque las reglas estaban relajadas.</p>
+
+  <h2 id="s26-7">26.7 Integración continua</h2>
+  <table class="compacta" id="t26-3">
+    <thead><tr><th style="width:8%">#</th><th style="width:30%">Etapa</th><th style="width:20%">Duración objetivo</th><th style="width:42%">Puerta</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Instalación estricta desde fichero de bloqueo</td><td>&lt; 60&nbsp;s</td><td>Falla si el fichero de bloqueo cambia.</td></tr>
+      <tr><td>2</td><td>Análisis estático y tipado</td><td>&lt; 60&nbsp;s</td><td>Cero errores.</td></tr>
+      <tr><td>3</td><td>Pruebas de dominio y de componente</td><td>&lt; 3&nbsp;min</td><td>Todas verdes; cobertura de dominio ≥ 90&nbsp;%.</td></tr>
+      <tr><td>4</td><td>Pruebas de reglas de seguridad</td><td>&lt; 2&nbsp;min</td><td>Todas verdes, positivas y negativas.</td></tr>
+      <tr><td>5</td><td>Construcción y presupuestos</td><td>&lt; 2&nbsp;min</td><td>Dentro de la tabla 24.3.</td></tr>
+      <tr><td>6</td><td>Vista previa y pruebas de extremo a extremo</td><td>&lt; 5&nbsp;min</td><td>Los tres recorridos críticos pasan.</td></tr>
+      <tr><td>7</td><td>Accesibilidad por ruta y auditoría sintética</td><td>&lt; 4&nbsp;min</td><td>Cero incumplimientos; sin regresión de métricas.</td></tr>
+      <tr><td>8</td><td>Exploración de dependencias y secretos</td><td>&lt; 60&nbsp;s</td><td>Sin hallazgos altos o críticos.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 26.3</b> — Etapas de la integración continua. El conjunto debe ejecutarse en menos de quince minutos: por encima, el equipo empieza a evitarlo.</caption>
+  </table>
+
+  <h2 id="s26-8">26.8 Lista de regresión manual</h2>
+  <p>Hay comprobaciones que no se automatizan con una relación coste/beneficio razonable y que se
+  ejecutan antes de cada publicación mayor: recorrido completo por teclado de los tres recorridos
+  críticos; prueba con lector de pantalla en una combinación de escritorio y una de móvil;
+  comportamiento sin conexión y al recuperar la red; cambio de tema y de densidad; ampliación al
+  400&nbsp;%; y la matriz de degradación de la tabla 14.4. La lista vive en el apéndice G y se firma
+  con fecha y versión.</p>
+
+  <h2 id="s26-9">26.9 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-CAL-01.</b> La lógica del dominio DEBE ser pura y estar cubierta por pruebas, incluidas pruebas de propiedades sobre las invariantes.</li>
+    <li><b>RQ-CAL-02.</b> Las pruebas de componente DEBEN consultar por rol y nombre accesibles.</li>
+    <li><b>RQ-CAL-03.</b> Las reglas de seguridad DEBEN probarse con casos permitidos y denegados.</li>
+    <li><b>RQ-CAL-04.</b> La integración continua DEBE bloquear ante incumplimiento de accesibilidad, presupuesto o seguridad.</li>
+    <li><b>RQ-CAL-05.</b> Las reglas de seguridad DEBEN ser idénticas en todos los entornos.</li>
+    <li><b>RQ-CAL-06.</b> La lista de regresión manual DEBE ejecutarse y firmarse antes de cada publicación mayor.</li>
+  </ul>
+</section>

@@ -117,7 +117,14 @@ def construir_toc(cuerpos):
         for niv, ident, texto in H_RE.findall(txt):
             if niv == "3":
                 continue
-            filas.append((f"n{niv}", ident, limpio(texto)))
+            rot = limpio(texto)
+            if niv == "1":
+                num = re.search(r'<span class="cnum">([^<]+)</span>', texto)
+                if num:
+                    etiqueta = limpio(num.group(1))
+                    corto = etiqueta.replace("Capítulo ", "").replace("Apéndice ", "")
+                    rot = f"{corto} · {rot}"
+            filas.append((f"n{niv}", ident, rot))
     li = []
     for clase, ident, texto in filas:
         c = "n1 pt" if clase == "pt" else clase
@@ -139,7 +146,9 @@ def construir_indices(cuerpos):
         li = []
         for i, e, r in items:
             r = re.sub(r'^\s*[—–-]\s*', '', r)
-            li.append(f'<li class="n2"><a href="#{i}">{html.escape(e)} — {html.escape(r[:118])}</a></li>')
+            if len(r) > 104:
+                r = r[:104].rsplit(' ', 1)[0].rstrip(' ,;:.') + '…'
+            li.append(f'<li class="n2"><a href="#{i}">{html.escape(e)} — {html.escape(r)}</a></li>')
         return (f'<section class="liminar toc" id="{ident_sec}"><h1>{titulo}</h1>\n<ul>\n'
                 + "\n".join(li) + "\n</ul>\n</section>\n")
     return bloque(figs, "Índice de figuras", "idxfig") + bloque(tabs, "Índice de tablas", "idxtab")

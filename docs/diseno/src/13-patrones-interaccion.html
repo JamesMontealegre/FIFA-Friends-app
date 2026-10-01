@@ -7,7 +7,20 @@
   formularios, a las tablas de datos, a la retroalimentación y a los tres estados que más a menudo se
   olvidan: vacío, cargando y error.</p>
 
-  <h2 id="s13-1">13.1 Formularios: estructura</h2>
+  <h2 id="s13-1">13.1 Taxonomía de las interacciones</h2>
+  <p>Las interacciones del producto se reducen a seis familias, y cada una tiene una respuesta
+  canónica en este capítulo: <b>decidir</b> entre alternativas (elegir formato, equipo o filtro),
+  <b>introducir</b> datos (marcador, nombre, código), <b>confirmar</b> una acción con consecuencia,
+  <b>explorar</b> una colección (ordenar, filtrar, desplazar), <b>corregir</b> un error y
+  <b>esperar</b> un resultado. Reconocer a qué familia pertenece una pantalla nueva es el primer paso
+  de su diseño, porque determina qué patrón se aplica sin necesidad de inventar nada.</p>
+  <p>Para las interacciones de decisión rige una regla derivada de §4.3: el número de alternativas
+  presentadas simultáneamente se mantiene bajo y cada una se describe por su consecuencia, no por su
+  nombre técnico. Los cuatro formatos de competición, por ejemplo, se presentan como cuatro opciones
+  con una línea que explica qué significa cada una —«todos contra todos, una vuelta»—, no como un
+  conjunto de parámetros que la persona deba combinar.</p>
+
+  <h2 id="s13-2">13.2 Formularios: estructura</h2>
   <ul>
     <li><b>Una columna.</b> Los formularios se disponen en una sola columna; las dos columnas obligan
     a un recorrido visual en zigzag y aumentan los errores de cumplimentación. Única excepción:
@@ -25,7 +38,7 @@
     cancelación como acción sutil y nunca como botón de igual peso.</li>
   </ul>
 
-  <h2 id="s13-2">13.2 Validación</h2>
+  <h2 id="s13-3">13.3 Validación</h2>
   <table id="t13-1">
     <thead><tr><th style="width:22%">Momento</th><th style="width:30%">Qué se valida</th><th style="width:48%">Regla</th></tr></thead>
     <tbody>
@@ -47,7 +60,7 @@
   &lt;/p&gt;
 &lt;/div&gt;</pre>
 
-  <h2 id="s13-3">13.3 Procesos de varios pasos</h2>
+  <h2 id="s13-4">13.4 Procesos de varios pasos</h2>
   <p>La creación de torneo es el único proceso de varios pasos del producto. Se especifica así:
   indicador de progreso con número de paso y total; estado persistido en la URL
   (<code>?paso=</code>) y en almacenamiento local, de modo que una recarga accidental no pierda el
@@ -56,7 +69,7 @@
   redundante—: si el nombre del torneo se introdujo en el paso 1, el paso 3 lo muestra, no lo vuelve
   a pedir.</p>
 
-  <h2 id="s13-4">13.4 Entradas especiales del dominio</h2>
+  <h2 id="s13-5">13.5 Entradas especiales del dominio</h2>
   <dl>
     <dt>Código de invitación</dt>
     <dd>Ocho caracteres de un alfabeto reducido sin caracteres ambiguos (se excluyen I, L, O, 0, 1).
@@ -72,7 +85,7 @@
     mientras se escribe y anuncio del recuento.</dd>
   </dl>
 
-  <h2 id="s13-5">13.5 Tablas de datos en pantalla estrecha</h2>
+  <h2 id="s13-6">13.6 Tablas de datos en pantalla estrecha</h2>
   <p>La clasificación tiene diez columnas y el ancho disponible en móvil no da para más de cinco. Se
   evalúan cuatro estrategias y se adopta una combinación:</p>
   <table class="compacta" id="t13-2">
@@ -86,14 +99,14 @@
     <caption class="tcap"><b>Tabla 13.2</b> — Estrategias para tablas anchas. La decisión combina reducción de columnas con expansión de fila y desplazamiento horizontal accesible.</caption>
   </table>
 
-  <h2 id="s13-6">13.6 Arrastre y alternativas</h2>
+  <h2 id="s13-7">13.7 Arrastre y alternativas</h2>
   <p>El criterio 2.5.7 exige que toda funcionalidad que use arrastre disponga de alternativa con un
   solo puntero. En este producto el arrastre aparece al reordenar participantes y al ajustar
   emparejamientos. La alternativa obligatoria son botones «subir» y «bajar» en cada elemento, más un
   campo numérico de posición en el menú contextual del elemento. Ambas vías actualizan el mismo
   estado y anuncian el resultado («Marta movida a la posición 3 de 8»).</p>
 
-  <h2 id="s13-7">13.7 Retroalimentación: qué mecanismo y cuándo</h2>
+  <h2 id="s13-8">13.8 Retroalimentación: qué mecanismo y cuándo</h2>
   <table id="t13-3">
     <thead><tr><th style="width:20%">Mecanismo</th><th style="width:30%">Cuándo</th><th style="width:26%">Semántica</th><th style="width:24%">Duración</th></tr></thead>
     <tbody>
@@ -106,14 +119,6 @@
     <caption class="tcap"><b>Tabla 13.3</b> — Mecanismos de retroalimentación. Una notificación efímera nunca es el único lugar donde consta un error: lo efímero no se puede revisar.</caption>
   </table>
 
-  <h2 id="s13-8">13.8 Acciones destructivas y reversibilidad</h2>
-  <p>Jerarquía de preferencia: <b>deshacer</b> &gt; <b>confirmar</b> &gt; <b>bloquear</b>. Eliminar un
-  partido del calendario es reversible durante 10 segundos mediante notificación con acción de
-  deshacer, y la operación sólo se consolida al expirar ese plazo. Eliminar un torneo completo no es
-  reversible: exige diálogo con el nombre del torneo escrito por la persona y botón que nombra la
-  acción. Cerrar un torneo consolida el palmarés y tampoco es reversible: exige confirmación con
-  resumen de lo que se consolidará.</p>
-
   <h2 id="s13-9">13.9 Aleatoriedad verificable</h2>
   <p>El sorteo de equipos es la función con más carga social del producto: si parece manipulable, el
   torneo entero pierde legitimidad. Se especifica: semilla generada en servidor y almacenada con el
@@ -122,14 +127,22 @@
   presentación del resultado ya decidido, nunca como su causa. Con movimiento reducido activo, la
   animación se sustituye por la aparición directa del resultado con anuncio textual.</p>
 
-  <h2 id="s13-10">13.10 Atajos y eficiencia</h2>
+  <h2 id="s13-10">13.10 Acciones destructivas y reversibilidad</h2>
+  <p>Jerarquía de preferencia: <b>deshacer</b> &gt; <b>confirmar</b> &gt; <b>bloquear</b>. Eliminar un
+  partido del calendario es reversible durante 10 segundos mediante notificación con acción de
+  deshacer, y la operación sólo se consolida al expirar ese plazo. Eliminar un torneo completo no es
+  reversible: exige diálogo con el nombre del torneo escrito por la persona y botón que nombra la
+  acción. Cerrar un torneo consolida el palmarés y tampoco es reversible: exige confirmación con
+  resumen de lo que se consolidará.</p>
+
+  <h2 id="s13-11">13.11 Atajos y eficiencia</h2>
   <p>Para el perfil de organización, que repite la misma operación muchas veces seguidas: tras
   registrar un resultado, el foco pasa al siguiente partido pendiente; <kbd>Enter</kbd> envía desde
   cualquier campo del formulario de marcador; los atajos de una sola tecla están desactivados por
   defecto y, de activarse, deben poder remapearse o desactivarse (criterio 2.1.4). Ningún atajo es el
   único medio de realizar una acción.</p>
 
-  <h2 id="s13-11">13.11 Catálogo de errores</h2>
+  <h2 id="s13-12">13.12 Catálogo de errores</h2>
   <table class="compacta" id="t13-4">
     <thead><tr><th style="width:22%">Situación</th><th style="width:40%">Mensaje</th><th style="width:38%">Acción ofrecida</th></tr></thead>
     <tbody>
@@ -143,7 +156,7 @@
     <caption class="tcap"><b>Tabla 13.4</b> — Catálogo de errores. Tres reglas: decir qué pasó, decir qué hacer y no culpar a la persona. Nunca se muestran códigos técnicos sin traducción.</caption>
   </table>
 
-  <h2 id="s13-12">13.12 Estados vacío, de carga y de error por vista</h2>
+  <h2 id="s13-13">13.13 Estados vacío, de carga y de error por vista</h2>
   <table class="compacta" id="t13-5">
     <thead><tr><th style="width:20%">Vista</th><th style="width:28%">Vacío</th><th style="width:26%">Cargando</th><th style="width:26%">Error</th></tr></thead>
     <tbody>
@@ -164,7 +177,7 @@
     se anuncian como contenido.</p>
   </div>
 
-  <h2 id="s13-13">13.13 Síntesis de requisitos del capítulo</h2>
+  <h2 id="s13-14">13.14 Síntesis de requisitos del capítulo</h2>
   <ul class="check">
     <li><b>RQ-INT-01.</b> Todo campo DEBE tener etiqueta visible y persistente asociada programáticamente.</li>
     <li><b>RQ-INT-02.</b> Los errores NO DEBEN mostrarse durante la primera escritura; DEBEN mostrarse al abandonar el campo y al enviar, con resumen enfocable.</li>

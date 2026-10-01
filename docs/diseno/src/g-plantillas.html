@@ -1,0 +1,107 @@
+<section class="capitulo" id="apg">
+  <h1 id="h1-apg"><span class="cnum">Apéndice G</span>Plantillas de trabajo</h1>
+
+  <p class="entradilla">Formularios operativos derivados de los procedimientos del documento. Se usan
+  tal cual: su valor está en que todas las revisiones hagan las mismas preguntas y produzcan
+  resultados comparables en el tiempo.</p>
+
+  <h2 id="sg-1">G.1 Ficha de revisión de diseño</h2>
+  <div class="ficha">
+    <p class="pares"><b>Incremento:</b> ____________ · <b>Fecha:</b> ______ · <b>Revisan:</b> diseño / front-end / accesibilidad</p>
+    <ul class="check">
+      <li>¿Qué pregunta responde cada vista afectada y qué elemento la responde? (§4.6)</li>
+      <li>¿Se usa alguna plantilla del catálogo o se introduce una nueva? Si es nueva, ¿por qué?</li>
+      <li>¿Qué componentes se reutilizan y cuáles se crean? ¿Los nuevos superan el umbral de tres usos? (§12.8)</li>
+      <li>¿Todos los valores proceden de tokens? ¿Hay literales?</li>
+      <li>¿Están definidos los estados vacío, de carga y de error? (§13.13)</li>
+      <li>¿Hay información codificada sólo con color? ¿Supera la prueba de escala de grises?</li>
+      <li>¿Los objetivos interactivos cumplen tamaño y separación mínimos? (§8.6)</li>
+      <li>¿Está definido el orden del foco y el destino del foco tras cada acción? (§17.3)</li>
+      <li>¿Qué estado nuevo debe representarse en la URL? (§9.2)</li>
+      <li>¿Qué escrituras introduce y qué regla de servidor las autoriza? (§22.6)</li>
+      <li>¿Qué coste añade al presupuesto de la ruta? (§24.3)</li>
+      <li>¿Qué se ha probado con contenido hostil? (§7.8)</li>
+      <li>¿Alguna decisión se aparta del documento? Si es así, ¿está redactada como decisión de arquitectura?</li>
+    </ul>
+    <p class="pares"><b>Resultado:</b> aprobado / aprobado con observaciones / rechazado · <b>Observaciones:</b> ____________</p>
+  </div>
+
+  <h2 id="sg-2">G.2 Guion de prueba de usabilidad moderada</h2>
+  <div class="ficha">
+    <p class="peq"><b>Preparación.</b> Perfil buscado, consentimiento informado firmado, dispositivo de
+    la persona participante siempre que sea posible, datos de prueba cargados, grabación de pantalla y
+    voz.</p>
+    <p class="peq"><b>Introducción (2 min).</b> «Estamos probando el producto, no a ti. No hay
+    respuestas incorrectas. Piensa en voz alta: cuéntame qué buscas y qué esperas que pase. Si te
+    atascas, es información valiosa para nosotros.»</p>
+    <table class="compacta">
+      <thead><tr><th style="width:14%">#</th><th style="width:46%">Tarea</th><th style="width:40%">Criterio de éxito</th></tr></thead>
+      <tbody>
+        <tr><td>T1</td><td>Has recibido este enlace. Únete al torneo.</td><td>Inscripción completada sin ayuda en ≤ 90&nbsp;s.</td></tr>
+        <tr><td>T2</td><td>Averigua contra quién juegas y cuándo.</td><td>Localiza su próximo partido en ≤ 20&nbsp;s.</td></tr>
+        <tr><td>T3</td><td>Acabas de ganar 3-1. Registra el resultado.</td><td>Resultado registrado y confirmado en ≤ 45&nbsp;s.</td></tr>
+        <tr><td>T4</td><td>Comprueba en qué posición vas y por qué.</td><td>Identifica posición y criterio de desempate aplicado.</td></tr>
+        <tr><td>T5</td><td>Mira quién ganó el torneo del año pasado.</td><td>Llega al palmarés sin ayuda.</td></tr>
+      </tbody>
+    </table>
+    <p class="peq"><b>Tras cada tarea.</b> «¿Cómo de fácil o difícil te ha resultado?» (1 = muy difícil,
+    7 = muy fácil). <b>Al final.</b> «¿Qué te ha sobrado? ¿Qué te ha faltado? ¿Qué le contarías a
+    alguien del grupo sobre esto?»</p>
+  </div>
+
+  <h2 id="sg-3">G.3 Informe de auditoría de accesibilidad</h2>
+  <div class="ficha">
+    <p class="pares"><b>Versión auditada:</b> ______ · <b>Fecha:</b> ______ · <b>Audita:</b> ______</p>
+    <table class="compacta">
+      <thead><tr><th style="width:22%">Configuración</th><th style="width:28%">Herramienta / versión</th><th style="width:16%">Resultado</th><th style="width:34%">Hallazgos</th></tr></thead>
+      <tbody>
+        <tr><td>Sólo teclado</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Lector de pantalla escritorio 1</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Lector de pantalla escritorio 2</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Lector de pantalla móvil</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Ampliación 200 % / 400 %</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><td>Contraste forzado y espaciado de texto</td><td>—</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p class="peq">Cada hallazgo se registra con: criterio incumplido, recorrido y paso donde aparece,
+    severidad (§19.5), descripción de lo observado, comportamiento esperado y evidencia. El informe se
+    archiva junto a la lista de verificación del apéndice B firmada.</p>
+  </div>
+
+  <h2 id="sg-4">G.4 Lista de regresión manual previa a publicación</h2>
+  <ul class="check">
+    <li>Los tres recorridos críticos, completos, sólo con teclado.</li>
+    <li>Un recorrido con lector de pantalla de escritorio y otro con lector móvil.</li>
+    <li>Pérdida y recuperación de red durante el registro de un resultado.</li>
+    <li>Cambio de tema claro/oscuro/automático y de densidad.</li>
+    <li>Ampliación al 400&nbsp;% en las vistas de clasificación y de partido.</li>
+    <li>Matriz de degradación de la tabla 14.4, fila a fila.</li>
+    <li>Retroceso y avance del navegador en maestro&ndash;detalle, con restauración de desplazamiento.</li>
+    <li>Publicación de versión nueva con sesión abierta: aviso de recarga, sin pérdida de trabajo.</li>
+    <li>Cierre de sesión: purga de cachés, cola y preferencias.</li>
+  </ul>
+  <p class="firma">Firmado por: ____________ · Versión: ______ · Fecha: ______</p>
+
+  <h2 id="sg-5">G.5 Plantilla de decisión de arquitectura</h2>
+  <pre># ADR-NNN · &lt;título en forma de decisión&gt;
+Estado: propuesta | aceptada | sustituida por ADR-MMM | obsoleta
+Fecha: AAAA-MM-DD   ·   Ámbito: &lt;diseño | front-end | datos | seguridad&gt;
+
+## Contexto
+&lt;Qué fuerza la decisión: requisito, restricción, incidente o hallazgo.&gt;
+
+## Alternativas consideradas
+1. &lt;Alternativa&gt; — ventajas / inconvenientes / por qué se descarta.
+2. …
+
+## Decisión
+&lt;Qué se decide, en una frase afirmativa y en presente.&gt;
+
+## Consecuencias
+Positivas: …
+Negativas y deuda aceptada: …
+Requisitos afectados: RQ-…
+
+## Revisión
+&lt;Cuándo o ante qué condición debe revisarse esta decisión.&gt;</pre>
+</section>

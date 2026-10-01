@@ -1,0 +1,99 @@
+<section class="capitulo" id="cap25">
+  <h1 id="h1-25"><span class="cnum">Capítulo 25</span>Rendimiento en ejecución y observabilidad</h1>
+
+  <p class="entradilla">La carga inicial ocurre una vez; la capacidad de respuesta se juzga en cada
+  toque durante toda la sesión. Este capítulo trata el rendimiento del hilo principal, la medición en
+  campo, el tratamiento de las animaciones, la memoria y el comportamiento bajo condiciones adversas,
+  y define las alertas que convierten la medición en acción.</p>
+
+  <h2 id="s25-1">25.1 El hilo principal y la capacidad de respuesta</h2>
+  <p>La métrica de interacción hasta el siguiente pintado mide el peor tramo entre que la persona
+  interactúa y que la pantalla refleja el resultado. Se descompone en tres fases —retardo de entrada,
+  tiempo de procesamiento y retardo de presentación— y cada una tiene su tratamiento:</p>
+  <table class="compacta" id="t25-1">
+    <thead><tr><th style="width:24%">Fase</th><th style="width:34%">Causa habitual</th><th style="width:42%">Tratamiento</th></tr></thead>
+    <tbody>
+      <tr><td>Retardo de entrada</td><td>El hilo principal está ocupado con otra tarea cuando llega el evento.</td><td>Trocear tareas largas y ceder el hilo explícitamente; diferir trabajo no urgente a periodos de inactividad.</td></tr>
+      <tr><td>Procesamiento</td><td>Manejador que recalcula demasiado, o cascada de repintados.</td><td>Separar la actualización visual inmediata del trabajo de fondo; mantener los manejadores por debajo de 50&nbsp;ms.</td></tr>
+      <tr><td>Presentación</td><td>Recálculo de diseño costoso o repintado de árboles grandes.</td><td>Animar sólo transformación y opacidad; acotar la zona de repintado; evitar sombras sobre superficies amplias.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 25.1</b> — Descomposición de la capacidad de respuesta y tratamiento por fase.</caption>
+  </table>
+  <pre>async function registrarResultado(r: Resultado) {
+  aplicarOptimista(r);                       <span class="c">// 1. respuesta visual inmediata (&lt; 16 ms)</span>
+  await cederHiloSiProcede();                <span class="c">// 2. deja pintar antes de seguir</span>
+  await enviar(r);                           <span class="c">// 3. trabajo de red fuera del camino crítico</span>
+}
+<span class="c">// Cesión compatible: usa la API del planificador si existe; si no, una espera mínima.</span>
+const cederHiloSiProcede = () =&gt;
+  'scheduler' in window &amp;&amp; 'yield' in (window as any).scheduler
+    ? (window as any).scheduler.yield()
+    : new Promise(r =&gt; setTimeout(r, 0));</pre>
+
+  <h2 id="s25-2">25.2 Medición de campo</h2>
+  <p>Se recogen las métricas esenciales de experiencia con la biblioteca oficial de medición, con
+  atribución activada para saber <i>qué</i> elemento o <i>qué</i> interacción causó el peor valor. Los
+  datos se envían agregados, sin identificadores personales, al cerrar la página o al perder
+  visibilidad, mediante el mecanismo de envío en segundo plano. Se segmentan por ruta, por tipo de
+  dispositivo y por tipo de conexión; sin segmentación, una media oculta exactamente el caso que hay
+  que arreglar.</p>
+  <table class="compacta" id="t25-2">
+    <thead><tr><th style="width:26%">Dimensión</th><th style="width:34%">Por qué se segmenta</th><th style="width:40%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td>Ruta</td><td>Las rutas tienen presupuestos distintos.</td><td>Detectar regresiones localizadas.</td></tr>
+      <tr><td>Tipo de dispositivo</td><td>La diferencia entre gama alta y media es de un orden de magnitud en CPU.</td><td>Evitar que el percentil 75 se vea maquillado por equipos potentes.</td></tr>
+      <tr><td>Primera visita o repetida</td><td>La caché cambia por completo el perfil.</td><td>Separar el problema de carga del de ejecución.</td></tr>
+      <tr><td>Elemento o interacción atribuida</td><td>Identifica la causa concreta.</td><td>Convertir una métrica en una tarea de corrección.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 25.2</b> — Segmentación obligatoria de las métricas de campo.</caption>
+  </table>
+
+  <h2 id="s25-3">25.3 Laboratorio y campo</h2>
+  <p>Las auditorías sintéticas se ejecutan en cada propuesta de cambio sobre un entorno de vista
+  previa, con red y CPU limitadas de forma reproducible, y sirven para <b>detectar regresiones</b>
+  antes de publicar. No definen el objetivo: el objetivo es el campo. Una puntuación sintética alta
+  con métricas de campo malas significa que el entorno de prueba no se parece a la realidad, no que la
+  realidad esté equivocada.</p>
+
+  <h2 id="s25-4">25.4 Memoria, fugas y sesiones largas</h2>
+  <ul>
+    <li>Toda suscripción, temporizador y observador se cancela al desmontar; se verifica con pruebas
+    que montan y desmontan repetidamente comprobando que no crece el número de oyentes.</li>
+    <li>La caché de consultas tiene retención acotada (§15.2); sin ella, una sesión larga acumula
+    datos de todos los torneos visitados.</li>
+    <li>Las listas virtualizadas liberan nodos fuera de la ventana visible.</li>
+    <li>Las imágenes grandes no se mantienen en memoria tras salir de la vista.</li>
+    <li>Se revisa el consumo tras diez minutos de uso continuado con suscripciones activas, que es el
+    escenario real de una jornada de torneo.</li>
+  </ul>
+
+  <h2 id="s25-5">25.5 Comportamiento bajo condiciones adversas</h2>
+  <table class="compacta" id="t25-3">
+    <thead><tr><th style="width:26%">Condición</th><th style="width:36%">Comportamiento especificado</th><th style="width:38%">Verificación</th></tr></thead>
+    <tbody>
+      <tr><td>Red lenta (2G simulada)</td><td>Esqueleto inmediato, datos en cuanto llegan, sin bloqueo de interacción.</td><td>Prueba manual trimestral con limitación de red.</td></tr>
+      <tr><td>CPU limitada ×6</td><td>Interacciones por debajo de 200&nbsp;ms; sin congelaciones visibles.</td><td>Auditoría sintética con limitación.</td></tr>
+      <tr><td>Modo de ahorro de datos</td><td>Sin prebúsqueda ni especulación; imágenes de menor densidad.</td><td>Prueba manual.</td></tr>
+      <tr><td>Batería baja</td><td>Suscripciones en tiempo real reducidas a consulta periódica.</td><td>Prueba manual.</td></tr>
+      <tr><td>Pestaña oculta</td><td>Suscripciones y temporizadores pausados (§14.8).</td><td>Prueba automatizada de ciclo de visibilidad.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 25.3</b> — Comportamiento exigido bajo condiciones adversas.</caption>
+  </table>
+
+  <h2 id="s25-6">25.6 Alertas y gestión de regresiones</h2>
+  <p>Una métrica sin alerta es un dato sin consecuencia. Se definen tres alertas: superación del
+  umbral de alarma de la tabla 24.2 en percentil 75 durante dos días consecutivos; empeoramiento de
+  más del 20&nbsp;% respecto a la semana anterior en cualquier métrica esencial; y superación del
+  presupuesto de transferencia en la construcción. Las dos primeras abren una tarea de investigación
+  con prioridad alta; la tercera bloquea la publicación. Las regresiones se analizan comparando con
+  la versión anterior y con la segmentación de la tabla 25.2, nunca sobre el agregado global.</p>
+
+  <h2 id="s25-7">25.7 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-REN-06.</b> Ningún manejador de interacción DEBE superar 50&nbsp;ms de trabajo continuo en el hilo principal.</li>
+    <li><b>RQ-REN-07.</b> Las métricas de campo DEBEN recogerse con atribución y segmentarse conforme a la tabla 25.2.</li>
+    <li><b>RQ-REN-08.</b> Toda suscripción y temporizador DEBE cancelarse al desmontar, con prueba que lo verifique.</li>
+    <li><b>RQ-REN-09.</b> Las animaciones DEBEN limitarse a transformación y opacidad.</li>
+    <li><b>RQ-REN-10.</b> Las alertas de §25.6 DEBEN estar configuradas y tener persona responsable asignada.</li>
+  </ul>
+</section>

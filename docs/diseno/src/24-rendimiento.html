@@ -1,0 +1,125 @@
+<section class="capitulo" id="cap24">
+  <h1 id="h1-24"><span class="cnum">Capítulo 24</span>Rendimiento: métricas, presupuestos y carga</h1>
+
+  <p class="entradilla">El rendimiento no es una optimización posterior sino una restricción de
+  diseño: determina cuánto código puede enviarse, qué puede cargarse en la ruta crítica y qué
+  arquitectura es viable. Este capítulo fija los objetivos de campo, los presupuestos por ruta y las
+  técnicas de carga, y explica cómo se verifica cada límite.</p>
+
+  <h2 id="s24-1">24.1 Cómo se percibe el tiempo</h2>
+  <table class="compacta" id="t24-1">
+    <thead><tr><th style="width:18%">Umbral</th><th style="width:34%">Percepción</th><th style="width:48%">Consecuencia de diseño</th></tr></thead>
+    <tbody>
+      <tr><td>≤ 100&nbsp;ms</td><td>Instantáneo: la respuesta parece causada directamente por la acción.</td><td>Toda retroalimentación visual de pulsación debe ocurrir aquí.</td></tr>
+      <tr><td>≈ 400&nbsp;ms</td><td>Umbral a partir del cual la espera empieza a frenar el ritmo de trabajo.</td><td>Por encima se muestra indicador de progreso; por debajo, no (§13.13).</td></tr>
+      <tr><td>≤ 1&nbsp;s</td><td>El hilo de pensamiento se mantiene, aunque se note la demora.</td><td>Límite para completar una navegación con datos en caché.</td></tr>
+      <tr><td>≤ 10&nbsp;s</td><td>Límite de la atención; más allá, la persona cambia de tarea.</td><td>Ninguna operación del producto puede acercarse a este valor sin progreso explícito y posibilidad de abandonar.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 24.1</b> — Umbrales de percepción temporal y su traducción a reglas de interfaz.</caption>
+  </table>
+
+  <h2 id="s24-2">24.2 Objetivos de campo</h2>
+  <p>Los objetivos se fijan sobre datos de uso real en percentil 75, no sobre puntuaciones de
+  laboratorio. El perfil de referencia es un teléfono de gama media en red móvil de cuarta
+  generación, que es el que utiliza la mayoría del grupo.</p>
+  <table id="t24-2">
+    <thead><tr><th style="width:28%">Métrica</th><th style="width:18%">Objetivo</th><th style="width:18%">Umbral de alarma</th><th style="width:36%">Observación</th></tr></thead>
+    <tbody>
+      <tr><td>Mayor despliegue de contenido</td><td>≤ 2,0&nbsp;s</td><td>&gt; 2,5&nbsp;s</td><td>Objetivo interno más exigente que el umbral público para dejar margen.</td></tr>
+      <tr><td>Interacción hasta siguiente pintado</td><td>≤ 150&nbsp;ms</td><td>&gt; 200&nbsp;ms</td><td>Es la métrica más sensible al tamaño del trabajo en el hilo principal (§25.1).</td></tr>
+      <tr><td>Desplazamiento acumulado</td><td>≤ 0,05</td><td>&gt; 0,1</td><td>Alcanzable casi siempre reservando espacio (§24.5).</td></tr>
+      <tr><td>Primer despliegue de contenido</td><td>≤ 1,4&nbsp;s</td><td>&gt; 1,8&nbsp;s</td><td>Depende del documento y de la hoja de estilo crítica.</td></tr>
+      <tr><td>Tiempo hasta el primer byte</td><td>≤ 0,4&nbsp;s</td><td>&gt; 0,8&nbsp;s</td><td>Contenido estático en red de distribución: debería ser holgado.</td></tr>
+      <tr><td>Tiempo hasta dato visible</td><td>≤ 2,5&nbsp;s</td><td>&gt; 4,0&nbsp;s</td><td>Métrica propia: cuándo aparece el primer dato real del torneo, no el esqueleto.</td></tr>
+      <tr><td>Navegación entre vistas (caché templada)</td><td>≤ 300&nbsp;ms</td><td>&gt; 600&nbsp;ms</td><td>Es la ventaja que justifica la arquitectura elegida (§14.1).</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 24.2</b> — Objetivos de rendimiento de campo en percentil 75.</caption>
+  </table>
+
+  <h2 id="s24-3">24.3 Presupuestos de transferencia</h2>
+  <table class="compacta" id="t24-3">
+    <thead><tr><th style="width:26%">Ruta</th><th style="width:18%">JavaScript</th><th style="width:16%">CSS</th><th style="width:16%">Imágenes</th><th style="width:24%">Total comprimido</th></tr></thead>
+    <tbody>
+      <tr><td>Primera visita a <code>/</code></td><td>≤ 155&nbsp;KB</td><td>≤ 22&nbsp;KB</td><td>≤ 60&nbsp;KB</td><td><b>≤ 260&nbsp;KB</b></td></tr>
+      <tr><td><code>/tournaments</code></td><td>≤ 45&nbsp;KB adic.</td><td>≤ 4&nbsp;KB</td><td>≤ 40&nbsp;KB</td><td>≤ 90&nbsp;KB adic.</td></tr>
+      <tr><td><code>/tournaments/:id</code></td><td>≤ 60&nbsp;KB adic.</td><td>≤ 6&nbsp;KB</td><td>≤ 50&nbsp;KB</td><td>≤ 120&nbsp;KB adic.</td></tr>
+      <tr><td><code>/teams</code></td><td>≤ 40&nbsp;KB adic.</td><td>≤ 4&nbsp;KB</td><td>≤ 180&nbsp;KB</td><td>≤ 230&nbsp;KB adic.</td></tr>
+      <tr><td>Fuentes (toda la aplicación)</td><td>—</td><td>—</td><td>—</td><td>≤ 45&nbsp;KB</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 24.3</b> — Presupuestos por ruta, comprimidos. Se verifican tras la construcción y fallan la integración al excederse en más de un 5&nbsp;% (§26.7).</caption>
+  </table>
+  <div class="clave">
+    <span class="et">Por qué un presupuesto y no una recomendación</span>
+    <p>Un presupuesto sólo funciona si tiene consecuencia automática. Sin ella, cada incremento añade
+    «sólo unos kilobytes» y el resultado agregado es una aplicación lenta sin que ninguna decisión
+    individual parezca responsable. Cuando el presupuesto se excede, las opciones son tres: optimizar,
+    aplazar la carga o retirar funcionalidad. Ampliar el presupuesto es una decisión de arquitectura
+    que exige registro y justificación.</p>
+  </div>
+
+  <h2 id="s24-4">24.4 Optimización de la carga</h2>
+  <ol>
+    <li><b>Ruta crítica mínima.</b> El documento enlaza una única hoja de estilo con los tokens y el
+    armazón, y un único módulo de entrada. Nada más bloquea el renderizado.</li>
+    <li><b>Precarga selectiva.</b> Se precarga la fuente de texto y el módulo de entrada. Precargar
+    más compite por ancho de banda con el recurso que define el mayor despliegue.</li>
+    <li><b>Sin cascadas de peticiones.</b> Los datos de la ruta se solicitan en paralelo con la carga
+    del código de la vista, no después; una cascada de tres saltos añade con facilidad un segundo en
+    red móvil.</li>
+    <li><b>Prebúsqueda por intención</b> de la ruta siguiente al apuntar o enfocar un enlace, con
+    prioridad baja y respeto del modo de ahorro de datos (§14.4).</li>
+    <li><b>Especulación de navegación</b> para las dos rutas más probables desde la vista actual,
+    cuando el navegador lo soporte, y siempre con prioridad que no compita con la ruta crítica.</li>
+    <li><b>Caché de retroceso.</b> Se evita todo aquello que la inhabilita, de modo que volver atrás
+    sea instantáneo.</li>
+  </ol>
+
+  <h2 id="s24-5">24.5 Estabilidad visual</h2>
+  <ul>
+    <li>Toda imagen declara dimensiones o relación de aspecto.</li>
+    <li>Los esqueletos tienen exactamente la geometría del contenido final (§13.13).</li>
+    <li>La fuente alternativa se ajusta en métricas para que el intercambio no mueva el texto
+    (§7.6).</li>
+    <li>Las notificaciones y banners se superponen o reservan espacio; nunca empujan el contenido ya
+    visible.</li>
+    <li>Las cifras que cambian en vivo —marcadores, contadores— reservan el ancho máximo previsto con
+    cifras tabulares.</li>
+    <li>Ningún contenido se inserta por encima de lo que la persona está leyendo salvo que lo haya
+    provocado ella.</li>
+  </ul>
+
+  <h2 id="s24-6">24.6 Imágenes</h2>
+  <table class="compacta" id="t24-4">
+    <thead><tr><th style="width:26%">Recurso</th><th style="width:24%">Formato</th><th style="width:50%">Reglas</th></tr></thead>
+    <tbody>
+      <tr><td>Escudos de equipo</td><td>Vectorial propio o rasterizado moderno</td><td>Tamaños de 48 y 96&nbsp;px; carga diferida fuera del pliegue; dimensiones declaradas.</td></tr>
+      <tr><td>Avatares</td><td>Rasterizado moderno</td><td>Tamaño único de 96&nbsp;px servido desde el proveedor con recorte; alternativa de iniciales si falla la carga.</td></tr>
+      <tr><td>Iconos de interfaz</td><td>Conjunto vectorial único</td><td>Un solo recurso cacheable; color heredado (§8.7).</td></tr>
+      <tr><td>Imagen de cabecera de torneo</td><td>Rasterizado moderno con alternativa</td><td>Fuente adaptativa por densidad y ancho; prioridad de obtención alta sólo si es el elemento mayor.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla 24.4</b> — Política de imágenes. Las imágenes son el recurso que más fácilmente arruina el presupuesto de la vista de equipos.</caption>
+  </table>
+
+  <h2 id="s24-7">24.7 Caché y red</h2>
+  <ul>
+    <li>Recursos con huella de contenido: caché inmutable de un año.</li>
+    <li>Documento raíz: sin caché persistente, con revalidación, para que una publicación nueva se
+    recoja de inmediato.</li>
+    <li>Compresión moderna activa en todos los recursos de texto.</li>
+    <li>Conexión multiplexada; se evita el fraccionamiento excesivo de recursos, que multiplica
+    cabeceras sin beneficio.</li>
+    <li>Conexión anticipada con el origen de datos mediante indicaciones de recurso, de modo que el
+    primer acceso no pague el establecimiento completo.</li>
+    <li>Las consultas de datos usan paginación por cursor y limitan el número de documentos leídos por
+    vista (§15.3).</li>
+  </ul>
+
+  <h2 id="s24-8">24.8 Síntesis de requisitos del capítulo</h2>
+  <ul class="check">
+    <li><b>RQ-REN-01.</b> Los objetivos de la tabla 24.2 DEBEN medirse en campo en percentil 75 y revisarse mensualmente.</li>
+    <li><b>RQ-REN-02.</b> Los presupuestos de la tabla 24.3 DEBEN verificarse tras cada construcción y bloquear al excederse.</li>
+    <li><b>RQ-REN-03.</b> Ningún recurso de terceros DEBE participar en la ruta crítica.</li>
+    <li><b>RQ-REN-04.</b> Toda imagen y todo esqueleto DEBEN reservar su espacio final.</li>
+    <li><b>RQ-REN-05.</b> Los datos de la ruta DEBEN solicitarse en paralelo con el código de la vista.</li>
+  </ul>
+</section>

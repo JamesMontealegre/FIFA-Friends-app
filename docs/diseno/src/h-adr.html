@@ -1,0 +1,115 @@
+<section class="capitulo" id="aph">
+  <h1 id="h1-aph"><span class="cnum">Apéndice H</span>Decisiones de arquitectura</h1>
+
+  <p class="entradilla">Registro de las decisiones estructurales que sostienen este documento. Cada
+  una indica su contexto, las alternativas descartadas, la decisión adoptada y las consecuencias —
+  incluida la deuda que se acepta conscientemente—. Una decisión no registrada es una decisión que se
+  volverá a discutir.</p>
+
+  <h2 id="sh-1">ADR-01 · Aplicación de página única servida como contenido estático</h2>
+  <p class="peq"><b>Contexto.</b> No existe servidor de aplicación propio ni presupuesto operativo para
+  mantenerlo; el contenido requiere sesión y no necesita indexación; la interacción es intensiva y se
+  beneficia de navegación sin recarga.<br>
+  <b>Alternativas.</b> Renderizado en servidor con hidratación (coste operativo y complejidad
+  injustificados); componentes de servidor (exige plataforma de ejecución y rediseño del acceso a
+  datos); sitio multipágina clásico (recarga en cada interacción).<br>
+  <b>Decisión.</b> Aplicación de página única sobre red de distribución estática, con reescritura al
+  documento raíz.<br>
+  <b>Consecuencias.</b> El primer pintado depende de JavaScript, lo que convierte el presupuesto del
+  armazón en requisito funcional (§24.3) y exige división de código estricta. Sin indexación ni
+  compartición enriquecida. Se revisa si el producto abre contenido público.</p>
+
+  <h2 id="sh-2">ADR-02 · Espacio de trabajo de color OKLCh con salida en sRGB</h2>
+  <p class="peq"><b>Contexto.</b> Las escalas construidas en HSL producen contrastes dispares entre
+  familias (figura 5.1) y obligan a verificar cada color a mano.<br>
+  <b>Alternativas.</b> Paleta elegida manualmente (no escalable); CIELAB (mejor que HSL, con no
+  uniformidades conocidas en azules).<br>
+  <b>Decisión.</b> Generar las escalas en OKLCh con croma ajustado a gama y publicarlas también en
+  sRGB.<br>
+  <b>Consecuencias.</b> Las escalas son predecibles y el contraste es calculable a priori; se requiere
+  un generador y una verificación automática. Los valores de gama extendida quedan disponibles pero no
+  se usan para información.</p>
+
+  <h2 id="sh-3">ADR-03 · Conformidad verificada con el criterio de contraste de WCAG 2.x</h2>
+  <p class="peq"><b>Contexto.</b> Existe un algoritmo perceptual más moderno, pero no es normativo y el
+  modelo de contraste de WCAG 3.0 sigue sin decidirse.<br>
+  <b>Decisión.</b> Verificar la conformidad exclusivamente con la relación de contraste de WCAG 2.x;
+  usar el algoritmo perceptual sólo como desempate entre opciones que ya cumplen.<br>
+  <b>Consecuencias.</b> Algunas combinaciones perceptualmente buenas se descartan por no alcanzar el
+  umbral normativo. Se revisa cuando WCAG 3.0 alcance estado de recomendación.</p>
+
+  <h2 id="sh-4">ADR-04 · El panel maestro es una lista de enlaces, no un cuadro de lista</h2>
+  <p class="peq"><b>Contexto.</b> El patrón de cuadro de lista impone navegación con flechas y
+  <code>aria-activedescendant</code>; está pensado para seleccionar valores en formularios, no para
+  navegar a recursos con URL propia.<br>
+  <b>Decisión.</b> Implementar el maestro como lista de enlaces con <code>aria-current</code>.<br>
+  <b>Consecuencias.</b> Se conserva el menú contextual, la apertura en pestaña nueva y la copia del
+  enlace; la navegación con flechas se ofrece como atajo opcional, nunca como única vía.</p>
+
+  <h2 id="sh-5">ADR-05 · Rol de organización almacenado en el documento de torneo</h2>
+  <p class="peq"><b>Contexto.</b> Hace falta un modelo de autorización delegable y auditable que
+  sustituya a la comparación con una dirección de correo literal.<br>
+  <b>Alternativas.</b> Reclamaciones personalizadas en el testigo de identidad (globales, se propagan
+  con retardo hasta la renovación y no son consultables por el grupo).<br>
+  <b>Decisión.</b> Lista de organizadores en el documento de torneo, consultada por las reglas.<br>
+  <b>Consecuencias.</b> Una lectura adicional por evaluación de regla, asumible con este volumen; a
+  cambio, delegación inmediata, visibilidad y auditoría. La reclamación en el testigo se reserva al rol
+  global de plataforma.</p>
+
+  <h2 id="sh-6">ADR-06 · La clasificación se deriva en servidor con recálculo total</h2>
+  <p class="peq"><b>Contexto.</b> El cálculo en cliente permite manipulación y divergencia entre
+  dispositivos (hallazgo H8).<br>
+  <b>Alternativas.</b> Recálculo incremental en servidor (más eficiente, pero sensible a eventos
+  perdidos o repetidos).<br>
+  <b>Decisión.</b> Función de servidor disparada por escritura de partido que recalcula la
+  clasificación completa de forma idempotente.<br>
+  <b>Consecuencias.</b> Coste de cómputo mayor por escritura, irrelevante con decenas de partidos; a
+  cambio, tolerancia a reintentos, verificación con una sola prueba y una única fuente de verdad. La
+  derivación es asíncrona, por lo que la interfaz debe mostrar el desfase (§16.6).</p>
+
+  <h2 id="sh-7">ADR-07 · La acción destructiva se separa del grupo de acciones frecuentes</h2>
+  <p class="peq"><b>Contexto.</b> La convención sitúa la acción destructiva junto a la primaria; la
+  observación de uso con una mano mostró activaciones accidentales.<br>
+  <b>Decisión.</b> Desplazar la acción destructiva al final del panel de detalle, con separación
+  mínima de 16&nbsp;px y confirmación explícita.<br>
+  <b>Consecuencias.</b> Ruptura deliberada de convención, aplicada de forma sistemática en todo el
+  producto (§4.8). Exige verificar que sigue siendo descubrible.</p>
+
+  <h2 id="sh-8">ADR-08 · Participación modelada como subcolección</h2>
+  <p class="peq"><b>Contexto.</b> Un arreglo de participantes dentro del torneo obliga a conceder
+  escritura sobre el campo completo, lo que permite eliminar a terceros (hallazgo H3), y produce
+  conflictos de escritura simultánea.<br>
+  <b>Decisión.</b> Un documento por persona en <code>players/{uid}</code>.<br>
+  <b>Consecuencias.</b> Regla mínima y verificable; escrituras concurrentes sin conflicto; requiere
+  migración de datos y una lectura adicional para contar participantes, que se resuelve con contador
+  mantenido por la función de servidor.</p>
+
+  <h2 id="sh-9">ADR-09 · Política de contenido estricta inyectada en el borde</h2>
+  <p class="peq"><b>Contexto.</b> Una aplicación estática no puede generar un valor único por respuesta
+  sin intermediario; las políticas basadas en listas de dominios son fáciles de eludir.<br>
+  <b>Decisión.</b> Generar la política en la capa perimetral con valor aleatorio por respuesta y
+  <code>strict-dynamic</code>, más Trusted Types.<br>
+  <b>Consecuencias.</b> Dependencia de la capa perimetral del proveedor de alojamiento; a cambio, la
+  mitigación más efectiva disponible frente a ejecución de código inyectado.</p>
+
+  <h2 id="sh-10">ADR-10 · Sin recursos de terceros en la ruta crítica</h2>
+  <p class="peq"><b>Contexto.</b> La carga de fuentes desde un tercero añade latencia, expone la
+  navegación y crea una dependencia de disponibilidad (hallazgo H5).<br>
+  <b>Decisión.</b> Autoalojar fuentes e iconos; prohibir etiquetas de terceros; declarar
+  explícitamente los únicos destinos de red permitidos.<br>
+  <b>Consecuencias.</b> Mantenimiento propio de los ficheros de fuente y de su subconjunto; mejora
+  directa del primer pintado y de la privacidad.</p>
+
+  <h2 id="sh-11">ADR-11 · Virtualización de listas sólo por encima de 150 elementos</h2>
+  <p class="peq"><b>Contexto.</b> La virtualización añade complejidad, rompe la búsqueda nativa del
+  navegador y es una fuente habitual de defectos de accesibilidad.<br>
+  <b>Decisión.</b> No virtualizar por debajo de 150 elementos visibles.<br>
+  <b>Consecuencias.</b> Las listas reales del producto —torneos, partidos, participantes— no se
+  virtualizan; sólo el catálogo de equipos puede requerirlo.</p>
+
+  <h2 id="sh-12">ADR-12 · Sin buscador global</h2>
+  <p class="peq"><b>Contexto.</b> El volumen de datos es de decenas de elementos por colección.<br>
+  <b>Decisión.</b> Filtros locales por lista en lugar de búsqueda global indexada.<br>
+  <b>Consecuencias.</b> Menos código, menos lecturas y resultados predecibles; se revisa si el número
+  de torneos por persona supera el centenar.</p>
+</section>

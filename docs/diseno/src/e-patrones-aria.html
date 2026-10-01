@@ -1,0 +1,65 @@
+<section class="capitulo" id="ape">
+  <h1 id="h1-ape"><span class="cnum">Apéndice E</span>Patrones ARIA y contratos de teclado</h1>
+
+  <p class="entradilla">Contrato de semántica y teclado para cada componente del catálogo, derivado de
+  la guía de prácticas de autoría ARIA del W3C y adaptado a las decisiones de este documento. Cuando
+  una fila se aparta de la guía, el motivo figura en la columna de observaciones: en todos los casos
+  la desviación consiste en preferir semántica nativa de navegación frente a patrones de control de
+  formulario.</p>
+
+  <h2 id="se-1">E.1 Controles básicos</h2>
+  <table class="compacta" id="te-1">
+    <thead><tr><th style="width:18%">Componente</th><th style="width:24%">Semántica</th><th style="width:26%">Teclado</th><th style="width:32%">Observaciones</th></tr></thead>
+    <tbody>
+      <tr><td>Botón</td><td><code>&lt;button&gt;</code></td><td><kbd>Enter</kbd>, <kbd>Espacio</kbd></td><td>Estado de carga con <code>aria-busy</code>; no se deshabilita sin explicación.</td></tr>
+      <tr><td>Botón de alternancia</td><td><code>&lt;button aria-pressed&gt;</code></td><td><kbd>Enter</kbd>, <kbd>Espacio</kbd></td><td>El nombre accesible no cambia al alternar; cambia el estado.</td></tr>
+      <tr><td>Enlace</td><td><code>&lt;a href&gt;</code></td><td><kbd>Enter</kbd></td><td>Nunca <kbd>Espacio</kbd>: es la diferencia audible entre enlace y botón.</td></tr>
+      <tr><td>Casilla</td><td><code>&lt;input type="checkbox"&gt;</code></td><td><kbd>Espacio</kbd></td><td>Etiqueta asociada e incluida en el área de activación.</td></tr>
+      <tr><td>Conmutador</td><td><code>role="switch"</code> + <code>aria-checked</code></td><td><kbd>Espacio</kbd></td><td>Sólo si el efecto es inmediato; si no, casilla.</td></tr>
+      <tr><td>Grupo de opciones</td><td><code>&lt;fieldset&gt;</code> + <code>radio</code></td><td>Flechas dentro del grupo</td><td>El tabulador entra y sale del grupo, no recorre las opciones.</td></tr>
+      <tr><td>Campo de texto</td><td><code>&lt;input&gt;</code> / <code>&lt;textarea&gt;</code></td><td>Nativo</td><td><code>aria-describedby</code> a ayuda y error; <code>aria-invalid</code> en error.</td></tr>
+      <tr><td>Selección simple</td><td><code>&lt;select&gt;</code></td><td>Nativo</td><td>Hasta 15 opciones; por encima, combo con filtro.</td></tr>
+      <tr><td>Combo con filtro</td><td><code>role="combobox"</code> + <code>listbox</code></td><td>Flechas, <kbd>Enter</kbd>, <kbd>Esc</kbd>, <kbd>Inicio</kbd>/<kbd>Fin</kbd></td><td>Patrón completo de la guía ARIA, con <code>aria-expanded</code> y <code>aria-activedescendant</code>.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla E.1</b> — Controles básicos.</caption>
+  </table>
+
+  <h2 id="se-2">E.2 Contenedores y superposiciones</h2>
+  <table class="compacta" id="te-2">
+    <thead><tr><th style="width:18%">Componente</th><th style="width:24%">Semántica</th><th style="width:26%">Teclado</th><th style="width:32%">Observaciones</th></tr></thead>
+    <tbody>
+      <tr><td>Diálogo modal</td><td><code>&lt;dialog&gt;</code> modal + <code>aria-labelledby</code></td><td><kbd>Esc</kbd> cierra; tabulador confinado</td><td>Foco al abrir y devolución al cerrar (§12.4).</td></tr>
+      <tr><td>Hoja inferior</td><td>Igual que diálogo</td><td>Igual que diálogo</td><td>Misma semántica, distinta presentación por ancho.</td></tr>
+      <tr><td>Menú de acciones</td><td><code>role="menu"</code> + <code>menuitem</code></td><td>Flechas, <kbd>Inicio</kbd>/<kbd>Fin</kbd>, <kbd>Esc</kbd>, inicial</td><td>Sólo para acciones; nunca para navegación entre rutas.</td></tr>
+      <tr><td>Pestañas de vista enlazable</td><td>Lista de enlaces con <code>aria-current</code></td><td>Tabulador y <kbd>Enter</kbd></td><td><b>Desviación deliberada</b>: cada vista tiene URL propia, luego son enlaces, no <code>tablist</code>.</td></tr>
+      <tr><td>Pestañas sin URL</td><td><code>role="tablist"</code>, <code>tab</code>, <code>tabpanel</code></td><td>Flechas, <kbd>Inicio</kbd>/<kbd>Fin</kbd></td><td>Sólo cuando el estado no debe compartirse.</td></tr>
+      <tr><td>Sección plegable</td><td><code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code></td><td><kbd>Enter</kbd>, <kbd>Espacio</kbd></td><td>Estado nativo; no requiere <code>aria-expanded</code> propio.</td></tr>
+      <tr><td>Información emergente</td><td><code>aria-describedby</code> al contenido</td><td>Aparece al enfocar; <kbd>Esc</kbd> la descarta</td><td>Nunca contiene controles; si los necesita, es un menú o un diálogo.</td></tr>
+      <tr><td>Navegación por puntos de referencia</td><td><code>banner</code>, <code>navigation</code>, <code>main</code>, <code>contentinfo</code></td><td>Atajos del lector de pantalla</td><td>Nombre accesible distinto si hay más de una región del mismo tipo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla E.2</b> — Contenedores, superposiciones y navegación.</caption>
+  </table>
+
+  <h2 id="se-3">E.3 Datos y estado</h2>
+  <table class="compacta" id="te-3">
+    <thead><tr><th style="width:18%">Componente</th><th style="width:24%">Semántica</th><th style="width:26%">Teclado</th><th style="width:32%">Observaciones</th></tr></thead>
+    <tbody>
+      <tr><td>Tabla de datos</td><td><code>&lt;table&gt;</code>, <code>&lt;caption&gt;</code>, <code>scope</code></td><td>Nativo del lector de pantalla</td><td>El contenedor con desplazamiento es enfocable y nombrado.</td></tr>
+      <tr><td>Encabezado ordenable</td><td><code>&lt;th aria-sort&gt;</code> con botón interno</td><td><kbd>Enter</kbd>, <kbd>Espacio</kbd></td><td>El cambio de orden se anuncia en región viva.</td></tr>
+      <tr><td>Lista maestro</td><td><code>&lt;ul&gt;</code> de enlaces + <code>aria-current</code></td><td>Tabulador, <kbd>Inicio</kbd>/<kbd>Fin</kbd></td><td><b>Desviación deliberada</b> respecto al patrón de cuadro de lista (§11.8).</td></tr>
+      <tr><td>Panel de detalle</td><td><code>&lt;section aria-label&gt;</code> + <code>aria-busy</code></td><td>Foco según §17.3</td><td>Encabezado con <code>tabindex="-1"</code> para recibir foco.</td></tr>
+      <tr><td>Notificación efímera</td><td><code>role="status"</code></td><td>Alcanzable si contiene acción</td><td>Región presente desde el montaje, no insertada con el texto.</td></tr>
+      <tr><td>Alerta bloqueante</td><td><code>role="alert"</code></td><td>—</td><td>Sólo para condiciones que exigen atención inmediata.</td></tr>
+      <tr><td>Indicador de progreso</td><td><code>role="progressbar"</code> con valores</td><td>—</td><td>Indeterminado sólo si realmente se desconoce el progreso.</td></tr>
+      <tr><td>Cuadro eliminatorio</td><td>Contenedor enfocable + lista anidada equivalente</td><td>Flechas para desplazar</td><td>Las dos representaciones proceden de la misma fuente (§18.7).</td></tr>
+      <tr><td>Migas de pan</td><td><code>&lt;nav aria-label="Ruta"&gt;</code> + lista</td><td>Tabulador</td><td>Elemento actual con <code>aria-current="page"</code>.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla E.3</b> — Componentes de datos y de estado.</caption>
+  </table>
+
+  <h2 id="se-4">E.4 Teclas reservadas</h2>
+  <p>El producto no captura nunca: <kbd>Tab</kbd>, <kbd>Mayús+Tab</kbd>, <kbd>Esc</kbd> fuera de
+  superposiciones, las combinaciones del navegador —búsqueda, recarga, historial, nueva pestaña— ni
+  las teclas de acceso del sistema operativo. Interceptar cualquiera de ellas rompe la navegación
+  asistida y es motivo de rechazo en revisión.</p>
+</section>

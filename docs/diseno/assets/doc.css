@@ -78,10 +78,14 @@
   @top-left{content:none} @top-right{content:none}
   @bottom-right{content:none}
   @bottom-center{
-    content: counter(page, lower-roman);
+    content: counter(page);
     font-family: var(--sans); font-size: 8.4pt; color:#5A666D;
     vertical-align: top; padding-top: 4mm;
   }
+}
+@page :blank{
+  @top-left{content:none} @top-right{content:none}
+  @bottom-center{content:none} @bottom-right{content:none}
 }
 @page parte{
   @top-left{content:none} @top-right{content:none}
@@ -346,9 +350,6 @@ figcaption b{ color: var(--ink-soft); }
 .ref{ font-size: 9.2pt; line-height: 1.4; margin-bottom: 2.4mm; padding-left: 6mm; text-indent: -6mm; text-align: left; }
 .ref .url{ font-family: var(--mono); font-size: 7.6pt; color: var(--accent); word-break: break-all; }
 .gloss dt{ font-size: 9.6pt; }
-
-/* ---------- 16b. Reinicio de la numeración en el cuerpo ---------- */
-#parte1{ counter-reset: page 0; }
 
 /* ---------- 17. Utilidades ---------- */
 .dos-col{ column-count: 2; column-gap: 7mm; }

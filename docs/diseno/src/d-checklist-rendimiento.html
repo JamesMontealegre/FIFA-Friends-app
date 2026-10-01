@@ -1,0 +1,47 @@
+<section class="capitulo" id="apd">
+  <h1 id="h1-apd"><span class="cnum">Apéndice D</span>Presupuestos y verificación de rendimiento</h1>
+
+  <p class="entradilla">Resumen operativo de los límites de rendimiento, con el punto exacto donde se
+  verifica cada uno y qué ocurre al excederlo. Es la referencia que se consulta cuando una
+  construcción falla por presupuesto.</p>
+
+  <h2 id="sd-1">D.1 Límites y consecuencias</h2>
+  <table class="compacta" id="td-1">
+    <thead><tr><th style="width:30%">Límite</th><th style="width:18%">Valor</th><th style="width:24%">Dónde se verifica</th><th style="width:28%">Consecuencia</th></tr></thead>
+    <tbody>
+      <tr><td>Transferencia total de la primera visita</td><td>≤ 260&nbsp;KB</td><td>Tras la construcción</td><td>Falla la integración.</td></tr>
+      <tr><td>JavaScript del armazón</td><td>≤ 110&nbsp;KB</td><td>Tras la construcción</td><td>Falla la integración.</td></tr>
+      <tr><td>JavaScript por vista</td><td>≤ 60&nbsp;KB</td><td>Tras la construcción</td><td>Falla la integración.</td></tr>
+      <tr><td>Fuentes</td><td>≤ 45&nbsp;KB</td><td>Tras la construcción</td><td>Falla la integración.</td></tr>
+      <tr><td>Mayor despliegue de contenido (campo, p75)</td><td>≤ 2,5&nbsp;s</td><td>Panel de campo, diario</td><td>Alerta a los dos días consecutivos.</td></tr>
+      <tr><td>Interacción hasta siguiente pintado (campo, p75)</td><td>≤ 200&nbsp;ms</td><td>Panel de campo, diario</td><td>Alerta e investigación prioritaria.</td></tr>
+      <tr><td>Desplazamiento acumulado (campo, p75)</td><td>≤ 0,1</td><td>Panel de campo, diario</td><td>Alerta.</td></tr>
+      <tr><td>Tarea larga en el hilo principal</td><td>≤ 50&nbsp;ms</td><td>Auditoría sintética</td><td>Revisión obligatoria antes de fusionar.</td></tr>
+      <tr><td>Lecturas por sesión de consulta</td><td>≤ 40 documentos</td><td>Métricas de la plataforma</td><td>Revisión de la política de caché. §15.3</td></tr>
+      <tr><td>Lecturas por sesión de organización</td><td>≤ 250 documentos</td><td>Métricas de la plataforma</td><td>Ídem.</td></tr>
+      <tr><td>Duración total de la integración continua</td><td>≤ 15 min</td><td>Informe del flujo</td><td>Tarea de optimización del flujo.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla D.1</b> — Límites de rendimiento, punto de verificación y consecuencia.</caption>
+  </table>
+
+  <h2 id="sd-2">D.2 Procedimiento ante exceso de presupuesto</h2>
+  <ol>
+    <li>Identificar qué fragmento creció y por qué, comparando el informe de composición del paquete
+    con el de la rama principal.</li>
+    <li>Aplicar, en este orden: eliminar la dependencia, sustituirla por una capacidad de plataforma,
+    importar selectivamente, aplazar la carga a la interacción que la necesita.</li>
+    <li>Si ninguna opción es viable, documentar decisión de arquitectura con la justificación y el
+    nuevo límite, aprobada por arquitectura front-end.</li>
+    <li>Nunca se desactiva la verificación para publicar.</li>
+  </ol>
+
+  <h2 id="sd-3">D.3 Comprobaciones manuales trimestrales</h2>
+  <ul class="check">
+    <li>Carga en frío con red limitada a 3G rápida y CPU ×4: la vista de entrada muestra dato real en ≤ 4&nbsp;s.</li>
+    <li>Navegación entre las cinco vistas principales con caché templada: ninguna supera 600&nbsp;ms.</li>
+    <li>Sesión de treinta minutos con suscripciones activas: el consumo de memoria se estabiliza.</li>
+    <li>Registro de diez resultados consecutivos: ninguna interacción supera 200&nbsp;ms.</li>
+    <li>Modo de ahorro de datos: no se observan prebúsquedas ni especulaciones.</li>
+    <li>Retroceso del navegador tras cuatro navegaciones: restauración instantánea y posición de desplazamiento correcta.</li>
+  </ul>
+</section>

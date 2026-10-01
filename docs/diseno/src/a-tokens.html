@@ -1,0 +1,117 @@
+<section class="capitulo" id="apa">
+  <h1 id="h1-apa"><span class="cnum">Apéndice A</span>Especificación de tokens de diseño</h1>
+
+  <p class="entradilla">Este apéndice reúne el conjunto completo de tokens del sistema distintos del
+  color, cuyas escalas se publican en §6.3. Es la referencia operativa: lo que no figura aquí no
+  existe como valor admisible en el producto.</p>
+
+  <h2 id="sa-1">A.1 Estructura del fichero de tokens</h2>
+  <p>Los tokens se mantienen en formato de intercambio estándar, con un fichero por familia y un
+  fichero de alias semánticos. De ahí se generan las propiedades personalizadas de CSS, la
+  configuración del motor de utilidades y la documentación del catálogo. La generación es
+  unidireccional: editar el resultado es un error que el análisis estático detecta.</p>
+  <pre>tokens/
+  color.json        <span class="c">// escalas primitivas (§6.3)</span>
+  espacio.json
+  tipografia.json
+  radio.json
+  elevacion.json
+  movimiento.json
+  capa.json
+  semantico.json    <span class="c">// alias por intención, con variante clara y oscura</span></pre>
+
+  <h2 id="sa-2">A.2 Espaciado</h2>
+  <table class="compacta" id="ta-1">
+    <thead><tr><th style="width:14%">Token</th><th style="width:12%">rem</th><th style="width:12%">px</th><th style="width:62%">Uso canónico</th></tr></thead>
+    <tbody>
+      <tr><td><code>esp-0</code></td><td>0</td><td>0</td><td>Anulación explícita.</td></tr>
+      <tr><td><code>esp-1</code></td><td>0,25</td><td>4</td><td>Separación icono-texto; relleno de insignia pequeña.</td></tr>
+      <tr><td><code>esp-2</code></td><td>0,5</td><td>8</td><td>Separación entre controles contiguos; relleno vertical de insignia.</td></tr>
+      <tr><td><code>esp-3</code></td><td>0,75</td><td>12</td><td>Relleno vertical de campo y de fila de tabla compacta.</td></tr>
+      <tr><td><code>esp-4</code></td><td>1</td><td>16</td><td>Margen lateral en móvil; relleno interior de tarjeta.</td></tr>
+      <tr><td><code>esp-5</code></td><td>1,25</td><td>20</td><td>Relleno de tarjeta ampliada.</td></tr>
+      <tr><td><code>esp-6</code></td><td>1,5</td><td>24</td><td>Separación entre bloques dentro de una sección.</td></tr>
+      <tr><td><code>esp-8</code></td><td>2</td><td>32</td><td>Separación entre secciones.</td></tr>
+      <tr><td><code>esp-10</code></td><td>2,5</td><td>40</td><td>Espaciado de cabecera de vista.</td></tr>
+      <tr><td><code>esp-12</code></td><td>3</td><td>48</td><td>Separación entre regiones principales.</td></tr>
+      <tr><td><code>esp-16</code></td><td>4</td><td>64</td><td>Respiro en disposiciones amplias.</td></tr>
+      <tr><td><code>esp-24</code></td><td>6</td><td>96</td><td>Centrado vertical de estados vacíos.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla A.1</b> — Escala de espaciado completa.</caption>
+  </table>
+
+  <h2 id="sa-3">A.3 Tipografía</h2>
+  <table class="compacta" id="ta-2">
+    <thead><tr><th style="width:20%">Token</th><th style="width:16%">Tamaño</th><th style="width:12%">Línea</th><th style="width:12%">Grosor</th><th style="width:14%">Interletra</th><th style="width:26%">Familia</th></tr></thead>
+    <tbody>
+      <tr><td><code>texto-display</code></td><td>clamp(2rem, 1.2rem+3.2vw, 3rem)</td><td>1,1</td><td>700</td><td>−0,01em</td><td>display</td></tr>
+      <tr><td><code>texto-titulo-1</code></td><td>1,75rem</td><td>1,2</td><td>700</td><td>−0,005em</td><td>texto</td></tr>
+      <tr><td><code>texto-titulo-2</code></td><td>1,4375rem</td><td>1,25</td><td>700</td><td>0</td><td>texto</td></tr>
+      <tr><td><code>texto-titulo-3</code></td><td>1,1875rem</td><td>1,3</td><td>600</td><td>0</td><td>texto</td></tr>
+      <tr><td><code>texto-cuerpo-g</code></td><td>1,125rem</td><td>1,55</td><td>400</td><td>0</td><td>texto</td></tr>
+      <tr><td><code>texto-cuerpo</code></td><td>1rem</td><td>1,55</td><td>400</td><td>0</td><td>texto</td></tr>
+      <tr><td><code>texto-dato</code></td><td>1rem</td><td>1,2</td><td>600</td><td>0</td><td>texto (tabulares)</td></tr>
+      <tr><td><code>texto-etiqueta</code></td><td>0,875rem</td><td>1,4</td><td>600</td><td>+0,01em</td><td>texto</td></tr>
+      <tr><td><code>texto-auxiliar</code></td><td>0,875rem</td><td>1,45</td><td>400</td><td>0</td><td>texto</td></tr>
+      <tr><td><code>texto-micro</code></td><td>0,8rem</td><td>1,4</td><td>600</td><td>+0,02em</td><td>texto</td></tr>
+      <tr><td><code>texto-codigo</code></td><td>0,875rem</td><td>1,45</td><td>400</td><td>0</td><td>mono</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla A.2</b> — Tokens tipográficos. La medida máxima de línea para prosa es <code>68ch</code>.</caption>
+  </table>
+
+  <h2 id="sa-4">A.4 Radios, elevación y capas</h2>
+  <table class="compacta" id="ta-3">
+    <thead><tr><th style="width:24%">Token</th><th style="width:26%">Valor</th><th style="width:50%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>radio-sm</code> / <code>md</code> / <code>lg</code> / <code>pleno</code></td><td>4 / 8 / 16 / 9999&nbsp;px</td><td>§8.5.</td></tr>
+      <tr><td><code>elev-1</code></td><td><code>0 1px 2px rgb(0 0 0 / .06)</code></td><td>Contenido; en oscuro, superficie +0,02 de claridad.</td></tr>
+      <tr><td><code>elev-2</code></td><td><code>0 4px 12px rgb(0 0 0 / .10)</code></td><td>Menús y desplegables.</td></tr>
+      <tr><td><code>elev-3</code></td><td><code>0 12px 32px rgb(0 0 0 / .16)</code></td><td>Diálogos y hojas.</td></tr>
+      <tr><td><code>capa-base</code></td><td>0</td><td>Contenido en flujo.</td></tr>
+      <tr><td><code>capa-fija</code></td><td>100</td><td>Cabecera y navegación.</td></tr>
+      <tr><td><code>capa-emergente</code></td><td>200</td><td>Menús e información emergente.</td></tr>
+      <tr><td><code>capa-modal</code></td><td>300</td><td>Diálogos; el elemento nativo usa la capa superior del navegador.</td></tr>
+      <tr><td><code>capa-notificacion</code></td><td>400</td><td>Notificaciones efímeras; siempre por encima del resto.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla A.3</b> — Radios, elevación y orden de capas. Ningún valor de capa se escribe fuera de esta tabla.</caption>
+  </table>
+
+  <h2 id="sa-5">A.5 Movimiento y puntos de ruptura</h2>
+  <table class="compacta" id="ta-4">
+    <thead><tr><th style="width:26%">Token</th><th style="width:24%">Valor</th><th style="width:50%">Uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>mov-instantaneo</code></td><td>80&nbsp;ms / <code>linear</code></td><td>Color y opacidad de controles.</td></tr>
+      <tr><td><code>mov-rapido</code></td><td>140&nbsp;ms / <code>cubic-bezier(.2,0,.2,1)</code></td><td>Menús, emergentes.</td></tr>
+      <tr><td><code>mov-estandar</code></td><td>220&nbsp;ms / <code>cubic-bezier(.2,0,0,1)</code></td><td>Paneles, hojas, diálogos.</td></tr>
+      <tr><td><code>mov-enfatico</code></td><td>320&nbsp;ms / <code>cubic-bezier(.3,0,0,1)</code></td><td>Entradas destacadas y sorteo.</td></tr>
+      <tr><td><code>br-sm</code></td><td>640&nbsp;px</td><td>De una columna a disposición con más densidad.</td></tr>
+      <tr><td><code>br-md</code></td><td>768&nbsp;px</td><td>Cuadrículas de tres columnas.</td></tr>
+      <tr><td><code>br-lg</code></td><td>1024&nbsp;px</td><td>Maestro&ndash;detalle de dos paneles (§11.5).</td></tr>
+      <tr><td><code>br-xl</code></td><td>1440&nbsp;px</td><td>Panel auxiliar opcional.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla A.4</b> — Tokens de movimiento y puntos de ruptura.</caption>
+  </table>
+
+  <h2 id="sa-6">A.6 Ejemplo de serialización y generación</h2>
+  <pre>// tokens/semantico.json (extracto)
+{
+  "color": {
+    "texto": {
+      "principal": {
+        "$type": "color",
+        "$value": "{color.neutro.900}",
+        "$extensions": { "modo.oscuro": "{color.neutro.100}" },
+        "$description": "Texto de lectura y cifras. Contraste verificado ≥ 13:1."
+      }
+    }
+  },
+  "espacio": { "4": { "$type": "dimension", "$value": "1rem" } },
+  "movimiento": { "estandar": { "$type": "duration", "$value": "220ms" } }
+}</pre>
+  <pre>// scripts/generar-tokens.ts — contrato del generador
+// 1. lee tokens/*.json y resuelve referencias {a.b.c}
+// 2. valida que todo alias semántico exista y que no haya ciclos
+// 3. comprueba los pares de contraste declarados (§6.9) en ambos modos
+// 4. emite styles/tokens.css, tokens.d.ts y la documentación del catálogo
+// 5. falla con código distinto de cero si cualquier verificación no pasa</pre>
+</section>

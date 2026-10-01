@@ -1,0 +1,84 @@
+<section class="capitulo" id="apb">
+  <h1 id="h1-apb"><span class="cnum">Apéndice B</span>Lista de verificación WCAG 2.2 niveles A y AA</h1>
+  <p class="entradilla">Lista completa de criterios de conformidad de nivel A y AA de WCAG 2.2, con su
+  aplicabilidad declarada y el método de verificación adoptado. El criterio 4.1.1 «Procesamiento» no
+  figura porque fue retirado en la versión 2.2. Los criterios declarados «no aplica» lo son por
+  ausencia de la funcionalidad correspondiente, no por dispensa: si esa funcionalidad se incorpora,
+  el criterio pasa a aplicar automáticamente.</p>
+  <h2 id="sb-1">B.1 Criterios y método de verificación</h2>
+  <table class="compacta" id="tb-1">
+  <thead><tr><th style="width:8%">Criterio</th><th style="width:7%">Nivel</th><th style="width:22%">Denominación</th><th style="width:11%">Estado</th><th style="width:52%">Método de verificación y referencia</th></tr></thead><tbody>
+<tr><td><code>1.1.1</code></td><td>A</td><td>Contenido no textual</td><td>Aplica</td><td>Automática (atributos) + manual: cada imagen, icono y control gráfico tiene alternativa adecuada o está oculto si es decorativo. §18.2</td></tr>
+<tr style="color:#6B7780"><td><code>1.2.1</code></td><td>A</td><td>Sólo audio y sólo vídeo (pregrabado)</td><td>No aplica</td><td>El producto no publica medios temporales. Si se incorporaran, pasaría a aplicar.</td></tr>
+<tr style="color:#6B7780"><td><code>1.2.2</code></td><td>A</td><td>Subtítulos (pregrabado)</td><td>No aplica</td><td>Ídem.</td></tr>
+<tr style="color:#6B7780"><td><code>1.2.3</code></td><td>A</td><td>Audiodescripción o alternativa (pregrabado)</td><td>No aplica</td><td>Ídem.</td></tr>
+<tr style="color:#6B7780"><td><code>1.2.4</code></td><td>AA</td><td>Subtítulos (en directo)</td><td>No aplica</td><td>Ídem.</td></tr>
+<tr style="color:#6B7780"><td><code>1.2.5</code></td><td>AA</td><td>Audiodescripción (pregrabado)</td><td>No aplica</td><td>Ídem.</td></tr>
+<tr><td><code>1.3.1</code></td><td>A</td><td>Información y relaciones</td><td>Aplica</td><td>Automática + manual: tablas con encabezados y <code>scope</code>, listas reales, jerarquía de encabezados sin saltos, grupos de formulario. §18.2</td></tr>
+<tr><td><code>1.3.2</code></td><td>A</td><td>Secuencia significativa</td><td>Aplica</td><td>Manual: orden del DOM igual al orden lógico en los cuatro puntos de ruptura. §10.7</td></tr>
+<tr><td><code>1.3.3</code></td><td>A</td><td>Características sensoriales</td><td>Aplica</td><td>Manual: ninguna instrucción se apoya sólo en forma, color, tamaño o posición.</td></tr>
+<tr><td><code>1.3.4</code></td><td>AA</td><td>Orientación</td><td>Aplica</td><td>Manual: ninguna vista exige orientación fija.</td></tr>
+<tr><td><code>1.3.5</code></td><td>AA</td><td>Identificar el propósito de la entrada</td><td>Aplica</td><td>Automática: <code>autocomplete</code> en campos de datos personales.</td></tr>
+<tr><td><code>1.4.1</code></td><td>A</td><td>Uso del color</td><td>Aplica</td><td>Manual + regresión en escala de grises: ningún estado se codifica sólo con color. §5.9</td></tr>
+<tr style="color:#6B7780"><td><code>1.4.2</code></td><td>A</td><td>Control del audio</td><td>No aplica</td><td>No hay audio automático.</td></tr>
+<tr><td><code>1.4.3</code></td><td>AA</td><td>Contraste (mínimo)</td><td>Aplica</td><td>Automática sobre el mapa de tokens en ambos modos. §6.9</td></tr>
+<tr><td><code>1.4.4</code></td><td>AA</td><td>Cambio de tamaño del texto</td><td>Aplica</td><td>Manual al 200 %: sin pérdida de contenido ni de función. §19.3</td></tr>
+<tr><td><code>1.4.5</code></td><td>AA</td><td>Imágenes de texto</td><td>Aplica</td><td>Manual: no se usan imágenes de texto.</td></tr>
+<tr><td><code>1.4.10</code></td><td>AA</td><td>Reflujo</td><td>Aplica</td><td>Manual a 320 px equivalentes; excepción documentada del cuadro eliminatorio con alternativa lineal. §18.7</td></tr>
+<tr><td><code>1.4.11</code></td><td>AA</td><td>Contraste no textual</td><td>Aplica</td><td>Automática: bordes de control, iconos informativos, indicador de selección y anillo de foco ≥ 3:1.</td></tr>
+<tr><td><code>1.4.12</code></td><td>AA</td><td>Espaciado del texto</td><td>Aplica</td><td>Manual con hoja de estilo de prueba en los tres recorridos críticos.</td></tr>
+<tr><td><code>1.4.13</code></td><td>AA</td><td>Contenido al pasar el puntero o al enfocar</td><td>Aplica</td><td>Manual: emergentes descartables, desplazables y persistentes.</td></tr>
+<tr><td><code>2.1.1</code></td><td>A</td><td>Teclado</td><td>Aplica</td><td>Manual: recorrido completo sin puntero en los tres recorridos.</td></tr>
+<tr><td><code>2.1.2</code></td><td>A</td><td>Sin trampas de foco</td><td>Aplica</td><td>Manual: sólo el diálogo confina, con salida por <kbd>Esc</kbd>.</td></tr>
+<tr><td><code>2.1.4</code></td><td>A</td><td>Atajos de teclado de un carácter</td><td>Aplica</td><td>Manual: desactivados por defecto y configurables. §13.11</td></tr>
+<tr><td><code>2.2.1</code></td><td>A</td><td>Tiempo ajustable</td><td>Aplica</td><td>Manual: el temporizador de deshacer es extensible; aviso previo a la caducidad de sesión.</td></tr>
+<tr><td><code>2.2.2</code></td><td>A</td><td>Pausar, detener, ocultar</td><td>Aplica</td><td>Manual: animaciones finitas; sorteo omitible.</td></tr>
+<tr><td><code>2.3.1</code></td><td>A</td><td>Tres destellos o por debajo del umbral</td><td>Aplica</td><td>Manual: ninguna animación parpadea más de tres veces por segundo.</td></tr>
+<tr><td><code>2.4.1</code></td><td>A</td><td>Evitar bloques</td><td>Aplica</td><td>Automática + manual: enlace de salto y puntos de referencia semánticos.</td></tr>
+<tr><td><code>2.4.2</code></td><td>A</td><td>Página titulada</td><td>Aplica</td><td>Automática por ruta: título actualizado en cada navegación. §17.2</td></tr>
+<tr><td><code>2.4.3</code></td><td>A</td><td>Orden del foco</td><td>Aplica</td><td>Manual por vista; matriz de foco de la tabla 17.1.</td></tr>
+<tr><td><code>2.4.4</code></td><td>A</td><td>Propósito de los enlaces (en contexto)</td><td>Aplica</td><td>Manual: ningún enlace genérico sin nombre accesible suficiente.</td></tr>
+<tr><td><code>2.4.5</code></td><td>AA</td><td>Múltiples vías</td><td>Aplica</td><td>Manual: navegación primaria más enlaces contextuales y URL directa; el producto tiene menos de diez destinos.</td></tr>
+<tr><td><code>2.4.6</code></td><td>AA</td><td>Encabezados y etiquetas</td><td>Aplica</td><td>Manual: un encabezado de nivel 1 descriptivo por vista; etiquetas que nombran su contenido.</td></tr>
+<tr><td><code>2.4.7</code></td><td>AA</td><td>Foco visible</td><td>Aplica</td><td>Automática (prohibición de supresión) + manual: anillo visible sobre todos los fondos. §6.5</td></tr>
+<tr><td><code>2.4.11</code></td><td>AA</td><td>Foco no oscurecido (mínimo)</td><td>Aplica</td><td>Manual: márgenes de desplazamiento bajo barras fijas. §10.4</td></tr>
+<tr><td><code>2.5.1</code></td><td>A</td><td>Gestos del puntero</td><td>Aplica</td><td>Manual: ningún gesto complejo es la única vía.</td></tr>
+<tr><td><code>2.5.2</code></td><td>A</td><td>Cancelación del puntero</td><td>Aplica</td><td>Manual: activación al soltar.</td></tr>
+<tr><td><code>2.5.3</code></td><td>A</td><td>Etiqueta en el nombre</td><td>Aplica</td><td>Automática: el nombre accesible comienza por el texto visible.</td></tr>
+<tr style="color:#6B7780"><td><code>2.5.4</code></td><td>A</td><td>Accionamiento por movimiento</td><td>No aplica</td><td>Ninguna función se activa agitando o inclinando el dispositivo.</td></tr>
+<tr><td><code>2.5.7</code></td><td>AA</td><td>Movimientos de arrastre</td><td>Aplica</td><td>Manual: alternativa con botones y campo de posición. §13.7</td></tr>
+<tr><td><code>2.5.8</code></td><td>AA</td><td>Tamaño del objetivo (mínimo)</td><td>Aplica</td><td>Automática aproximada + manual: mínimo del sistema 44 × 44 px. §8.6</td></tr>
+<tr><td><code>3.1.1</code></td><td>A</td><td>Idioma de la página</td><td>Aplica</td><td>Automática: <code>lang="es"</code> (corrección del hallazgo H4).</td></tr>
+<tr><td><code>3.1.2</code></td><td>AA</td><td>Idioma de las partes</td><td>Aplica</td><td>Manual: fragmentos en otro idioma marcados.</td></tr>
+<tr><td><code>3.2.1</code></td><td>A</td><td>Al recibir el foco</td><td>Aplica</td><td>Manual: enfocar no provoca cambios de contexto.</td></tr>
+<tr><td><code>3.2.2</code></td><td>A</td><td>Al introducir datos</td><td>Aplica</td><td>Manual: ningún campo navega ni envía automáticamente.</td></tr>
+<tr><td><code>3.2.3</code></td><td>AA</td><td>Navegación coherente</td><td>Aplica</td><td>Manual: posición invariable de la navegación en todas las vistas.</td></tr>
+<tr><td><code>3.2.4</code></td><td>AA</td><td>Identificación coherente</td><td>Aplica</td><td>Manual: un icono y una etiqueta por función en todo el producto.</td></tr>
+<tr><td><code>3.2.6</code></td><td>A</td><td>Ayuda coherente</td><td>Aplica</td><td>Manual: acceso a ayuda en la misma posición relativa. §9.4</td></tr>
+<tr><td><code>3.3.1</code></td><td>A</td><td>Identificación de errores</td><td>Aplica</td><td>Automática + manual: errores asociados por <code>aria-describedby</code> y <code>aria-invalid</code>.</td></tr>
+<tr><td><code>3.3.2</code></td><td>A</td><td>Etiquetas o instrucciones</td><td>Aplica</td><td>Automática: etiqueta visible y persistente en todo campo.</td></tr>
+<tr><td><code>3.3.3</code></td><td>AA</td><td>Sugerencia ante error</td><td>Aplica</td><td>Manual: catálogo de mensajes con corrección propuesta. §13.12</td></tr>
+<tr><td><code>3.3.4</code></td><td>AA</td><td>Prevención de errores (legal, financiero, de datos)</td><td>Aplica</td><td>Manual: confirmación revisable al cerrar torneo y al eliminar.</td></tr>
+<tr><td><code>3.3.7</code></td><td>A</td><td>Entrada redundante</td><td>Aplica</td><td>Manual: ningún dato se solicita dos veces en el asistente. §13.4</td></tr>
+<tr><td><code>3.3.8</code></td><td>AA</td><td>Autenticación accesible (mínimo)</td><td>Aplica</td><td>Manual: identidad federada, pegado permitido, sin prueba cognitiva. §22.3</td></tr>
+<tr><td><code>4.1.2</code></td><td>A</td><td>Nombre, función, valor</td><td>Aplica</td><td>Automática + manual: componentes nativos; los personalizados declaran rol, estado y valor.</td></tr>
+<tr><td><code>4.1.3</code></td><td>AA</td><td>Mensajes de estado</td><td>Aplica</td><td>Manual: regiones vivas para carga, guardado, recuento y cambios en tiempo real. §17.4</td></tr>
+</tbody><caption class="tcap"><b>Tabla B.1</b> — Lista de verificación completa de criterios A y AA de WCAG 2.2. Las filas atenuadas corresponden a criterios no aplicables a la funcionalidad actual del producto.</caption></table>
+
+  <h2 id="sb-2">B.2 Criterios AAA adoptados voluntariamente</h2>
+  <table class="compacta" id="tb-2">
+    <thead><tr><th style="width:10%">Criterio</th><th style="width:28%">Denominación</th><th style="width:62%">Motivo de la adopción</th></tr></thead>
+    <tbody>
+      <tr><td><code>2.4.13</code></td><td>Apariencia del foco</td><td>El indicador especificado en §6.5 cumple área y contraste del nivel AAA porque el foco es el principal mecanismo de orientación sin puntero.</td></tr>
+      <tr><td><code>3.3.9</code></td><td>Autenticación accesible (mejorado)</td><td>Se cumple de facto con la identidad federada; se declara para que una futura alternativa de acceso no lo degrade.</td></tr>
+      <tr><td><code>2.2.6</code></td><td>Advertencia de caducidad</td><td>Se avisa antes de que la sesión caduque, porque perder un resultado a medio registrar es inaceptable.</td></tr>
+    </tbody>
+    <caption class="tcap"><b>Tabla B.2</b> — Criterios de nivel AAA adoptados como requisito interno.</caption>
+  </table>
+
+  <h2 id="sb-3">B.3 Procedimiento de registro</h2>
+  <p>Cada publicación mayor archiva una copia firmada de esta lista con tres columnas adicionales:
+  resultado (conforme, no conforme, no aplicable), evidencia (captura, registro de prueba o nota de
+  auditoría) y persona que verificó. Una lista sin evidencia no constituye prueba de conformidad, y
+  es lo primero que se solicita en cualquier revisión externa.</p>
+</section>
