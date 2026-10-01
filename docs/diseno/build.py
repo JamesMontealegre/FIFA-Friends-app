@@ -170,6 +170,14 @@ def main():
         '<!DOCTYPE html>\n<html lang="es">\n<head>\n<meta charset="utf-8">\n'
         '<title>Documento de Diseño de Interfaz, Accesibilidad, Seguridad y '
         'Rendimiento — Plataforma FIFA Friends</title>\n'
+        '<meta name="author" content="Unidad de Arquitectura de Experiencia Digital y Front-End">\n'
+        '<meta name="description" content="Especificación integral de experiencia de usuario, '
+        'sistema visual, accesibilidad WCAG 2.2 AA, seguridad, rendimiento, patrón maestro-detalle '
+        'y arquitectura de aplicación de página única.">\n'
+        '<meta name="keywords" content="diseño de interfaces, UI, UX, teoría del color, tipografía, '
+        'accesibilidad, WCAG 2.2, seguridad web, OWASP, rendimiento, Core Web Vitals, maestro-detalle, '
+        'SPA, sistema de diseño, tokens">\n'
+        '<meta name="dcterms.created" content="2026-10-01">\n'
         '<link rel="stylesheet" href="../assets/doc.css">\n</head>\n<body>\n'
         + "\n".join(partes) + "\n</body>\n</html>\n"
     )
